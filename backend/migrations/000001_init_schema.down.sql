@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS `trades`;
+DROP TABLE IF EXISTS `shares`;
+DROP TABLE IF EXISTS `segments`;
+DROP TABLE IF EXISTS `transactions`;
+DROP TABLE IF EXISTS `wallets`;
+DROP TABLE IF EXISTS `bank_details`;
+DROP TABLE IF EXISTS `personal_details`;
+DROP TABLE IF EXISTS `sessions`;
+DROP TABLE IF EXISTS `users`;

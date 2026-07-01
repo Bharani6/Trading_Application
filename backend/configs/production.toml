@@ -1,0 +1,10 @@
+[app]
+env = "production"
+log_level = "info"
+
+[db]
+password = "prod_db_password"
+name = "stock_trading_prod"
+
+[jwt]
+secret = "prod_secret_key"

@@ -1,0 +1,513 @@
+<template>
+  <div class="register-split-page">
+    <!-- Animated Background Particles -->
+    <div class="bg-particles">
+      <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div><div class="particle p4"></div>
+      <div class="particle p5"></div><div class="particle p6"></div><div class="particle p7"></div><div class="particle p8"></div>
+    </div>
+
+    <div class="right-panel">
+      <div class="auth-card" style="max-width: 600px; width: 100%;">
+        <div class="auth-card-header">
+          <div class="brand-header">
+            <img src="../../assets/icons/favicon.svg" alt="MoneymakePro" class="auth-brand-logo" />
+            <span class="auth-brand-name">MoneymakePro</span>
+          </div>
+          <h1 class="auth-title">Create Account</h1>
+          
+          <!-- Stepper -->
+          <div class="wizard-stepper">
+            <div class="step" :class="{ active: currentStep === 1, completed: currentStep > 1 }">1. Personal</div>
+            <div class="step-divider"></div>
+            <div class="step" :class="{ active: currentStep === 2, completed: currentStep > 2 }">2. Identity</div>
+            <div class="step-divider"></div>
+            <div class="step" :class="{ active: currentStep === 3, completed: currentStep > 3 }">3. Bank</div>
+            <div class="step-divider"></div>
+            <div class="step" :class="{ active: currentStep === 4, completed: currentStep > 4 }">4. Nominee</div>
+          </div>
+        </div>
+
+        <form @submit.prevent="handleNextOrSubmit" class="auth-form" novalidate>
+          <div v-if="errorMessage" class="error-banner">
+            <i class="fa fa-exclamation-circle"></i>
+            {{ errorMessage }}
+          </div>
+
+          <!-- STEP 1: Personal Information -->
+          <div v-if="currentStep === 1" class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full name <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.name" placeholder="John Doe" autocomplete="name" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email address <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mobile number <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="tel" class="form-input" v-model="form.mobile" placeholder="9876543210" autocomplete="tel" maxlength="10" @input="form.mobile = form.mobile.replace(/[^0-9]/g, '')" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Date of birth <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="date" class="form-input" v-model="form.dob" :max="maxDate" @click="$event.target.showPicker()" style="cursor: pointer" />
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Password <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input :type="showPassword ? 'text' : 'password'" class="form-input" v-model="form.password" placeholder="Min. 8 characters" autocomplete="new-password" />
+                <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'" class="password-toggle-icon" @click="showPassword = !showPassword"></i>
+              </div>
+              <span class="password-hint">Use at least 8 characters with uppercase, lowercase, number & special character</span>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Residential address <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <textarea class="form-input" v-model="form.address" placeholder="Enter your full residential address" rows="2"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label class="form-label">Income range <span class="required-star">*</span></label>
+              <div class="income-chips">
+                <button type="button" v-for="range in ['< ₹1L', '₹1L - ₹5L', '₹5L - ₹10L', '> ₹10L']" :key="range" :class="['income-chip', { active: form.income_range === range }]" @click="form.income_range = range">
+                  {{ range }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Identity Details -->
+          <div v-if="currentStep === 2" class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">PAN Number <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.pan" placeholder="ABCDE1234F" style="text-transform: uppercase" maxlength="10" @input="form.pan = form.pan.toUpperCase().replace(/[^A-Z0-9]/g, '')" />
+              </div>
+              <span v-if="panError" class="error-text" style="color: #f43f5e; font-size: 12px; margin-top: 4px; display: block;">{{ panError }}</span>
+            </div>
+            
+            <div class="form-group full-width">
+              <label class="form-label">Aadhaar Number <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.aadhaar" placeholder="12 Digit Aadhaar" maxlength="12" @input="form.aadhaar = form.aadhaar.replace(/[^0-9]/g, '')" />
+              </div>
+              <span v-if="aadhaarError" class="error-text" style="color: #f43f5e; font-size: 12px; margin-top: 4px; display: block;">{{ aadhaarError }}</span>
+            </div>
+          </div>
+
+          <!-- STEP 3: Bank Details -->
+          <div v-if="currentStep === 3" class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">Account Holder Name <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.bank_accounts[0].account_holder_name" placeholder="Name as per bank" />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">IFSC Code <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.bank_accounts[0].ifsc" placeholder="HDFC0001234" style="text-transform: uppercase" maxlength="11" @input="handleIfscInput" />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Bank Name <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.bank_accounts[0].bank_name" placeholder="Auto-fetched or manual" />
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label class="form-label">Branch <span class="text-muted">(Optional)</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.bank_accounts[0].branch" placeholder="Auto-fetched or manual" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Account Number <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="password" class="form-input" v-model="form.bank_accounts[0].account_number" placeholder="Enter Account Number" @input="form.bank_accounts[0].account_number = form.bank_accounts[0].account_number.replace(/[^0-9]/g, '')" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm Account Number <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" v-model="form.bank_accounts[0].confirm_account_number" placeholder="Re-enter Account Number" @input="form.bank_accounts[0].confirm_account_number = form.bank_accounts[0].confirm_account_number.replace(/[^0-9]/g, '')" />
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Nominee Details -->
+          <div v-if="currentStep === 4" class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">Do you want to add a nominee?</label>
+              <div class="income-chips" style="justify-content: flex-start; gap: 10px;">
+                <button type="button" class="income-chip" :class="{ active: form.addNominee }" @click="form.addNominee = true">Yes</button>
+                <button type="button" class="income-chip" :class="{ active: !form.addNominee }" @click="form.addNominee = false">No</button>
+              </div>
+            </div>
+            
+            <template v-if="form.addNominee">
+              <div class="form-group">
+                <label class="form-label">Nominee Name <span class="required-star">*</span></label>
+                <div class="input-wrapper">
+                  <input type="text" class="form-input" v-model="form.nominees[0].name" placeholder="Nominee Full Name" />
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Relationship <span class="required-star">*</span></label>
+                <div class="input-wrapper">
+                  <select class="form-input" v-model="form.nominees[0].relationship">
+                    <option value="" disabled>Select Relationship</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
+                    <option value="Father">Father</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Date of Birth <span class="required-star">*</span></label>
+                <div class="input-wrapper">
+                  <input type="date" class="form-input" v-model="form.nominees[0].dob" @click="$event.target.showPicker()" style="cursor: pointer" />
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Phone Number <span class="text-muted">(Optional)</span></label>
+                <div class="input-wrapper">
+                  <input type="tel" class="form-input" v-model="form.nominees[0].phone" placeholder="9876543210" maxlength="10" @input="form.nominees[0].phone = form.nominees[0].phone.replace(/[^0-9]/g, '')" />
+                </div>
+              </div>
+
+              <!-- Guardian Details if Minor -->
+              <template v-if="form.nominees[0].dob && calculateAge(form.nominees[0].dob) < 18">
+                <div class="form-group full-width" style="margin-top: 10px;">
+                  <h4 style="color: var(--primary); font-size: 14px; margin-bottom: 5px;"><i class="fas fa-shield-alt mr-2"></i> Guardian Details (Required for Minor)</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Since the nominee is below 18 years of age, guardian details are mandatory.</p>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Guardian Name <span class="required-star">*</span></label>
+                  <div class="input-wrapper">
+                    <input type="text" class="form-input" v-model="form.nominees[0].guardian_name" placeholder="Guardian Full Name" />
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Guardian DOB <span class="required-star">*</span></label>
+                  <div class="input-wrapper">
+                    <input type="date" class="form-input" v-model="form.nominees[0].guardian_dob" :max="maxDate" />
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+
+          <p class="terms-note" v-if="currentStep === 4">
+            By creating an account, you agree to our
+            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          </p>
+
+          <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button type="button" class="btn btn-outline" style="flex: 0 0 50px; display: flex; justify-content: center; align-items: center;" v-if="currentStep > 1" @click="currentStep--">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <button type="submit" class="submit-btn" style="flex: 1;" :disabled="loading">
+              <span v-if="!loading">{{ currentStep < 4 ? 'Continue' : 'Create Account' }}</span>
+              <i v-else class="fa fa-spinner fa-spin"></i>
+            </button>
+          </div>
+        </form>
+
+        <div class="login-prompt">
+          Already have an account? 
+          <router-link to="/login" class="login-link">Sign in</router-link>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import '../../assets/css/register.css'
+import { reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
+import { authApi } from '../../api/auth.api'
+import { utilsApi } from '../../api/utils.api'
+
+const router = useRouter()
+const toast = useToast()
+
+const currentStep = ref(1)
+const loading = ref(false)
+const errorMessage = ref('')
+const panError = ref('')
+const aadhaarError = ref('')
+const showPassword = ref(false)
+
+const form = reactive({
+  name: '',
+  email: '',
+  mobile: '',
+  dob: '',
+  pan: '',
+  aadhaar: '',
+  income_range: '',
+  password: '',
+  address: '',
+  bank_accounts: [{
+    account_type: 'savings',
+    ifsc: '',
+    bank_name: '',
+    branch: '',
+    account_number: '',
+    confirm_account_number: '',
+    account_holder_name: ''
+  }],
+  addNominee: false,
+  nominees: [{
+    name: '',
+    dob: '',
+    pan: '',
+    relationship: '',
+    percentage: 100,
+    guardian_name: '',
+    guardian_dob: '',
+    guardian_relationship: '',
+    guardian_pan: ''
+  }]
+})
+
+const today = new Date()
+const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0]
+
+const showError = (msg) => {
+  errorMessage.value = msg
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  loading.value = false
+}
+
+const calculateAge = (dobString) => {
+  if (!dobString) return 0
+  const dob = new Date(dobString)
+  const today = new Date()
+  let age = today.getFullYear() - dob.getFullYear()
+  const m = today.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--
+  }
+  return age
+}
+
+let ifscTimeout = null
+const handleIfscInput = () => {
+  const bank = form.bank_accounts[0]
+  bank.ifsc = bank.ifsc.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (ifscTimeout) clearTimeout(ifscTimeout)
+  if (bank.ifsc.length === 11) {
+    ifscTimeout = setTimeout(async () => {
+      try {
+        const response = await utilsApi.getIfscDetails(bank.ifsc)
+        if (response.data.success && response.data.data) {
+          bank.bank_name = response.data.data.BANK || ''
+          bank.branch = response.data.data.BRANCH || ''
+        }
+      } catch (err) {
+        // Silently fail, user can enter manually
+      }
+    }, 500)
+  }
+}
+
+const validateStep = (step) => {
+  errorMessage.value = ''
+  if (step === 1) {
+    if (!form.name) return 'Full name is required.'
+    if (!/^[a-zA-Z\s]+$/.test(form.name)) return 'Name must contain only letters and spaces.'
+    if (!form.email) return 'Email address is required.'
+    if (!form.mobile || form.mobile.length !== 10) return 'Valid 10-digit mobile number is required.'
+    if (!form.dob) return 'Date of birth is required.'
+    if (calculateAge(form.dob) < 18) return 'You must be at least 18 years old.'
+    
+    if (!form.password) return 'Password is required.'
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(form.password)) {
+      return 'Password must be at least 8 chars long with uppercase, lowercase, numeric, and special characters.'
+    }
+
+    if (!form.address) return 'Residential address is required.'
+    if (!form.income_range) return 'Income range is required.'
+    return true
+  }
+  
+  if (step === 2) {
+    panError.value = ''
+    aadhaarError.value = ''
+    let valid = true
+
+    if (!form.pan) {
+      panError.value = 'PAN Number is required.'
+      valid = false
+    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan)) {
+      panError.value = 'PAN format must be ABCDE1234F'
+      valid = false
+    }
+
+    if (!form.aadhaar || form.aadhaar.length !== 12) {
+      aadhaarError.value = '12-digit Aadhaar Number is required.'
+      valid = false
+    }
+
+    if (!valid) return false
+    return true
+  }
+  
+  if (step === 3) {
+    const bank = form.bank_accounts[0]
+    if (!bank.account_holder_name) return 'Account Holder Name is required.'
+    if (!bank.ifsc || bank.ifsc.length !== 11) return 'Valid 11-character IFSC code is required.'
+    if (!bank.bank_name) return 'Bank Name is required.'
+    if (!bank.account_number) return 'Account Number is required.'
+    if (bank.account_number !== bank.confirm_account_number) return 'Account Numbers do not match.'
+    return true
+  }
+  
+  if (step === 4) {
+    if (form.addNominee) {
+      const nom = form.nominees[0]
+      if (!nom.name) return 'Nominee Name is required.'
+      if (!nom.relationship) return 'Nominee Relationship is required.'
+      if (!nom.dob) return 'Nominee Date of Birth is required.'
+      if (calculateAge(nom.dob) < 18) {
+        if (!nom.guardian_name) return 'Guardian Name is required for minor nominee.'
+        if (!nom.guardian_dob) return 'Guardian Date of Birth is required.'
+        if (calculateAge(nom.guardian_dob) < 18) return 'Guardian must be at least 18 years old.'
+      }
+    }
+    return true
+  }
+  
+  return true
+}
+
+const formatBackendError = (errObj) => {
+  if (typeof errObj === 'string') return errObj
+  return 'Invalid input parameters'
+}
+
+const handleNextOrSubmit = async () => {
+  const isValid = validateStep(currentStep.value)
+  if (isValid !== true) {
+    showError(isValid)
+    return
+  }
+
+  if (currentStep.value < 4) {
+    currentStep.value++
+    return
+  }
+
+  // Step 4 Complete: Submit Payload
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const payload = {
+      name: form.name,
+      email: form.email,
+      mobile: form.mobile,
+      dob: form.dob,
+      pan: form.pan.toUpperCase(),
+      aadhaar: form.aadhaar,
+      income_range: form.income_range,
+      password: form.password,
+      address: form.address,
+      bank_accounts: [{
+        account_type: form.bank_accounts[0].account_type,
+        ifsc: form.bank_accounts[0].ifsc.toUpperCase(),
+        bank_name: form.bank_accounts[0].bank_name,
+        branch: form.bank_accounts[0].branch,
+        account_number: form.bank_accounts[0].account_number
+      }],
+      nominees: form.addNominee ? [{
+        name: form.nominees[0].name,
+        dob: form.nominees[0].dob,
+        relationship: form.nominees[0].relationship,
+        percentage: 100,
+        guardian_name: form.nominees[0].guardian_name,
+        guardian_dob: form.nominees[0].guardian_dob,
+      }] : []
+    }
+
+    const res = await authApi.register(payload)
+    if (res.data.success) {
+      toast.success('Registration successful! Please log in.')
+      router.push('/login')
+    }
+  } catch (error) {
+    if (error.response?.data) {
+      const { message, error: details } = error.response.data
+      errorMessage.value = details ? formatBackendError(details) : (message || 'Registration failed.')
+    } else {
+      errorMessage.value = 'Registration failed. Please try again.'
+    }
+    toast.error(errorMessage.value)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<style scoped>
+.wizard-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.5rem 0 2rem;
+  font-size: 13px;
+  font-weight: 500;
+}
+.step {
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+.step.active {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+  font-weight: 600;
+}
+.step.completed {
+  color: #10b981;
+}
+.step-divider {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 10px;
+}
+</style>

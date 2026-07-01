@@ -1,0 +1,21 @@
+[app]
+name = "Stock Trading System"
+port = 8080
+env = "development"
+log_level = "debug"
+
+[db]
+host = "localhost"
+port = 5432
+user = "postgres"
+password = "root"
+name = "stock_trading"
+
+[redis]
+host = "localhost"
+port = 6379
+password = ""
+
+[jwt]
+secret = "supersecretkeychangeinprod"
+expiration_hours = 24

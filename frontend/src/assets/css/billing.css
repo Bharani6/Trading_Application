@@ -1,0 +1,365 @@
+/* ========================================================
+   BILLING.CSS — Ledger / Transaction History Page
+   Premium Dark Trading App
+   ======================================================== */
+
+/* ===== PAGE WRAPPER ===== */
+.billingpage {
+  /* Inherits from .page-container */
+}
+
+/* ========================================================
+   HEADER SECTION
+   ======================================================== */
+.billingpage .header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.billingpage .header-section .page-title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--text-main) 40%, var(--primary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Export Button ── */
+.billingpage .header-section .export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.billingpage .header-section .export-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background-color: var(--primary-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(59,130,246,0.15);
+}
+
+/* ========================================================
+   LEDGER SECTION — Main Card
+   ======================================================== */
+.billingpage .ledger-section {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition-base);
+}
+
+.billingpage .ledger-section:hover {
+  border-color: rgba(59,130,246,0.15);
+}
+
+/* ── Filters Row ── */
+.billingpage .ledger-section .ledger-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.billingpage .ledger-section .filter-select,
+.billingpage .ledger-section .date-picker {
+  padding: 10px 14px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: var(--font-family-base);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.billingpage .ledger-section .date-picker {
+  background-image: none;
+  padding-right: 14px;
+}
+
+.billingpage .ledger-section .filter-select:hover,
+.billingpage .ledger-section .date-picker:hover {
+  border-color: var(--primary-color);
+  color: var(--text-main);
+}
+
+.billingpage .ledger-section .filter-select:focus,
+.billingpage .ledger-section .date-picker:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+  color: var(--text-main);
+}
+
+/* Dark calendar icon for date-picker */
+.billingpage .ledger-section .date-picker::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* ========================================================
+   LEDGER TABLE
+   ======================================================== */
+.billingpage .ledger-section .table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-md);
+}
+
+.billingpage .ledger-section .ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+/* ── Table Header ── */
+.billingpage .ledger-section .ledger-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.billingpage .ledger-section .ledger-table th {
+  text-align: left;
+  padding: 14px 16px;
+  background-color: var(--bg-color);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.billingpage .ledger-section .ledger-table th:last-child {
+  text-align: right;
+}
+
+/* ── Table Body Rows ── */
+.billingpage .ledger-section .ledger-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+
+.billingpage .ledger-section .ledger-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Zebra striping */
+.billingpage .ledger-section .ledger-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.018);
+}
+
+.billingpage .ledger-section .ledger-table tbody tr:hover {
+  background-color: var(--surface-hover);
+}
+
+.billingpage .ledger-section .ledger-table td {
+  padding: 15px 16px;
+  font-size: var(--font-size-base);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+/* ── Reference ID (monospace muted) ── */
+.billingpage .ledger-section .ref-id {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ── Amount Column ── */
+.billingpage .ledger-section .amount-col {
+  text-align: right;
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  letter-spacing: -0.3px;
+}
+
+.billingpage .ledger-section .amount-positive {
+  color: var(--profit-color);
+}
+
+.billingpage .ledger-section .amount-negative {
+  color: var(--loss-color);
+}
+
+/* ── Type Badges (color-coded) ── */
+.billingpage .ledger-section .type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Deposit = Green */
+.billingpage .ledger-section .type-deposit {
+  background-color: var(--profit-bg);
+  color: var(--profit-color);
+  border: 1px solid var(--profit-border);
+}
+
+/* Withdraw = Red */
+.billingpage .ledger-section .type-withdraw {
+  background-color: var(--loss-bg);
+  color: var(--loss-color);
+  border: 1px solid var(--loss-border);
+}
+
+/* Trade = Blue */
+.billingpage .ledger-section .type-trade {
+  background-color: var(--primary-dim);
+  color: var(--primary-color);
+  border: 1px solid rgba(59,130,246,0.25);
+}
+
+/* Fee / Other = Muted */
+.billingpage .ledger-section .type-fee {
+  background-color: var(--surface-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+/* ── Status Badge ── */
+.billingpage .ledger-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.billingpage .ledger-section .status-completed {
+  background-color: var(--profit-bg);
+  color: var(--profit-color);
+}
+
+.billingpage .ledger-section .status-pending {
+  background-color: var(--yellow-dim);
+  color: var(--yellow-color);
+}
+
+.billingpage .ledger-section .status-failed {
+  background-color: var(--loss-bg);
+  color: var(--loss-color);
+}
+
+/* ── Pagination ── */
+.billingpage .ledger-section .pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.billingpage .ledger-section .page-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-family-base);
+}
+
+.billingpage .ledger-section .page-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background-color: var(--primary-dim);
+}
+
+.billingpage .ledger-section .page-btn.active {
+  background: var(--primary-gradient);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: var(--shadow-blue);
+}
+
+/* ========================================================
+   MEDIA QUERIES
+   ======================================================== */
+@media (max-width: 1024px) {
+  .billingpage .ledger-section {
+    padding: var(--spacing-md);
+  }
+
+  .billingpage .header-section {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 576px) {
+  .billingpage .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .billingpage .header-section .page-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .billingpage .ledger-section .ledger-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .billingpage .ledger-section .filter-select,
+  .billingpage .ledger-section .date-picker {
+    width: 100%;
+  }
+
+  .billingpage .ledger-section .pagination {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,392 @@
+/* ========================================================
+   LOGIN.CSS — Ultra-Minimalist Fintech Theme
+   ======================================================== */
+
+@keyframes ambient-glow {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+  50% { transform: scale(1.1) translate(20px, -20px); opacity: 0.8; }
+  100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+}
+
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Page Wrapper ── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+
+.loginpage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: #010202; /* Match landing page */
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  font-family: 'Outfit', sans-serif;
+}
+
+
+.bg-particles { display: none; } /* Hide particles */
+
+/* ── Auth Card Wrapper ── */
+.loginpage .auth-section {
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  z-index: 10;
+  animation: float-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* ── Brand Header ── */
+.loginpage .auth-brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.loginpage .brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.loginpage .brand-logo i {
+  color: #3B82F6;
+}
+
+.loginpage .brand-tagline {
+  font-size: 13px;
+  color: #8B949E;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Floating Dark Glass Card ── */
+.loginpage .auth-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(79, 70, 229, 0.1);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+  transform: skewX(-20deg);
+  transition: 0.8s ease;
+  pointer-events: none;
+}
+.auth-card:hover::before {
+  left: 200%;
+}
+
+/* ── Card Header ── */
+.loginpage .auth-card-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.loginpage .brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.loginpage .auth-brand-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.loginpage .auth-brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.loginpage .auth-title {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 10px;
+  letter-spacing: -1px;
+}
+
+.loginpage .auth-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── Form Fields ── */
+.loginpage .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loginpage .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loginpage .form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8B949E;
+}
+
+.loginpage .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.loginpage .input-icon {
+  position: absolute;
+  left: 16px;
+  color: #475569;
+  font-size: 18px;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.loginpage .form-input {
+  width: 100%;
+  padding: 14px 44px 14px 44px;
+  background-color: #010202;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #E2E8F0;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.loginpage .form-input:focus {
+  outline: none !important;
+  border-color: #4F46E5 !important;
+  background-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
+}
+
+.loginpage .form-input:invalid:not(:focus):not(:placeholder-shown) {
+  border-color: #f43f5e;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+
+.loginpage .password-toggle-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.loginpage .password-toggle-icon:hover {
+  color: #a5b4fc;
+}
+
+.loginpage .form-input::placeholder {
+  color: #475569;
+}
+
+.loginpage .input-wrapper:focus-within .input-icon {
+  color: #4F46E5;
+}
+
+/* ── Actions Row ── */
+.loginpage .form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loginpage .remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8B949E;
+  cursor: pointer;
+}
+
+.loginpage .remember-me input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #010202;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.loginpage .remember-me input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: white;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.loginpage .remember-me input[type="checkbox"]:checked {
+  background-color: #4F46E5;
+  border-color: #4F46E5;
+}
+
+.loginpage .remember-me input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.loginpage .forgot-link {
+  font-size: 13px;
+  color: #3B82F6;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.loginpage .forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Button ── */
+@keyframes pulseGlowBtn {
+  0% { box-shadow: 0 0 12px rgba(79, 70, 229, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(79, 70, 229, 0.6), 0 0 40px rgba(79, 70, 229, 0.2); }
+  100% { box-shadow: 0 0 12px rgba(79, 70, 229, 0.3); }
+}
+@keyframes buttonShimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+.loginpage .submit-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background-image: linear-gradient(to right, #4F46E5 0%, #3B82F6 50%, #4F46E5 100%);
+  background-size: 200% auto;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: pulseGlowBtn 3s infinite;
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.loginpage .submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-25deg);
+  animation: buttonShimmer 4s infinite;
+}
+.loginpage .submit-btn:hover:not(:disabled) {
+  background-position: right center;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.loginpage .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Error Banner ── */
+.loginpage .error-banner {
+  background-color: rgba(195, 67, 6, 0.1); /* Energy orange */
+  border: 1px solid rgba(195, 67, 6, 0.3);
+  color: #C34306;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ── Bottom Prompt ── */
+.loginpage .register-prompt {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #8B949E;
+}
+
+.loginpage .register-link {
+  color: #3B82F6;
+  font-weight: 600;
+  margin-left: 4px;
+  text-decoration: none;
+}
+
+.loginpage .register-link:hover {
+  text-decoration: underline;
+}
+
+.loginpage .security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.loginpage .security-note i {
+  color: #3B82F6;
+}

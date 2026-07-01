@@ -1,0 +1,222 @@
+/* ================= USER MANAGEMENT (ADMIN) ================= */
+
+.usermanagementpage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* ===== HEADER ===== */
+.usermanagementpage .dashboard-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.usermanagementpage .dashboard-header h1 {
+  font-size: var(--font-size-heading);
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.usermanagementpage .dashboard-header p {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== TABLE CONTAINER ===== */
+.usermanagementpage .table-card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.usermanagementpage .table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.usermanagementpage .search-box {
+  position: relative;
+  width: 300px;
+}
+
+.usermanagementpage .search-box i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.usermanagementpage .search-box input {
+  width: 100%;
+  background-color: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 10px 14px 10px 40px;
+  color: var(--text-main);
+  font-family: inherit;
+  transition: all 0.3s var(--spring-easing);
+}
+
+.usermanagementpage .search-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* ===== TABLE ===== */
+.usermanagementpage table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.usermanagementpage th {
+  padding: 8px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.usermanagementpage td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  font-size: var(--font-size-sm);
+  vertical-align: middle;
+}
+
+.usermanagementpage tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* ===== USER INFO ===== */
+.usermanagementpage .user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.usermanagementpage .user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.usermanagementpage .user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.usermanagementpage .user-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.usermanagementpage .user-email {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ===== KYC DOCS ===== */
+.usermanagementpage .docs-cell {
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ===== BADGES ===== */
+.usermanagementpage .status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.usermanagementpage .status-pending {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.usermanagementpage .status-active {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--profit-color);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.usermanagementpage .status-blocked,
+.usermanagementpage .status-rejected {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: var(--loss-color);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+/* ===== ACTIONS ===== */
+.usermanagementpage .actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.usermanagementpage .btn-action {
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.usermanagementpage .btn-approve {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--profit-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.usermanagementpage .btn-approve:hover:not(:disabled) {
+  background-color: var(--profit-color);
+  color: #000;
+}
+
+.usermanagementpage .btn-reject {
+  background-color: rgba(244, 63, 94, 0.1);
+  color: var(--loss-color);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+.usermanagementpage .btn-reject:hover:not(:disabled) {
+  background-color: var(--loss-color);
+  color: #fff;
+}
+
+.usermanagementpage .btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== EMPTY STATE ===== */
+.usermanagementpage .empty-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-muted);
+}

@@ -1,0 +1,19 @@
+/* Vite default styles — overridden by common.css */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+#app { width: 100%; min-height: 100vh; }
+
+/* UTILITY CLASSES */
+.p-20 { padding: 20px; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: var(--primary-color); }
+.btn-secondary-outline { margin-bottom: 8px; border-color: var(--text-muted); color: var(--text-muted); }
+.font-bold { font-weight: bold; }
+.bg-gradient-admin { background: linear-gradient(135deg, #f43f5e, #8b5cf6); }
+.text-danger { color: #f43f5e; }
+.bg-primary-light { background: rgba(59, 130, 246, 0.1); }
+.bg-warning-light { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.text-warning { color: #f59e0b; }
+.bg-success-light { background: rgba(16, 185, 129, 0.1); }
+.text-success { color: #10b981; }
+.bg-danger-light { background: rgba(244, 63, 94, 0.1); }

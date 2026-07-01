@@ -1,0 +1,7 @@
+[app]
+env = "testing"
+log_level = "debug"
+port = 8081
+
+[db]
+name = "stock_trading_test"

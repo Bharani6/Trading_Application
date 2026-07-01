@@ -1,0 +1,439 @@
+/* ========================================================
+   COMMON.CSS — Global Design System for MoneymakePro
+   Premium Dark Trading App Theme
+   ======================================================== */
+
+/* ===== GOOGLE FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ========================================================
+   CSS VARIABLES — Single source of truth
+   ======================================================== */
+:root {
+  /* ── Background Layers ── */
+  --bg-color:          #010202;
+  --surface-color:     #080c13;
+  --surface-hover:     #0c121c;
+  --surface-elevated:  #121a26;
+
+  /* ── Border ── */
+  --border-color:      rgba(255, 255, 255, 0.07);
+  --border-focus:      rgba(16, 185, 129, 0.6);
+
+  /* ── Primary Brand (Electric Blue → Purple) ── */
+  --primary-color:     #10B981;
+  --primary-hover:     #059669;
+  --primary-dim:       rgba(16, 185, 129, 0.12);
+  --primary-gradient:  linear-gradient(135deg, #10B981 0%, #00F0FF 100%);
+  --purple-color:      #8b5cf6;
+  --purple-dim:        rgba(139, 92, 246, 0.12);
+
+  /* ── Trading Colors ── */
+  --profit-color:      #10b981;
+  --profit-bg:         rgba(16, 185, 129, 0.12);
+  --profit-border:     rgba(16, 185, 129, 0.3);
+  --loss-color:        #f43f5e;
+  --loss-bg:           rgba(244, 63, 94, 0.12);
+  --loss-border:       rgba(244, 63, 94, 0.3);
+
+  /* ── Accent Palette ── */
+  --orange-color:      #f97316;
+  --orange-dim:        rgba(249, 115, 22, 0.12);
+  --teal-color:        #06b6d4;
+  --teal-dim:          rgba(6, 182, 212, 0.12);
+  --yellow-color:      #f59e0b;
+  --yellow-dim:        rgba(245, 158, 11, 0.12);
+  --yellow-border:     rgba(245, 158, 11, 0.3);
+
+  /* ── Icon Gradient Backgrounds (for stat cards) ── */
+  --icon-bg-blue:      linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(59,130,246,0.08) 100%);
+  --icon-bg-purple:    linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.08) 100%);
+  --icon-bg-green:     linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.08) 100%);
+  --icon-bg-orange:    linear-gradient(135deg, rgba(249,115,22,0.25) 0%, rgba(249,115,22,0.08) 100%);
+  --icon-bg-teal:      linear-gradient(135deg, rgba(6,182,212,0.25) 0%, rgba(6,182,212,0.08) 100%);
+
+  /* ── Typography ── */
+  --font-family-base:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono:  'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --font-size-xs:      11px;
+  --font-size-sm:      12px;
+  --font-size-base:    14px;
+  --font-size-md:      16px;
+  --font-size-lg:      20px;
+  --font-size-xl:      24px;
+  --font-size-2xl:     30px;
+  --font-size-heading: 36px;
+
+  /* ── Text Colors ── */
+  --text-main:         #f1f5f9;
+  --text-secondary:    #94a3b8;
+  --text-muted:        #64748b;
+  --text-disabled:     #374151;
+
+  /* ── Spacing Scale ── */
+  --spacing-xs:  8px;
+  --spacing-sm:  16px;
+  --spacing-md:  24px;
+  --spacing-lg:  32px;
+  --spacing-xl:  48px;
+
+  /* ── Border Radius ── */
+  --border-radius-xs: 4px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 14px;
+  --border-radius-xl: 20px;
+  --border-radius-full: 9999px;
+
+  /* ── Shadows (dark-optimized) ── */
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg:   0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-blue: 0 4px 20px rgba(59, 130, 246, 0.35);
+  --shadow-glow: 0 0 24px rgba(59, 130, 246, 0.2);
+
+  /* ── Sidebar ── */
+  --sidebar-width: 260px;
+
+  /* ── Transitions ── */
+  --spring-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --bounce-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 0.15s var(--spring-easing);
+  --transition-base: 0.25s var(--spring-easing);
+  --transition-slow: 0.4s  var(--spring-easing);
+}
+
+/* ========================================================
+   GLOBAL RESET
+   ======================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+@keyframes panGrid {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  background-color: var(--bg-color);
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: panGrid 20s linear infinite;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Ambient Floating Orbs Theme for Body */
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, -50px) scale(1.2); }
+}
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 50px) scale(0.8); }
+}
+body::before, body::after {
+  content: '';
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(150px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.15;
+}
+body::before {
+  top: -10vw;
+  left: -10vw;
+  background: radial-gradient(circle, #10B981, transparent 70%);
+  animation: floatOrb1 15s infinite ease-in-out;
+}
+body::after {
+  bottom: -10vw;
+  right: -10vw;
+  background: radial-gradient(circle, #00F0FF, transparent 70%);
+  animation: floatOrb2 18s infinite ease-in-out reverse;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--primary-color);
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  color: var(--text-main);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-dim), 0 0 12px rgba(59, 130, 246, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ── Select arrow ── */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+/* ── Option dropdowns ── */
+option {
+  background-color: var(--surface-elevated);
+  color: var(--text-main);
+}
+
+/* ========================================================
+   CUSTOM SCROLLBAR
+   ======================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-elevated);
+  border-radius: var(--border-radius-full);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-elevated) var(--bg-color);
+}
+
+/* ========================================================
+   TOASTIFICATION — Dark Theme Overrides
+   ======================================================== */
+.Vue-Toastification__container {
+  z-index: 99999;
+}
+
+.Vue-Toastification__toast {
+  font-family: var(--font-family-base) !important;
+  background-color: var(--surface-elevated) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(59,130,246,0.06) !important;
+  border-radius: var(--border-radius-md) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: var(--font-size-base) !important;
+}
+
+.Vue-Toastification__toast--success {
+  border-left: 3px solid var(--profit-color) !important;
+}
+
+.Vue-Toastification__toast--error {
+  border-left: 3px solid var(--loss-color) !important;
+}
+
+.Vue-Toastification__toast--warning {
+  border-left: 3px solid var(--yellow-color) !important;
+}
+
+.Vue-Toastification__toast--info {
+  border-left: 3px solid var(--primary-color) !important;
+}
+
+.Vue-Toastification__progress-bar {
+  background: var(--primary-gradient) !important;
+}
+
+.Vue-Toastification__close-button {
+  color: var(--text-muted) !important;
+}
+
+.Vue-Toastification__close-button:hover {
+  color: var(--text-main) !important;
+}
+
+/* ========================================================
+   UTILITY HELPERS
+   ======================================================== */
+.text-profit  { color: var(--profit-color); }
+.text-loss    { color: var(--loss-color); }
+.text-primary { color: var(--primary-color); }
+.text-muted   { color: var(--text-muted); }
+.text-main    { color: var(--text-main); }
+
+.bg-surface   { background-color: var(--surface-color); }
+.bg-elevated  { background-color: var(--surface-elevated); }
+
+/* Shimmer / skeleton loading */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-color) 25%,
+    var(--surface-elevated) 37%,
+    var(--surface-color) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Pulsing live indicator */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--profit-color);
+}
+
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: var(--profit-color);
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* ========================================================
+   #APP RESET — Vite default overrides
+   ======================================================== */
+#app {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  border: none;
+}
+
+/* ── Error Banner ── */
+.error-banner {
+  background-color: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #f43f5e;
+  padding: 12px 16px;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* Floating Particles Theme (Global) */
+.bg-particles {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+  animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+  0% { transform: translateY(110vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-20vh) scale(2); opacity: 0; }
+}
+.p1 { left: 15%; width: 4px; height: 4px; animation-duration: 25s; animation-delay: 0s; }
+.p2 { left: 35%; width: 8px; height: 8px; animation-duration: 18s; animation-delay: 2s; background: rgba(0, 240, 255, 0.4); box-shadow: 0 0 15px rgba(0, 240, 255, 0.8); }
+.p3 { left: 55%; width: 5px; height: 5px; animation-duration: 32s; animation-delay: 5s; }
+.p4 { left: 75%; width: 3px; height: 3px; animation-duration: 22s; animation-delay: 1s; }
+.p5 { left: 85%; width: 7px; height: 7px; animation-duration: 28s; animation-delay: 4s; }
+.p6 { left: 5%; width: 6px; height: 6px; animation-duration: 20s; animation-delay: 8s; background: rgba(0, 240, 255, 0.4); box-shadow: 0 0 15px rgba(0, 240, 255, 0.8); }
+.p7 { left: 45%; width: 9px; height: 9px; animation-duration: 35s; animation-delay: 3s; }
+.p8 { left: 95%; width: 4px; height: 4px; animation-duration: 26s; animation-delay: 6s; }

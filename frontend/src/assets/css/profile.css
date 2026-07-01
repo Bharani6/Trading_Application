@@ -1,0 +1,400 @@
+/* ========================================================
+   PROFILE.CSS — Profile & KYC Page
+   Premium Dark Trading App Theme
+   ======================================================== */
+
+/* ===== PAGE WRAPPER ===== */
+.profilepage {
+  /* Inherits from .page-container */
+}
+
+/* ========================================================
+   HEADER SECTION
+   ======================================================== */
+.profilepage .header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.profilepage .header-section .page-title {
+  margin: 0 0 6px 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.profilepage .header-section .page-subtitle {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+}
+
+/* ── KYC Status Badges ── */
+.profilepage .header-section .kyc-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all var(--transition-base);
+}
+
+.profilepage .header-section .status-pending {
+  background-color: var(--yellow-dim);
+  color: var(--yellow-color);
+  border-color: var(--yellow-border);
+}
+
+.profilepage .header-section .status-active {
+  background-color: var(--profit-bg);
+  color: var(--profit-color);
+  border-color: var(--profit-border);
+}
+
+.profilepage .header-section .status-rejected {
+  background-color: var(--loss-bg);
+  color: var(--loss-color);
+  border-color: var(--loss-border);
+}
+
+.profilepage .header-section .status-blocked {
+  background-color: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+/* ========================================================
+   USER INFO CARD
+   ======================================================== */
+.profilepage .user-info-card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+/* ── Avatar + Name ── */
+.profilepage .user-info-card .avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.profilepage .user-info-card .avatar-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -1px;
+  box-shadow: 0 0 0 3px var(--surface-color), 0 0 0 5px var(--primary-dim), var(--shadow-blue);
+  flex-shrink: 0;
+}
+
+.profilepage .user-info-card .avatar-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profilepage .user-info-card .user-full-name {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.profilepage .user-info-card .user-email {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.profilepage .user-info-card .role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  width: fit-content;
+}
+
+.profilepage .user-info-card .role-user {
+  background-color: var(--primary-dim);
+  color: var(--primary-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.profilepage .user-info-card .role-admin {
+  background-color: var(--purple-dim);
+  color: var(--purple-color);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* ── Info Grid (mobile/status/account ID) ── */
+.profilepage .user-info-card .info-grid {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.profilepage .user-info-card .info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profilepage .user-info-card .info-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.profilepage .user-info-card .info-value {
+  font-size: var(--font-size-base);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.profilepage .user-info-card .id-value {
+  font-family: var(--font-family-mono);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ── Status chip ── */
+.profilepage .user-info-card .status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+.profilepage .user-info-card .chip-pending {
+  background-color: var(--yellow-dim);
+  color: var(--yellow-color);
+  border-color: var(--yellow-border);
+}
+
+.profilepage .user-info-card .chip-active {
+  background-color: var(--profit-bg);
+  color: var(--profit-color);
+  border-color: var(--profit-border);
+}
+
+.profilepage .user-info-card .chip-rejected,
+.profilepage .user-info-card .chip-blocked {
+  background-color: var(--loss-bg);
+  color: var(--loss-color);
+  border-color: var(--loss-border);
+}
+
+/* ========================================================
+   SETTINGS SECTION
+   ======================================================== */
+.profilepage .settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ── Settings Content Card ── */
+.profilepage .settings-section .settings-content {
+  background-color: var(--surface-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Form Grid ── */
+.profilepage .settings-section .grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.profilepage .settings-section .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profilepage .settings-section .full-width {
+  grid-column: 1 / -1;
+}
+
+.profilepage .settings-section .form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+}
+
+.profilepage .settings-section .required-star {
+  color: #f43f5e;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+/* ── Inputs override (uses global but needs specific overrides) ── */
+.profilepage .settings-section .form-input,
+.profilepage .settings-section .form-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--surface-elevated, #1e2740);
+  color: var(--text-main);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.profilepage .settings-section .form-input:focus,
+.profilepage .settings-section .form-textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+.profilepage .settings-section .form-input::placeholder,
+.profilepage .settings-section .form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.profilepage .settings-section .form-input:disabled {
+  background-color: var(--surface-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.04);
+  opacity: 0.7;
+}
+
+.profilepage .settings-section .form-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* ── Form Actions ── */
+.profilepage .settings-section .form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profilepage .settings-section .submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-blue);
+}
+
+.profilepage .settings-section .submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+}
+
+.profilepage .settings-section .submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========================================================
+   MEDIA QUERIES
+   ======================================================== */
+@media (max-width: 1024px) {
+  .profilepage .user-info-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profilepage .user-info-card .info-grid {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .profilepage .settings-section .settings-content {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 576px) {
+  .profilepage .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profilepage .user-info-card .avatar-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profilepage .user-info-card .info-grid {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .profilepage .settings-section .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .profilepage .settings-section .full-width {
+    grid-column: 1;
+  }
+
+  .profilepage .settings-section .form-actions {
+    justify-content: stretch;
+  }
+
+  .profilepage .settings-section .submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

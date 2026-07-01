@@ -1,0 +1,6 @@
+[app]
+env = "development"
+log_level = "debug"
+
+[db]
+name = "stock_trading_dev"

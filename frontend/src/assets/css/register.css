@@ -1,0 +1,504 @@
+/* ========================================================
+   REGISTER.CSS — Ultra-Minimalist Fintech Theme (Split Screen)
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+
+.register-split-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #010202; /* Match landing page */
+  color: #E2E8F0;
+  font-family: 'Outfit', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.bg-particles { display: none; } /* Hide particles */
+
+/* ── LEFT PANEL (Marketing) ── */
+.register-split-page .left-panel {
+  flex: 1;
+  background: transparent;
+  padding: 60px 80px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.register-split-page .bg-particles {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+  animation: floatUp linear infinite;
+}
+.p1 { left: 15%; width: 4px; height: 4px; animation-duration: 25s; animation-delay: 0s; }
+.p2 { left: 35%; width: 8px; height: 8px; animation-duration: 18s; animation-delay: 2s; background: rgba(0, 240, 255, 0.4); box-shadow: 0 0 15px rgba(0, 240, 255, 0.8); }
+.p3 { left: 55%; width: 5px; height: 5px; animation-duration: 32s; animation-delay: 5s; }
+.p4 { left: 75%; width: 3px; height: 3px; animation-duration: 22s; animation-delay: 1s; }
+.p5 { left: 85%; width: 7px; height: 7px; animation-duration: 28s; animation-delay: 4s; }
+.p6 { left: 5%; width: 6px; height: 6px; animation-duration: 20s; animation-delay: 8s; background: rgba(0, 240, 255, 0.4); box-shadow: 0 0 15px rgba(0, 240, 255, 0.8); }
+.p7 { left: 45%; width: 9px; height: 9px; animation-duration: 35s; animation-delay: 3s; }
+.p8 { left: 95%; width: 4px; height: 4px; animation-duration: 26s; animation-delay: 6s; }
+
+.register-split-page .brand-logo {
+  font-size: 28px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.register-split-page .brand-logo i {
+  color: #3B82F6;
+}
+
+.register-split-page .marketing-content {
+  margin-bottom: auto;
+  max-width: 480px;
+  position: relative;
+  z-index: 2;
+}
+
+.register-split-page .marketing-headline {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 24px;
+  color: #FFFFFF;
+}
+
+.register-split-page .marketing-subheadline {
+  font-size: 18px;
+  color: #8B949E;
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+.register-split-page .trust-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 48px 0;
+}
+
+.register-split-page .trust-list li {
+  font-size: 16px;
+  color: #E2E8F0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.register-split-page .trust-list li i {
+  color: #4F46E5;
+  font-size: 18px;
+}
+
+/* Abstract Metric Card Graphic */
+.register-split-page .abstract-graphic {
+  position: relative;
+}
+
+.register-split-page .metric-card {
+  background: rgba(18, 22, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 24px;
+  width: 280px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  transform: translateY(0);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.register-split-page .mc-title {
+  font-size: 14px;
+  color: #8B949E;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.register-split-page .mc-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #3B82F6;
+  margin-bottom: 16px;
+}
+
+.register-split-page .mc-chart {
+  height: 40px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(59, 130, 246, 0.3) 100%);
+  border-bottom: 2px solid #3B82F6;
+  border-radius: 4px 4px 0 0;
+}
+
+/* ── RIGHT PANEL (Form) ── */
+.register-split-page .right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Floating Dark Glass Card ── */
+.register-split-page .auth-card {
+  width: 100%;
+  max-width: 580px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(79, 70, 229, 0.1);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-split-page .auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+  transform: skewX(-20deg);
+  transition: 0.8s ease;
+  pointer-events: none;
+}
+
+.register-split-page .auth-card:hover::before {
+  left: 200%;
+}
+
+.register-split-page .auth-card-header {
+  margin-bottom: 32px;
+}
+
+.register-split-page .brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.register-split-page .auth-brand-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.register-split-page .auth-brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.register-split-page .auth-title {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 10px 0;
+  letter-spacing: -1px;
+}
+
+.register-split-page .auth-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.register-split-page .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.register-split-page .form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.register-split-page .form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.required-star {
+  color: #f43f5e;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+.register-split-page .input-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+.register-split-page .form-input {
+  width: 100%;
+  padding: 12px 38px 12px 14px;
+  background-color: #010202;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #E2E8F0;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+  color-scheme: dark;
+}
+
+.register-split-page .form-input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.register-split-page .password-toggle-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.register-split-page .password-toggle-icon:hover {
+  color: #a5b4fc;
+}
+
+.register-split-page .form-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.register-split-page .form-input:focus {
+  outline: none !important;
+  border-color: #4F46E5 !important;
+  background-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
+}
+
+.register-split-page .form-input:invalid:not(:focus):not(:placeholder-shown):not(select):not([type="date"]) {
+  border-color: #f43f5e;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+
+.register-split-page .form-input::placeholder {
+  color: #475569;
+}
+
+/* Custom Select styling */
+.register-split-page .custom-select select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.register-split-page .select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #475569;
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.register-split-page .income-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.register-split-page .income-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.register-split-page .income-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.register-split-page .income-chip.active {
+  background: rgba(79, 70, 229, 0.15);
+  border-color: #4F46E5;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+}
+
+.register-split-page .password-hint {
+  display: block;
+  font-size: 12px;
+  color: #8B949E;
+  margin-top: 6px;
+}
+
+.register-split-page .terms-note {
+  font-size: 13px;
+  color: #8B949E;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.register-split-page .terms-note a {
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* ── Button ── */
+@keyframes pulseGlowBtn {
+  0% { box-shadow: 0 0 12px rgba(79, 70, 229, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(79, 70, 229, 0.6), 0 0 40px rgba(79, 70, 229, 0.2); }
+  100% { box-shadow: 0 0 12px rgba(79, 70, 229, 0.3); }
+}
+@keyframes buttonShimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.register-split-page .submit-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background-image: linear-gradient(to right, #4F46E5 0%, #3B82F6 50%, #4F46E5 100%);
+  background-size: 200% auto;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: pulseGlowBtn 3s infinite;
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.register-split-page .submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-25deg);
+  animation: buttonShimmer 4s infinite;
+}
+.register-split-page .submit-btn:hover:not(:disabled) {
+  background-position: right center;
+  transform: translateY(-2px) scale(1.02);
+}
+.register-split-page .submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-split-page .login-prompt {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 14px;
+  color: #8B949E;
+}
+
+.register-split-page .login-link {
+  color: #3B82F6;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.register-split-page .login-link:hover {
+  text-decoration: underline;
+}
+
+/* Error Banner with Energy Accent */
+.register-split-page .error-banner {
+  background-color: rgba(195, 67, 6, 0.1);
+  border: 1px solid rgba(195, 67, 6, 0.3);
+  color: #C34306;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ── RESPONSIVE DESIGN ── */
+@media (max-width: 1024px) {
+  .register-split-page .left-panel {
+    display: none;
+  }
+  .register-split-page .right-panel {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .register-split-page .auth-card {
+    padding: 32px 24px;
+  }
+  .register-split-page .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
