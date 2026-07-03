@@ -5,9 +5,9 @@
         <h1 class="page-title">Account Settings</h1>
         <p class="page-subtitle">Manage your account details and personal information</p>
       </div>
-      <div :class="['kyc-status', `status-${authStore.state.user?.status || 'pending'}`]">
-        <i :class="authStore.state.user?.status === 'active' ? 'fas fa-check-circle' : 'fas fa-clock'"></i>
-        {{ authStore.state.user?.status === 'active' ? 'Verified' : authStore.state.user?.status === 'rejected' ? 'Rejected' : 'Verification Pending' }}
+      <div :class="['kyc-status', `status-${authStore.state.user?.role === 'admin' ? 'active' : (authStore.state.user?.status || 'pending')}`]">
+        <i :class="(authStore.state.user?.role === 'admin' || authStore.state.user?.status === 'active') ? 'fas fa-check-circle' : 'fas fa-clock'"></i>
+        {{ (authStore.state.user?.role === 'admin' || authStore.state.user?.status === 'active') ? 'Verified' : authStore.state.user?.status === 'rejected' ? 'Rejected' : 'Verification Pending' }}
       </div>
     </div>
 
@@ -32,8 +32,8 @@
         </div>
         <div class="info-item">
           <span class="info-label">Account Status</span>
-          <span :class="['status-chip', `chip-${authStore.state.user?.status || 'pending'}`]">
-            {{ authStore.state.user?.status || 'pending' }}
+          <span :class="['status-chip', `chip-${authStore.state.user?.role === 'admin' ? 'active' : (authStore.state.user?.status || 'pending')}`]">
+            {{ authStore.state.user?.role === 'admin' ? 'active' : (authStore.state.user?.status || 'pending') }}
           </span>
         </div>
       </div>

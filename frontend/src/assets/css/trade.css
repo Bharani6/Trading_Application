@@ -130,7 +130,7 @@
 /* ── Market Header Row (sticky) ── */
 .tradepage .market-section .market-row {
   display: grid;
-  grid-template-columns: 2.2fr 1.2fr 1fr 1fr 1fr 1.8fr;
+  grid-template-columns: 2.2fr 1fr 1.6fr 1fr 1fr 1.8fr;
   align-items: center;
   padding: 14px 24px;
   border-bottom: 1px solid var(--border-color);
@@ -187,10 +187,6 @@
 .tradepage .market-section .stock-name {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
 }
 
 /* ── Segment Badge (pill) ── */
