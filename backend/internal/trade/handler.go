@@ -20,9 +20,9 @@ func NewTradeController() *TradeController {
 
 // ========================== GET SHARES ==========================
 
-func ConstructGetShares(pSvc TradeService) (interface{}, error) {
+func ConstructGetShares(pSvc TradeService, search string) (interface{}, error) {
 	log.Println("ConstructGetShares (+)")
-	lShares, lErr := pSvc.GetAllShares()
+	lShares, lErr := pSvc.GetAllShares(search)
 	log.Println("ConstructGetShares (-)")
 	return lShares, lErr
 }
@@ -50,7 +50,8 @@ func (c *TradeController) GetShares(lCtx *gin.Context) {
 	var lDetails interface{}
 	var lShares interface{}
 
-	lShares, lErr = ConstructGetShares(c.svc)
+	search := lCtx.Query("search")
+	lShares, lErr = ConstructGetShares(c.svc, search)
 	if lErr != nil {
 		lStatus = http.StatusInternalServerError
 		lCode = "FETCH_ERROR"

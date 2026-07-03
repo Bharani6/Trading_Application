@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	market_service "stock-trading/internal/market/service"
 	"stock-trading/internal/wallet"
 	walletpkg "stock-trading/internal/wallet"
 
@@ -13,7 +14,7 @@ import (
 )
 
 type TradeService interface {
-	GetAllShares() ([]ShareResponse, error)
+	GetAllShares(search string) ([]ShareResponse, error)
 	BuyShare(userID string, req TradeRequest, isPending bool) error
 	SellShare(userID string, req TradeRequest, isPending bool) error
 	GetUserTrades(userID string) ([]Trade, error)
@@ -22,14 +23,16 @@ type TradeService interface {
 }
 
 type tradeService struct {
-	repo       TradeRepository
-	walletRepo wallet.WalletRepository
+	repo              TradeRepository
+	walletRepo        wallet.WalletRepository
+	marketDataService market_service.MarketDataService
 }
 
 func NewTradeService() TradeService {
 	return &tradeService{
-		repo:       NewTradeRepository(),
-		walletRepo: wallet.NewWalletRepository(),
+		repo:              NewTradeRepository(),
+		walletRepo:        wallet.NewWalletRepository(),
+		marketDataService: market_service.NewYahooFinanceService(),
 	}
 }
 
@@ -48,17 +51,54 @@ func IsMarketOpen() bool {
 	min := now.Minute()
 
 	// Open between 9:00 and 15:30
-	if hour < 9 || hour > 15 || (hour == 15 && min > 30) {
-		return false
+	if (hour > 9 || (hour == 9 && min >= 0)) && (hour < 15 || (hour == 15 && min <= 30)) {
+		return true
 	}
-
-	return true
+	return false
 }
 
-func (s *tradeService) GetAllShares() ([]ShareResponse, error) {
-	shares, err := s.repo.GetAllShares()
+func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
+	shares, err := s.repo.GetAllShares(search)
 	if err != nil {
 		return nil, errors.New("failed to retrieve shares")
+	}
+
+	// Trigger dynamic market search if local results are few and a search query is provided
+	if len(shares) < 3 && search != "" {
+		if results, err := s.marketDataService.SearchSymbol(search); err == nil && len(results) > 0 {
+			var newSymbols []string
+			for _, res := range results {
+				newSymbols = append(newSymbols, res.Symbol)
+			}
+			// Fetch prices for the newly discovered symbols
+			prices, err := s.marketDataService.GetLatestPrices(newSymbols)
+			if err == nil {
+				for _, res := range results {
+					priceData := prices[res.Symbol]
+					
+					// Assuming Segment ID 1 is NSE
+					newShare := &Share{
+						ID:              uuid.New(),
+						Symbol:          res.Symbol,
+						Name:            res.LongName,
+						Price:           priceData.Current,
+						PreviousPrice:   priceData.Previous,
+						SegmentID:       1,
+						TotalShares:     1000000,
+						AvailableShares: 1000000,
+					}
+					// If LongName is empty, fallback to ShortName
+					if newShare.Name == "" {
+						newShare.Name = res.ShortName
+					}
+					
+					if err := s.repo.FirstOrCreateShare(newShare); err == nil {
+						// Append to the list of shares to return
+						shares = append(shares, *newShare)
+					}
+				}
+			}
+		}
 	}
 
 	var res []ShareResponse
