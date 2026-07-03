@@ -2,14 +2,16 @@ package trade
 
 import (
 	"stock-trading/internal/database"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type TradeRepository interface {
-	GetAllShares() ([]Share, error)
+	GetAllShares(search string) ([]Share, error)
 	GetShareForUpdate(tx *gorm.DB, shareID string) (*Share, error)
+	FirstOrCreateShare(share *Share) error
 	UpdateShare(tx *gorm.DB, share *Share) error
 	CreateTrade(tx *gorm.DB, trade *Trade) error
 	GetTradesByUser(userID string) ([]Trade, error)
@@ -24,9 +26,16 @@ func NewTradeRepository() TradeRepository {
 	return &tradeRepository{db: database.DB}
 }
 
-func (r *tradeRepository) GetAllShares() ([]Share, error) {
-	var shares []Share
-	err := r.db.Preload("Segment").Find(&shares).Error
+func (r *tradeRepository) GetAllShares(search string) ([]Share, error) {
+	var shares []Share = make([]Share, 0)
+	query := r.db.Preload("Segment")
+	
+	search = strings.TrimSpace(search)
+	if search != "" {
+		searchTerm := "%" + search + "%"
+		query = query.Where("name ILIKE ? OR symbol ILIKE ?", searchTerm, searchTerm)
+	}
+	err := query.Find(&shares).Error
 	return shares, err
 }
 
@@ -34,6 +43,10 @@ func (r *tradeRepository) GetShareForUpdate(tx *gorm.DB, shareID string) (*Share
 	var share Share
 	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", shareID).First(&share).Error
 	return &share, err
+}
+
+func (r *tradeRepository) FirstOrCreateShare(share *Share) error {
+	return r.db.Where("symbol = ?", share.Symbol).FirstOrCreate(share).Error
 }
 
 func (r *tradeRepository) UpdateShare(tx *gorm.DB, share *Share) error {

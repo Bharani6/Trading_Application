@@ -122,7 +122,7 @@
 
 <script setup>
 import '../../assets/css/trade.css'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useTradeStore } from '../../store/trade'
 import { useAuthStore } from '../../store'
@@ -152,9 +152,17 @@ let refreshInterval = null
 
 const fetchMarketData = async () => {
   isRefreshing.value = true
-  await tradeStore.fetchShares()
+  await tradeStore.fetchShares(searchQuery.value)
   isRefreshing.value = false
 }
+
+let searchTimeout = null
+watch(searchQuery, () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    fetchMarketData()
+  }, 300)
+})
 
 onMounted(async () => {
   await Promise.all([

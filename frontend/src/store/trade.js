@@ -8,9 +8,9 @@ const state = reactive({
 })
 
 export const useTradeStore = () => {
-  const fetchShares = async () => {
+  const fetchShares = async (search = '') => {
     try {
-      const res = await api.get('/shares')
+      const res = await api.get('/shares', { params: { search } })
       if (res.data.success) {
         state.shares = res.data.data || []
       }
