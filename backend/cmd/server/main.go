@@ -15,6 +15,7 @@ import (
 	"stock-trading/internal/trade"
 	"stock-trading/internal/wallet"
 	"stock-trading/internal/profile"
+	watchlistpkg "stock-trading/internal/watchlist"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -34,6 +35,7 @@ func main() {
 	database.ConnectDB()
 	if err := database.DB.AutoMigrate(
 		&userpkg.User{},
+		&watchlistpkg.Watchlist{},
 		&userpkg.Session{},
 		&userpkg.BankDetails{},
 		&userpkg.NomineeDetails{},

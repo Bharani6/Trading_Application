@@ -7,6 +7,7 @@
       <router-link :to="{ query: { tab: 'explore' } }" class="tab-item" :class="{ active: activeTab === 'explore' }">Explore</router-link>
       <router-link :to="{ query: { tab: 'holdings' } }" class="tab-item" :class="{ active: activeTab === 'holdings' }">Holdings</router-link>
       <router-link :to="{ query: { tab: 'orders' } }" class="tab-item" :class="{ active: activeTab === 'orders' }">Orders</router-link>
+      <router-link :to="{ query: { tab: 'watchlist' } }" class="tab-item" :class="{ active: activeTab === 'watchlist' }">Watchlist</router-link>
     </div>
 
     <!-- 2 COLUMN GRID -->
@@ -221,6 +222,11 @@
           </div>
         </template>
         
+        <!-- WATCHLIST TAB -->
+        <template v-if="activeTab === 'watchlist'">
+          <Watchlist />
+        </template>
+        
       </div>
     </div>
 
@@ -286,6 +292,7 @@ import { useTradeStore } from '../../store/trade'
 import { useAuthStore } from '../../store'
 import { useToast } from 'vue-toastification'
 import { formatNumber, formatDate } from '../../utils/formatters'
+import Watchlist from '../../views/Watchlist.vue'
 
 const route = useRoute()
 const walletStore = useWalletStore()
