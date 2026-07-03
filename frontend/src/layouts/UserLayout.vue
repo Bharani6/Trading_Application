@@ -20,6 +20,7 @@
             <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
             <span>Trade</span>
           </router-link>
+
           <router-link to="/billing" class="nav-item" active-class="active">
             <i class="fas fa-file-invoice-dollar nav-icon"></i>
             <span>Billing</span>

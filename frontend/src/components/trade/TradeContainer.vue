@@ -54,6 +54,13 @@
             class="action-btn sell-btn" 
             @click="openTradeModal(stock, 'Sell')"
           >Sell</button>
+          <button 
+            class="watchlist-icon-btn"
+            @click="toggleWatchlist(stock)"
+            :title="isInWatchlist(stock.id) ? 'Remove from Watchlist' : 'Add to Watchlist'"
+          >
+            <i class="fas fa-heart" :class="isInWatchlist(stock.id) ? 'text-red-500' : 'text-gray-500'"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -120,11 +127,13 @@ import { useToast } from 'vue-toastification'
 import { useTradeStore } from '../../store/trade'
 import { useAuthStore } from '../../store'
 import { useWalletStore } from '../../store/wallet'
+import { useWatchlistStore } from '../../store/watchlist'
 
 const toast = useToast()
 const tradeStore = useTradeStore()
 const authStore = useAuthStore()
 const walletStore = useWalletStore()
+const watchlistStore = useWatchlistStore()
 
 // Filter State
 const searchQuery = ref('')
@@ -150,7 +159,8 @@ const fetchMarketData = async () => {
 onMounted(async () => {
   await Promise.all([
     fetchMarketData(),
-    tradeStore.fetchHistory()
+    tradeStore.fetchHistory(),
+    watchlistStore.fetchWatchlist()
   ])
 
   refreshInterval = setInterval(() => {
@@ -247,6 +257,29 @@ const confirmTrade = async () => {
     closeModal()
   } else {
     toast.error(res.message)
+  }
+}
+
+const isInWatchlist = (stockId) => {
+  return watchlistStore.state.watchlist.some(w => w.stockId === stockId)
+}
+
+const toggleWatchlist = async (stock) => {
+  const watchlistItem = watchlistStore.state.watchlist.find(w => w.stockId === stock.id)
+  if (watchlistItem) {
+    const res = await watchlistStore.removeFromWatchlist(watchlistItem.id)
+    if (res.success) {
+      toast.success('Removed from watchlist')
+    } else {
+      toast.error(res.message)
+    }
+  } else {
+    const res = await watchlistStore.addToWatchlist(stock.id)
+    if (res.success) {
+      toast.success('Added to watchlist')
+    } else {
+      toast.error(res.message)
+    }
   }
 }
 </script>
@@ -432,5 +465,34 @@ const confirmTrade = async () => {
 
 .confirm-btn.bg-sell:hover:not(:disabled) {
   background: #e11d48;
+}
+
+.watchlist-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.watchlist-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+.text-red-500 {
+  color: #ef4444;
+}
+
+.text-gray-500 {
+  color: #6b7280;
 }
 </style>

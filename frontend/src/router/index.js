@@ -24,6 +24,7 @@ const routes = [
       { path: 'trade', name: 'Trade', component: () => import('../views/Trade.vue') },
       { path: 'billing', name: 'Billing', component: () => import('../views/Billing.vue') },
       { path: 'profile', name: 'Profile', component: () => import('../views/Profile.vue') },
+      { path: 'watchlist', name: 'Watchlist', component: () => import('../views/Watchlist.vue') },
     ]
   },
   {

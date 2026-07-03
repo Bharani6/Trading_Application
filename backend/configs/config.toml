@@ -1,6 +1,6 @@
 [app]
 name = "Stock Trading System"
-port = 8080
+port = 8081
 env = "development"
 log_level = "debug"
 market_update_interval = "1m"

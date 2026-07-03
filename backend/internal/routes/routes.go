@@ -8,6 +8,7 @@ import (
 	"stock-trading/internal/trade"
 	"stock-trading/internal/utils"
 	"stock-trading/internal/wallet"
+	"stock-trading/internal/watchlist"
 
 	"github.com/gin-gonic/gin"
 )
@@ -76,6 +77,12 @@ func SetupRouter(r *gin.Engine) {
 				admin.POST("/shares/upload", adminController.UploadShares)
 				admin.DELETE("/shares", adminController.DeleteAllShares)
 			}
+			
+			watchlistController := watchlist.NewWatchlistController()
+			secure.POST("/watchlist", watchlistController.AddStock)
+			secure.GET("/watchlist", watchlistController.GetWatchlist)
+			secure.DELETE("/watchlist/:id", watchlistController.RemoveStock)
+			secure.PUT("/watchlist/:id/favorite", watchlistController.UpdateFavorite)
 		}
 	}
 }
