@@ -13,7 +13,7 @@ type FileUpload struct {
 	FileName      string    `json:"file_name" gorm:"type:varchar(255)"`
 	FilePath      string    `json:"file_path" gorm:"type:text"`
 	FileSize      int64     `json:"file_size"`
-	FileType      string    `json:"file_type" gorm:"type:enum('pan_card', 'address_proof', 'bank_proof')"`
+	FileType      string    `json:"file_type" gorm:"type:varchar(50)"`
 	FileExtension string    `json:"file_extension" gorm:"type:varchar(10)"`
 	CreatedAt     time.Time `json:"created_at"`
 }

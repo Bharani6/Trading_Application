@@ -232,19 +232,7 @@ func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
 		return nil, errors.New("failed to register user: " + err.Error())
 	}
 
-	return &UserResponse{
-		ID:          user.ID.String(),
-		Name:        user.Name,
-		Email:       user.Email,
-		Mobile:      user.Mobile,
-		Role:        user.Role,
-		Status:      user.Status,
-		DOB:         user.DOB.Format("2006-01-02"),
-		Address:     user.Address,
-		PAN:         user.PAN,
-		Aadhaar:     user.Aadhaar,
-		IncomeRange: user.IncomeRange,
-	}, nil
+	return s.GetMe(user.ID.String())
 }
 
 func (s *authService) Login(req LoginRequest, ip string, userAgent string) (*LoginResponse, error) {
@@ -281,22 +269,15 @@ func (s *authService) Login(req LoginRequest, ip string, userAgent string) (*Log
 		return nil, errors.New("internal server error")
 	}
 
+	userResp, err := s.GetMe(user.ID.String())
+	if err != nil {
+		return nil, errors.New("failed to fetch user details")
+	}
+
 	return &LoginResponse{
 		AccessToken:  access,
 		RefreshToken: refresh,
-		User: &UserResponse{
-			ID:          user.ID.String(),
-			Name:        user.Name,
-			Email:       user.Email,
-			Mobile:      user.Mobile,
-			Role:        user.Role,
-			Status:      user.Status,
-			DOB:         user.DOB.Format("2006-01-02"),
-			Address:     user.Address,
-			PAN:         user.PAN,
-			Aadhaar:     user.Aadhaar,
-			IncomeRange: user.IncomeRange,
-		},
+		User:         userResp,
 	}, nil
 }
 

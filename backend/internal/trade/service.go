@@ -68,6 +68,7 @@ func (s *tradeService) GetAllShares() ([]ShareResponse, error) {
 			Symbol:          share.Symbol,
 			Name:            share.Name,
 			Price:           share.Price,
+			PreviousPrice:   share.PreviousPrice,
 			Segment:         share.Segment.Name,
 			AvailableShares: share.AvailableShares,
 		})

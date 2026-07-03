@@ -3,14 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	userpkg "stock-trading/internal/user"
 
 	"stock-trading/internal/config"
 	"stock-trading/internal/database"
 	"stock-trading/internal/logger"
-	"stock-trading/internal/response"
+	"stock-trading/internal/market"
+	"stock-trading/internal/market/service"
 	"stock-trading/internal/routes"
 	"stock-trading/internal/trade"
+	"stock-trading/internal/wallet"
+	"stock-trading/internal/profile"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -28,12 +32,29 @@ func main() {
 
 	// 3. Init Database & Redis
 	database.ConnectDB()
-	database.DB.AutoMigrate(&userpkg.User{})
+	if err := database.DB.AutoMigrate(
+		&userpkg.User{},
+		&userpkg.Session{},
+		&userpkg.BankDetails{},
+		&userpkg.NomineeDetails{},
+		&userpkg.PersonalDetails{},
+		&wallet.Wallet{},
+		&wallet.Transaction{},
+		&trade.Segment{},
+		&trade.Share{},
+		&trade.Trade{},
+		&profile.FileUpload{},
+	); err != nil {
+		log.Fatalf("Failed to auto-migrate: %v", err)
+	}
 	// database.InitRedis()
 
 	// 4. Setup Services & Background Workers
 	tradeSvc := trade.NewTradeService()
 	trade.StartTradeWorker(tradeSvc)
+
+	marketSvc := service.NewYahooFinanceService()
+	market.StartMarketDataWorker(database.DB, marketSvc)
 
 	// 5. Setup Router
 	if config.App.App.Env == "production" {
@@ -57,8 +78,27 @@ func main() {
 	})
 
 	// Health check
-	r.GET("/ping", func(c *gin.Context) {
-		response.Success(c, 200, "Pong", nil)
+	r.GET("/health", func(c *gin.Context) {
+		dbStatus := "OK"
+		if err := database.DB.Exec("SELECT 1").Error; err != nil {
+			dbStatus = "Error: " + err.Error()
+		}
+
+		yahooStatus := "OK"
+		// Make a quick HEAD/GET request to Yahoo to check connectivity
+		if resp, err := http.Get("https://query1.finance.yahoo.com/v7/finance/quote?symbols=AAPL"); err != nil || resp.StatusCode != 200 {
+			yahooStatus = "Error or Unreachable"
+		}
+
+		workerStatus := market.WorkerStatus
+		version := "v1.0.0"
+
+		c.JSON(200, gin.H{
+			"database": dbStatus,
+			"yahoo":    yahooStatus,
+			"worker":   workerStatus,
+			"version":  version,
+		})
 	})
 
 	// Register API Routes

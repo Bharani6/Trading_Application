@@ -14,10 +14,11 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name     string
-	Port     int
-	Env      string
-	LogLevel string `mapstructure:"log_level"`
+	Name                 string
+	Port                 int
+	Env                  string
+	LogLevel             string `mapstructure:"log_level"`
+	MarketUpdateInterval string `mapstructure:"market_update_interval"`
 }
 
 type DBConfig struct {
@@ -45,6 +46,7 @@ func LoadConfig(dir string) {
 	viper.AddConfigPath(dir)
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)

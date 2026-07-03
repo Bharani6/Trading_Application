@@ -12,6 +12,10 @@
           <i class="fas fa-search search-icon"></i>
           <input type="text" class="search-input" v-model="searchQuery" placeholder="Search stocks (e.g. RELIANCE)" />
         </div>
+        <div class="countdown-timer" style="display: flex; align-items: center; color: var(--text-muted); font-size: 14px; margin-left: 15px;">
+          <i class="fas fa-sync-alt" :class="{'fa-spin': isRefreshing}" style="margin-right: 6px;"></i>
+          Updates in {{ countdown }}s
+        </div>
       </div>
     </div>
 
@@ -27,13 +31,18 @@
 
       <div class="market-row stock-item" v-for="stock in filteredShares" :key="stock.id">
         <div class="company-info">
-          <div class="stock-symbol">{{ stock.symbol }}</div>
+          <div class="stock-symbol">{{ stock.symbol.split('.')[0] }}</div>
           <div class="stock-name">{{ stock.name }}</div>
         </div>
         <div class="segment">
           <span class="segment-badge">{{ stock.segment }}</span>
         </div>
-        <div class="stock-price">₹{{ stock.price.toFixed(2) }}</div>
+        <div class="stock-price">
+          ₹{{ stock.price.toFixed(2) }}
+          <span :class="getPriceChange(stock).class" style="font-size: 0.85em; margin-left: 4px;">
+            {{ getPriceChange(stock).text }}
+          </span>
+        </div>
         <div class="stock-qty">{{ stock.available_shares.toLocaleString() }}</div>
         <div class="stock-owned">{{ getOwnedShares(stock.id).toLocaleString() }}</div>
         <div class="actions-wrap">
@@ -53,7 +62,7 @@
     <div v-if="showModal" class="trade-modal-overlay">
       <div class="trade-modal-card">
         <div class="modal-header">
-          <h3>{{ modalAction }} {{ modalStock?.symbol }}</h3>
+          <h3>{{ modalAction }} {{ modalStock?.symbol.split('.')[0] }}</h3>
           <button class="close-btn" @click="closeModal"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
@@ -106,7 +115,7 @@
 
 <script setup>
 import '../../assets/css/trade.css'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useTradeStore } from '../../store/trade'
 import { useAuthStore } from '../../store'
@@ -127,11 +136,34 @@ const modalAction = ref('')
 const modalStock = ref(null)
 const modalQuantity = ref('')
 
+// Auto-refresh State
+const countdown = ref(60)
+const isRefreshing = ref(false)
+let refreshInterval = null
+
+const fetchMarketData = async () => {
+  isRefreshing.value = true
+  await tradeStore.fetchShares()
+  isRefreshing.value = false
+}
+
 onMounted(async () => {
   await Promise.all([
-    tradeStore.fetchShares(),
+    fetchMarketData(),
     tradeStore.fetchHistory()
   ])
+
+  refreshInterval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      countdown.value = 60
+      fetchMarketData()
+    }
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval)
 })
 
 const filteredShares = computed(() => {
@@ -144,6 +176,18 @@ const filteredShares = computed(() => {
     return matchesSegment && matchesSearch
   })
 })
+
+const getPriceChange = (stock) => {
+  if (!stock.previous_price || stock.previous_price === 0) return { text: '', class: '' }
+  const diff = stock.price - stock.previous_price
+  const pct = (diff / stock.previous_price) * 100
+  const sign = diff >= 0 ? '+' : ''
+  const color = diff >= 0 ? 'text-green' : 'text-red'
+  return {
+    text: `(1d ${sign}${pct.toFixed(3)}%)`,
+    class: color
+  }
+}
 
 const getOwnedShares = (shareId) => {
   if (!tradeStore.state.history || !tradeStore.state.history.length) return 0;
