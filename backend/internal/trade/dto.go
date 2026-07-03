@@ -10,6 +10,7 @@ type ShareResponse struct {
 	Symbol          string  `json:"symbol"`
 	Name            string  `json:"name"`
 	Price           float64 `json:"price"`
+	PreviousPrice   float64 `json:"previous_price"`
 	Segment         string  `json:"segment"`
 	AvailableShares int     `json:"available_shares"`
 }

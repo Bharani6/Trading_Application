@@ -9,7 +9,7 @@ import (
 
 type Segment struct {
 	ID   uint   `json:"id" gorm:"primaryKey"`
-	Name string `json:"name" gorm:"type:enum('NSE', 'BSE', 'MCX');unique"`
+	Name string `json:"name" gorm:"type:varchar(20);unique"`
 }
 
 type Share struct {
@@ -17,6 +17,7 @@ type Share struct {
 	Symbol          string         `json:"symbol" gorm:"type:varchar(50);uniqueIndex;not null"`
 	Name            string         `json:"name" gorm:"type:varchar(150);not null"`
 	Price           float64        `json:"price" gorm:"type:decimal(15,2);not null"`
+	PreviousPrice   float64        `json:"previous_price" gorm:"type:decimal(15,2);default:0"`
 	SegmentID       uint           `json:"segment_id"`
 	Segment         Segment        `json:"segment" gorm:"foreignKey:SegmentID"`
 	TotalShares     int            `json:"total_shares"`
@@ -26,6 +27,13 @@ type Share struct {
 	DeletedAt       gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
 
+func (s *Share) BeforeCreate(tx *gorm.DB) (err error) {
+	if s.ID == uuid.Nil {
+		s.ID = uuid.New()
+	}
+	return
+}
+
 type Trade struct {
 	ID        uuid.UUID `json:"id" gorm:"type:char(36);primaryKey"`
 	UserID    uuid.UUID `json:"user_id" gorm:"type:char(36);index"`
@@ -33,8 +41,8 @@ type Trade struct {
 	Share     Share     `json:"share" gorm:"foreignKey:ShareID"`
 	Quantity  int       `json:"quantity" gorm:"not null"`
 	Price     float64   `json:"price" gorm:"type:decimal(15,2);not null"`
-	Type      string    `json:"type" gorm:"type:enum('buy', 'sell');not null"`
-	Status    string    `json:"status" gorm:"type:enum('pending', 'completed', 'cancelled');default:'completed'"`
+	Type      string    `json:"type" gorm:"type:varchar(20)"`
+	Status    string    `json:"status" gorm:"type:varchar(20);default:'completed'"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -3,6 +3,7 @@ name = "Stock Trading System"
 port = 8080
 env = "development"
 log_level = "debug"
+market_update_interval = "1m"
 
 [db]
 host = "localhost"

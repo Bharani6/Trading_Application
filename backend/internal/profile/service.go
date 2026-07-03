@@ -139,9 +139,16 @@ func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
 			}
 		}
 
-		// Update user status to 'submitted' or keep 'pending' until admin approval
-		// Let's assume it moves to a state where admin review is needed
-		updateData := map[string]interface{}{"status": "pending_approval"}
+		var existingUser user.User
+		updateData := map[string]interface{}{}
+		if err := tx.Where("id = ?", userID).First(&existingUser).Error; err == nil {
+			if existingUser.Role != "admin" {
+				updateData["status"] = "pending_approval"
+			}
+		} else {
+			updateData["status"] = "pending_approval"
+		}
+		
 		if req.Mobile != "" {
 			updateData["mobile"] = req.Mobile
 		}

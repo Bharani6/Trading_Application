@@ -18,8 +18,8 @@ type User struct {
 	Address      string         `json:"address" gorm:"type:text;not null"`
 	IncomeRange  string         `json:"income_range" gorm:"type:varchar(50);not null"`
 	DOB          time.Time      `json:"dob" gorm:"type:date;not null"`
-	Role         string         `json:"role" gorm:"type:enum('admin', 'user');default:'user'"`
-	Status       string         `json:"status" gorm:"type:enum('pending', 'active', 'rejected', 'blocked');default:'pending'"`
+	Role         string         `json:"role" gorm:"type:varchar(20);default:'user'"`
+	Status       string         `json:"status" gorm:"type:varchar(20);default:'pending'"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `json:"deleted_at" gorm:"index"`
