@@ -28,16 +28,17 @@
           <div class="stock-name">{{ item.stockName }}</div>
         </div>
         <div class="stock-price">
-          ₹{{ item.currentPrice.toFixed(2) }}
+          ₹{{ item.currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
         </div>
         <div class="stock-change" :class="getChangeClass(item.currentPrice, item.previousPrice)">
           {{ getChangeText(item.currentPrice, item.previousPrice) }}
         </div>
         <div class="actions-wrap">
-          <button 
-            class="action-btn remove-btn" 
-            @click="removeItem(item.id)"
-          >Remove</button>
+          <button class="action-btn buy-btn" @click="openModal('Buy', item)">B</button>
+          <button class="action-btn sell-btn" @click="openModal('Sell', item)">S</button>
+          <button class="action-btn remove-btn" @click="removeItem(item.id)">
+            <i class="fas fa-trash-alt"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -50,6 +51,55 @@
         <router-link to="/trade" class="browse-market-btn">Browse Market</router-link>
       </div>
     </div>
+
+    <!-- Trade Modal -->
+    <div class="trade-modal-overlay" v-if="showModal" @click.self="closeModal">
+      <div class="trade-modal-card">
+        <div class="modal-header">
+          <h3>{{ modalAction }} {{ modalStock?.symbol.split('.')[0] }}</h3>
+          <button class="close-btn" @click="closeModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="stock-summary">
+            <div class="summary-row">
+              <span>Market Price:</span>
+              <span class="highlight-val">₹{{ modalStock?.currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span>
+            </div>
+            <div class="summary-row" v-if="modalAction === 'Buy' && walletStore.state.balance">
+              <span>Current Balance:</span>
+              <span class="highlight-val">₹{{ walletStore.state.balance.available_balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Quantity</label>
+            <input 
+              type="number" 
+              class="qty-input" 
+              v-model="modalQuantity" 
+              min="1" 
+              placeholder="Enter number of shares"
+              @keyup.enter="confirmTrade"
+            />
+          </div>
+          <div class="total-est" v-if="modalQuantity > 0">
+            <span>Estimated Total:</span>
+            <span class="highlight-val">₹{{ (modalQuantity * modalStock.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" @click="closeModal">Cancel</button>
+          <button 
+            class="confirm-btn" 
+            :class="modalAction === 'Buy' ? 'bg-buy' : 'bg-sell'"
+            :disabled="!modalQuantity || modalQuantity <= 0 || tradeStore.state.loading"
+            @click="confirmTrade"
+          >
+            <i v-if="tradeStore.state.loading" class="fas fa-circle-notch fa-spin"></i>
+            <span v-else>Confirm {{ modalAction }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -58,15 +108,26 @@ import '../../assets/css/trade.css'
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useWatchlistStore } from '../../store/watchlist'
+import { useTradeStore } from '../../store/trade'
+import { useWalletStore } from '../../store/wallet'
 
 const toast = useToast()
 const watchlistStore = useWatchlistStore()
+const tradeStore = useTradeStore()
+const walletStore = useWalletStore()
 
 const searchQuery = ref('')
 const sortBy = ref('name')
 
+// Trade Modal State
+const showModal = ref(false)
+const modalAction = ref('')
+const modalStock = ref(null)
+const modalQuantity = ref('')
+
 onMounted(async () => {
   await watchlistStore.fetchWatchlist()
+  await walletStore.fetchBalance()
 })
 
 const filteredWatchlist = computed(() => {
@@ -112,6 +173,48 @@ const removeItem = async (id) => {
     toast.error(res.message)
   }
 }
+
+// Modal Actions
+const openModal = (action, item) => {
+  modalAction.value = action
+  modalStock.value = item
+  modalQuantity.value = ''
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  modalStock.value = null
+  modalQuantity.value = ''
+}
+
+const confirmTrade = async () => {
+  if (!modalQuantity.value || modalQuantity.value <= 0) return
+  
+  try {
+    if (modalAction.value === 'Buy') {
+      const res = await tradeStore.buyShare(modalStock.value.stockId, modalQuantity.value)
+      if (res.success) {
+        toast.success(`Successfully placed order to buy ${modalQuantity.value} shares of ${modalStock.value.symbol}`)
+        closeModal()
+        walletStore.fetchBalance()
+      } else {
+        toast.error(res.message)
+      }
+    } else {
+      const res = await tradeStore.sellShare(modalStock.value.stockId, modalQuantity.value)
+      if (res.success) {
+        toast.success(`Successfully placed order to sell ${modalQuantity.value} shares of ${modalStock.value.symbol}`)
+        closeModal()
+        walletStore.fetchBalance()
+      } else {
+        toast.error(res.message)
+      }
+    }
+  } catch (err) {
+    toast.error(err.message || 'An error occurred')
+  }
+}
 </script>
 
 <style scoped>
@@ -138,12 +241,12 @@ const removeItem = async (id) => {
   background: rgba(239, 68, 68, 0.2);
 }
 .watchlist-row {
-  grid-template-columns: 2fr 1fr 1.5fr 1fr !important;
+  grid-template-columns: 2fr 1fr 1.5fr 1.5fr !important;
 }
 
 @media (max-width: 768px) {
   .watchlist-row {
-    grid-template-columns: 2fr 1fr 1fr 1fr !important;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr !important;
   }
 }
 
