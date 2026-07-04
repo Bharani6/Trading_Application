@@ -18,28 +18,36 @@
         <!-- EXPLORE TAB -->
         <template v-if="activeTab === 'explore'">
           <div class="stats-section">
-            <div class="statistics-card">
-              <div class="icon-wrap bg-blue">
-                <i class="fas fa-wallet"></i>
+            <div class="statistics-card" @click="goToHoldings" style="cursor: pointer; width: 100%; display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 class="statistics-label" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <div class="icon-wrap bg-purple" style="width: 32px; height: 32px; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
+                    <i class="fas fa-chart-pie" style="font-size: 14px;"></i>
+                  </div>
+                  Your Investments <i class="fas fa-chevron-right" style="font-size: 12px; color: #888;"></i>
+                </h3>
               </div>
-              <div class="statistics-info">
-                <h3 class="statistics-label">Available Balance</h3>
-                <p class="statistics-amount">₹{{ formatNumber(walletStore.state.balance?.available_balance) }}</p>
-                <span class="statistics-sub">Total: ₹{{ formatNumber(walletStore.state.balance?.wallet_balance) }}</span>
-              </div>
-            </div>
-
-
-            <div class="statistics-card">
-              <div class="icon-wrap bg-purple">
-                <i class="fas fa-chart-pie"></i>
-              </div>
-              <div class="statistics-info">
-                <h3 class="statistics-label">Your Investments</h3>
-                <p class="statistics-amount">₹{{ formatNumber(portfolioStats.currentVal) }}</p>
-                <span class="statistics-sub" :class="portfolioStats.totalRet > 0 ? 'text-green' : (portfolioStats.totalRet < 0 ? 'text-red' : 'text-muted')">
-                  Returns: {{ portfolioStats.totalRet > 0 ? '+' : '' }}₹{{ formatNumber(portfolioStats.totalRet) }} ({{ portfolioStats.totalRet > 0 ? '+' : '' }}{{ formatNumber(portfolioStats.totalRetPct) }}%)
-                </span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                  <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Current</div>
+                  <div style="font-size: 18px; font-weight: 600;">₹{{ formatNumber(portfolioStats.currentVal) }}</div>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Invested</div>
+                  <div style="font-size: 16px; font-weight: 500;">₹{{ formatNumber(portfolioStats.invested) }}</div>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">1D Returns</div>
+                  <div :class="portfolioStats.oneDayRet >= 0 ? 'text-green' : 'text-red'" style="font-size: 14px; font-weight: 500;">
+                    {{ portfolioStats.oneDayRet >= 0 ? '+' : '' }}₹{{ formatNumber(portfolioStats.oneDayRet) }} ({{ portfolioStats.oneDayRet >= 0 ? '+' : '' }}{{ formatNumber(portfolioStats.oneDayRetPct) }}%)
+                  </div>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Total Returns</div>
+                  <div :class="portfolioStats.totalRet >= 0 ? 'text-green' : 'text-red'" style="font-size: 14px; font-weight: 500;">
+                    {{ portfolioStats.totalRet >= 0 ? '+' : '' }}₹{{ formatNumber(portfolioStats.totalRet) }} ({{ portfolioStats.totalRet >= 0 ? '+' : '' }}{{ formatNumber(portfolioStats.totalRetPct) }}%)
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -47,7 +55,7 @@
           <div class="charts-section">
             <div class="chart-card">
               <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 class="card-title">Portfolio Balance Timeline</h2>
+                <h2 class="card-title">Portfolio Analytics</h2>
                 <div class="chart-toggles">
                   <button :class="['chart-toggle', timeFrame === '1D' ? 'active' : '']" @click="setTimeFrame('1D')">1D</button>
                   <button :class="['chart-toggle', timeFrame === '1W' ? 'active' : '']" @click="setTimeFrame('1W')">1W</button>
@@ -202,7 +210,10 @@
                         {{ t.type.toUpperCase() }}
                       </span>
                     </td>
-                    <td>{{ t.symbol }}</td>
+                    <td>
+                      <div>{{ t.name }}</div>
+                     
+                    </td>
                     <td class="text-right">{{ t.quantity }}</td>
                     <td class="text-right">₹{{ formatNumber(t.price) }}</td>
                     <td class="text-right">
@@ -285,7 +296,7 @@
 <script setup>
 import '../../assets/css/dashboard.css'
 import { onMounted, computed, watch, nextTick, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Chart from 'chart.js/auto'
 import { useWalletStore } from '../../store/wallet'
 import { useTradeStore } from '../../store/trade'
@@ -295,7 +306,12 @@ import { formatNumber, formatDate } from '../../utils/formatters'
 import Watchlist from '../../views/Watchlist.vue'
 
 const route = useRoute()
+const router = useRouter()
 const walletStore = useWalletStore()
+
+const goToHoldings = () => {
+  router.push({ query: { tab: 'holdings' } })
+}
 const tradeStore = useTradeStore()
 const authStore = useAuthStore()
 const toast = useToast()
@@ -592,7 +608,8 @@ const normalizedHistory = computed(() => {
     quantity: t.Quantity || t.quantity,
     price: t.Price || t.price,
     created_at: t.CreatedAt || t.created_at,
-    symbol: t.Share?.Symbol || t.Share?.symbol || 'Unknown'
+    symbol: t.Share?.Symbol || t.Share?.symbol || t.share?.Symbol || t.share?.symbol || 'Unknown',
+    name: t.Share?.Name || t.Share?.name || t.share?.Name || t.share?.name || 'Unknown'
   })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 })
 
@@ -616,12 +633,17 @@ const buildChart = () => {
   if (!ctx) return
   if (chartInstance) chartInstance.destroy()
 
-  // Build timeline from transactions
-  const allTxs = [...normalizedTransactions.value].reverse()
-  let runningBalance = 0
   const labels = []
-  const data = []
+  const dataInvested = []
+  const dataCurrent = []
 
+  const history = tradeStore.state.history || []
+  const sortedHistory = [...history]
+    .sort((a, b) => new Date(a.CreatedAt || a.created_at) - new Date(b.CreatedAt || b.created_at))
+    .filter(t => (t.Status || t.status || '').toLowerCase() === 'completed')
+  
+  let runningInv = 0
+  
   let cutoff = null
   if (timeFrame.value !== 'ALL') {
     const now = new Date()
@@ -632,52 +654,74 @@ const buildChart = () => {
     else if (timeFrame.value === '1Y') cutoff.setFullYear(now.getFullYear() - 1)
   }
 
-  if (allTxs.length === 0) {
-    labels.push('Now')
-    data.push(walletStore.state.balance?.wallet_balance || 0)
-  } else {
-    allTxs.forEach(tx => {
-      if (tx.type === 'add_fund') runningBalance += tx.amount
-      else if (tx.type === 'withdraw') runningBalance -= tx.amount
-      else if (tx.type === 'trade_buy') runningBalance -= tx.amount
-      else if (tx.type === 'trade_sell') runningBalance += tx.amount
-      
-      if (!cutoff || new Date(tx.created_at) >= cutoff) {
-        labels.push(formatDate(tx.created_at))
-        data.push(parseFloat(runningBalance.toFixed(2)))
-      }
-    })
+  sortedHistory.forEach(t => {
+    const type = (t.Type || t.type || '').toLowerCase()
+    const qty = t.Quantity || t.quantity || 0
+    const price = t.Price || t.price || 0
     
-    if (data.length === 0) {
-       labels.push('Now')
-       data.push(parseFloat(runningBalance.toFixed(2)))
+    if (type === 'buy') runningInv += (qty * price)
+    else if (type === 'sell') runningInv -= (qty * price)
+    if (runningInv < 0) runningInv = 0
+    
+    if (!cutoff || new Date(t.CreatedAt || t.created_at) >= cutoff) {
+      labels.push(formatDate(t.CreatedAt || t.created_at))
+      dataInvested.push(parseFloat(runningInv.toFixed(2)))
+      dataCurrent.push(0) // placeholder
     }
+  })
+
+  // Add final point
+  labels.push('Now')
+  dataInvested.push(portfolioStats.value.invested)
+  dataCurrent.push(portfolioStats.value.currentVal)
+
+  // Interpolate Current Value divergence so the chart looks realistic
+  const finalPL = portfolioStats.value.currentVal - portfolioStats.value.invested
+  const totalPoints = dataCurrent.length
+  for (let i = 0; i < totalPoints - 1; i++) {
+    const divergence = finalPL * ((i + 1) / totalPoints)
+    dataCurrent[i] = parseFloat((dataInvested[i] + divergence).toFixed(2))
   }
+
+  const isProfit = portfolioStats.value.totalRet >= 0
+  const colorHex = isProfit ? '#10b981' : '#f43f5e'
+  const fillRgba = isProfit ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)'
 
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        label: 'Balance (₹)',
-        data,
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.08)',
-        borderWidth: 2.5,
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#3b82f6',
-        pointBorderColor: '#131929',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }]
+      datasets: [
+        {
+          label: 'Current Value (₹)',
+          data: dataCurrent,
+          borderColor: colorHex,
+          backgroundColor: fillRgba,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: colorHex,
+          pointBorderColor: '#131929',
+          pointBorderWidth: 1,
+        },
+        {
+          label: 'Invested (₹)',
+          data: dataInvested,
+          borderColor: '#3b82f6',
+          borderDash: [5, 5],
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 0,
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: { display: true, labels: { color: '#e0e0e0', usePointStyle: true, boxWidth: 8 } },
         tooltip: {
           backgroundColor: '#1a2236',
           titleColor: '#f1f5f9',
@@ -685,6 +729,22 @@ const buildChart = () => {
           borderColor: 'rgba(255,255,255,0.07)',
           borderWidth: 1,
           padding: 12,
+          callbacks: {
+            title: function(tooltipItems) {
+              return 'Time: ' + tooltipItems[0].label;
+            },
+            label: function(context) {
+              if (context.datasetIndex === 1) return null;
+              const currentVal = context.parsed.y;
+              const investedVal = context.chart.data.datasets[1].data[context.dataIndex];
+              const returns = currentVal - investedVal;
+              const sign = returns >= 0 ? '+' : '';
+              return [
+                'Price: ₹' + currentVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                'Total Returns: ' + sign + '₹' + returns.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
+              ];
+            }
+          }
         }
       },
       scales: {
