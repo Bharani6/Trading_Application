@@ -216,3 +216,56 @@ func (c *AuthController) GetMe(lCtx *gin.Context) {
 Complete:
 	CompleteGetMe(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
+
+// ========================== FORGOT PASSWORD ==========================
+
+func (c *AuthController) ForgotPassword(ctx *gin.Context) {
+	var req ForgotPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	tokenStr, err := c.svc.ForgotPassword(req)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "FORGOT_PASSWORD_ERROR", err.Error(), nil)
+		return
+	}
+
+	// Token string is sent back to mock email functionality
+	response.Success(ctx, http.StatusOK, "Password reset link has been generated", gin.H{"mock_token": tokenStr})
+}
+
+// ========================== VERIFY RESET TOKEN ==========================
+
+func (c *AuthController) VerifyResetToken(ctx *gin.Context) {
+	var req VerifyResetTokenRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	if err := c.svc.VerifyResetToken(req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "INVALID_TOKEN", err.Error(), nil)
+		return
+	}
+
+	response.Success(ctx, http.StatusOK, "Token is valid", gin.H{"valid": true})
+}
+
+// ========================== RESET PASSWORD ==========================
+
+func (c *AuthController) ResetPassword(ctx *gin.Context) {
+	var req ResetPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	if err := c.svc.ResetPassword(req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "RESET_PASSWORD_ERROR", err.Error(), nil)
+		return
+	}
+
+	response.Success(ctx, http.StatusOK, "Password updated successfully", nil)
+}

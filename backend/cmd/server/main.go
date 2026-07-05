@@ -35,6 +35,7 @@ func main() {
 	database.ConnectDB()
 	if err := database.DB.AutoMigrate(
 		&userpkg.User{},
+		&userpkg.PasswordResetToken{},
 		&watchlistpkg.Watchlist{},
 		&userpkg.Session{},
 		&userpkg.BankDetails{},

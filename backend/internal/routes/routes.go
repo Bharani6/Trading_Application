@@ -30,6 +30,9 @@ func SetupRouter(r *gin.Engine) {
 		{
 			auth.POST("/register", authController.Register)
 			auth.POST("/login", authController.Login)
+			auth.POST("/forgot-password", authController.ForgotPassword)
+			auth.POST("/verify-reset-token", authController.VerifyResetToken)
+			auth.POST("/reset-password", authController.ResetPassword)
 		}
 
 		utils := api.Group("/utils")

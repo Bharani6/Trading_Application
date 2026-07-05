@@ -58,3 +58,16 @@ type LoginResponse struct {
 	RefreshToken string        `json:"refresh_token"`
 	User         *UserResponse `json:"data"`
 }
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type VerifyResetTokenRequest struct {
+	Token string `json:"token" binding:"required"`
+}
+
+type ResetPasswordRequest struct {
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}

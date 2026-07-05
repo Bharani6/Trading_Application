@@ -52,13 +52,13 @@ This project is currently under active development.
 - Stock Trading
 - Profile Management
 - Admin Dashboard
+- Live Stock Market API Integration
+- Watchlist
 
 ### In Progress
-- Live Stock Market API Integration
 - Portfolio Analytics
 
 ### Planned
-- Watchlist
 - Notifications
 - Real-Time Updates
 - Mobile Optimization
@@ -70,6 +70,7 @@ This project is currently under active development.
 ### 🔐 Authentication & Security
 - Secure user registration and login
 - JWT-based authentication
+- Password reset and forgot password flow
 - Comprehensive profile management
 
 ### 💰 Wallet & Orders
@@ -208,20 +209,22 @@ npm run dev
 Trading_Application/
 ├── backend/                          # Go Backend (Modular Architecture)
 │   ├── cmd/server/                   # Application entry point (main.go)
-│   ├── configs/                      # Environment & app configurations
 │   ├── internal/                     # Core Business Logic & Modules
 │   │   ├── admin/                    # Admin panel controllers & services
 │   │   ├── auth/                     # Authentication & JWT logic
+│   │   ├── config/                   # Environment & app configurations
 │   │   ├── database/                 # DB connection & ORM setup
+│   │   ├── logger/                   # Custom logging utilities
 │   │   ├── market/                   # External market data integration
 │   │   ├── middleware/               # HTTP middlewares (auth, logging)
 │   │   ├── profile/                  # User profile & KYC management
+│   │   ├── response/                 # Standardized API responses
 │   │   ├── routes/                   # API route definitions
 │   │   ├── trade/                    # Trading execution logic
 │   │   ├── user/                     # User management & models
+│   │   ├── utils/                    # Shared backend utilities
 │   │   ├── wallet/                   # Fund management & ledgers
-│   │   └── utils/                    # Shared utilities
-│   ├── migrations/                   # Database migration files
+│   │   └── watchlist/                # User stock watchlists
 │   ├── go.mod                        # Go dependencies
 │   └── go.sum
 │
@@ -229,11 +232,14 @@ Trading_Application/
 │   ├── public/                       # Static assets
 │   ├── src/                          # Vue source code
 │   │   ├── api/                      # Axios clients & API wrappers
+│   │   ├── assets/                   # Images, CSS, and styling
 │   │   ├── components/               # Reusable Vue/Vuetify components
+│   │   ├── constants/                # Global frontend constants
 │   │   ├── layouts/                  # Page layouts (Navbar, Footer, Sidebar)
 │   │   ├── router/                   # Vue Router definitions
 │   │   ├── services/                 # Business logic & external calls
 │   │   ├── store/                    # State management (Vuex/Pinia)
+│   │   ├── utils/                    # Shared frontend utilities
 │   │   ├── views/                    # Main page components
 │   │   └── App.vue                   # Root component
 │   ├── package.json                  # NPM dependencies
@@ -252,17 +258,36 @@ Trading_Application/
 |--------|----------|-------------|
 | `POST` | `/api/v1/auth/register` | Register a new user |
 | `POST` | `/api/v1/auth/login` | Authenticate & get JWT token |
+| `POST` | `/api/v1/auth/forgot-password` | Generate password reset token |
+| `POST` | `/api/v1/auth/verify-reset-token` | Verify password reset token |
+| `POST` | `/api/v1/auth/reset-password` | Set new user password |
+
+### User & Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/users/me` | Get current user's profile |
+| `POST` | `/api/v1/users/kyc` | Submit KYC details |
 
 ### Trading & Wallets
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/v1/wallet/balance` | Get current user's wallet balance |
+| `POST` | `/api/v1/wallet/add-fund` | Add funds to wallet |
+| `POST` | `/api/v1/wallet/withdraw` | Withdraw funds from wallet |
+| `GET` | `/api/v1/wallet/transactions` | Get wallet transaction history |
 | `GET` | `/api/v1/shares` | Get available shares to trade |
 | `POST` | `/api/v1/trades/buy` | Execute a buy order |
 | `POST` | `/api/v1/trades/sell` | Execute a sell order |
 | `GET` | `/api/v1/trades/history` | Get user's trade history |
+| `POST` | `/api/v1/trades/:id/cancel` | Cancel an open trade |
 
-*(Note: API endpoints are examples based on standard trading architecture)*
+### Watchlist
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/watchlist` | Get user's watchlist |
+| `POST` | `/api/v1/watchlist` | Add a stock to watchlist |
+| `DELETE` | `/api/v1/watchlist/:id` | Remove a stock from watchlist |
+| `PUT` | `/api/v1/watchlist/:id/favorite` | Toggle favorite status |
 
 ---
 

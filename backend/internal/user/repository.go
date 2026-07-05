@@ -21,6 +21,10 @@ type UserRepository interface {
 	GetUserNominees(userID string) ([]NomineeDetails, error)
 	GetUserPersonalDetails(userID string) (*PersonalDetails, error)
 	RunInTransaction(fn func(tx *gorm.DB) error) error
+	CreatePasswordResetToken(token *PasswordResetToken) error
+	GetPasswordResetToken(tokenStr string) (*PasswordResetToken, error)
+	DeletePasswordResetToken(tokenStr string) error
+	UpdatePassword(userID string, hashedPassword string) error
 }
 
 type userRepository struct {
@@ -111,4 +115,24 @@ func (r *userRepository) DeleteAllSessions(userID string) error {
 
 func (r *userRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
 	return r.db.Transaction(fn)
+}
+
+func (r *userRepository) CreatePasswordResetToken(token *PasswordResetToken) error {
+	return r.db.Create(token).Error
+}
+
+func (r *userRepository) GetPasswordResetToken(tokenStr string) (*PasswordResetToken, error) {
+	var token PasswordResetToken
+	if err := r.db.Where("token = ?", tokenStr).First(&token).Error; err != nil {
+		return nil, err
+	}
+	return &token, nil
+}
+
+func (r *userRepository) DeletePasswordResetToken(tokenStr string) error {
+	return r.db.Where("token = ?", tokenStr).Delete(&PasswordResetToken{}).Error
+}
+
+func (r *userRepository) UpdatePassword(userID string, hashedPassword string) error {
+	return r.db.Model(&User{}).Where("id = ?", userID).Update("password_hash", hashedPassword).Error
 }

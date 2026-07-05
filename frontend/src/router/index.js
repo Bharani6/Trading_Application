@@ -11,7 +11,9 @@ const routes = [
     component: () => import('../layouts/AuthLayout.vue'),
     children: [
       { path: 'login', name: 'Login', component: () => import('../views/Login.vue') },
-      { path: 'register', name: 'Register', component: () => import('../views/Register.vue') }
+      { path: 'register', name: 'Register', component: () => import('../views/Register.vue') },
+      { path: 'forgot-password', name: 'ForgotPassword', component: () => import('../views/ForgotPassword.vue') },
+      { path: 'reset-password', name: 'ResetPassword', component: () => import('../views/ResetPassword.vue') }
     ]
   },
   {
