@@ -103,3 +103,18 @@ func (n *NomineeDetails) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
+
+type PasswordResetToken struct {
+	ID        uuid.UUID `json:"id" gorm:"type:char(36);primaryKey"`
+	UserID    uuid.UUID `json:"user_id" gorm:"type:char(36);not null;index"`
+	Token     string    `json:"token" gorm:"type:varchar(255);uniqueIndex;not null"`
+	ExpiresAt time.Time `json:"expires_at" gorm:"not null"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (p *PasswordResetToken) BeforeCreate(tx *gorm.DB) (err error) {
+	if p.ID == uuid.Nil {
+		p.ID = uuid.New()
+	}
+	return
+}

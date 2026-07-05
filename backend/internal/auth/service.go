@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"regexp"
 	"strings"
@@ -21,6 +23,9 @@ type AuthService interface {
 	Register(req RegisterRequest) (*UserResponse, error)
 	Login(req LoginRequest, ip string, userAgent string) (*LoginResponse, error)
 	GetMe(userID string) (*UserResponse, error)
+	ForgotPassword(req ForgotPasswordRequest) (string, error)
+	VerifyResetToken(req VerifyResetTokenRequest) error
+	ResetPassword(req ResetPasswordRequest) error
 }
 
 type authService struct {
@@ -344,3 +349,98 @@ func (s *authService) GetMe(userID string) (*UserResponse, error) {
 	}, nil
 }
 
+func generateCryptoToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
+func (s *authService) ForgotPassword(req ForgotPasswordRequest) (string, error) {
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	if req.Email == "" {
+		return "", errors.New("Email is required")
+	}
+
+	u, err := s.repo.GetUserByEmail(req.Email)
+	if err != nil {
+		// As per security best practices, do not reveal if email exists.
+		return "", nil 
+	}
+
+	tokenStr, err := generateCryptoToken()
+	if err != nil {
+		return "", errors.New("failed to generate reset token")
+	}
+
+	resetToken := &userpkg.PasswordResetToken{
+		UserID:    u.ID,
+		Token:     tokenStr,
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+	}
+
+	if err := s.repo.CreatePasswordResetToken(resetToken); err != nil {
+		return "", errors.New("failed to save reset token")
+	}
+
+	// Returning the token here to mock the email sending process
+	return tokenStr, nil
+}
+
+func (s *authService) VerifyResetToken(req VerifyResetTokenRequest) error {
+	tokenStr := strings.TrimSpace(req.Token)
+	if tokenStr == "" {
+		return errors.New("Token is required")
+	}
+
+	token, err := s.repo.GetPasswordResetToken(tokenStr)
+	if err != nil {
+		return errors.New("invalid or expired token")
+	}
+
+	if time.Now().After(token.ExpiresAt) {
+		s.repo.DeletePasswordResetToken(tokenStr)
+		return errors.New("invalid or expired token")
+	}
+
+	return nil
+}
+
+func (s *authService) ResetPassword(req ResetPasswordRequest) error {
+	if err := s.VerifyResetToken(VerifyResetTokenRequest{Token: req.Token}); err != nil {
+		return err
+	}
+
+	token, _ := s.repo.GetPasswordResetToken(req.Token)
+
+	// Validate Password complexity
+	if len(req.Password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(req.Password)
+	hasLower := regexp.MustCompile(`[a-z]`).MatchString(req.Password)
+	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(req.Password)
+	hasSpecial := regexp.MustCompile(`[\W_]`).MatchString(req.Password)
+
+	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+		return errors.New("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+	}
+
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if err := s.repo.UpdatePassword(token.UserID.String(), hashedPassword); err != nil {
+		return errors.New("failed to reset password")
+	}
+
+	// Invalidate the token
+	s.repo.DeletePasswordResetToken(req.Token)
+    
+	// invalidate all existing sessions
+	s.repo.DeleteAllSessions(token.UserID.String())
+
+	return nil
+}

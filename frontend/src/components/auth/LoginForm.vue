@@ -55,7 +55,7 @@
           <input type="checkbox" v-model="form.remember" />
           <span>Remember me</span>
         </label>
-        <a href="#" class="forgot-link" @click.prevent="handleForgotPassword">Forgot Password?</a>
+        <router-link to="/forgot-password" class="forgot-link">Forgot Password?</router-link>
       </div>
 
       <button type="submit" class="submit-btn" :disabled="loading">
@@ -98,9 +98,7 @@ const showError = (msg) => {
   loading.value = false
 }
 
-const handleForgotPassword = () => {
-  toast.info('Please Contact Administrator')
-}
+
 
 const handleLogin = async () => {
   loading.value = true
