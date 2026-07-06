@@ -221,21 +221,36 @@
       <div class="footer-bottom">
         <div class="logo"><img src="../../assets/icons/favicon.svg" alt="MoneymakePro Logo" class="brand-logo" /> MoneymakePro</div>
         <div class="footer-links">
-          <a href="#">Terms of Service</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Support</a>
+          <a href="#" @click.prevent="openDisclaimer('Terms of Service')">Terms of Service</a>
+          <a href="#" @click.prevent="openDisclaimer('Privacy Policy')">Privacy Policy</a>
+          <a href="#" @click.prevent="showSupportModal = true">Support</a>
         </div>
       </div>
+
       <div class="footer-copyright">
         &copy; 2026 MoneymakePro. All Rights Reserved. MoneymakePro is an online brand of MoneymakePro.
       </div>
     </footer>
+
+    <SupportModal :isOpen="showSupportModal" @close="showSupportModal = false" />
+    <DisclaimerModal :isOpen="showDisclaimerModal" :title="disclaimerTitle" @close="showDisclaimerModal = false" />
   </div>
 </template>
 
 <script setup>
 import '../../assets/css/landing.css'
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import SupportModal from '../common/SupportModal.vue'
+import DisclaimerModal from '../common/DisclaimerModal.vue'
+
+const showSupportModal = ref(false)
+const showDisclaimerModal = ref(false)
+const disclaimerTitle = ref('Disclaimer')
+
+const openDisclaimer = (title) => {
+  disclaimerTitle.value = title
+  showDisclaimerModal.value = true
+}
 
 const vReveal = {
   mounted: (el) => {

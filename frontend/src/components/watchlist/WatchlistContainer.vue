@@ -241,12 +241,29 @@ const confirmTrade = async () => {
   background: rgba(239, 68, 68, 0.2);
 }
 .watchlist-row {
-  grid-template-columns: 2fr 1fr 1.5fr 1.5fr !important;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr !important;
+}
+
+.watchlist-row > *:nth-child(2),
+.watchlist-row > *:nth-child(3),
+.watchlist-row > *:nth-child(4) {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.watchlist-row > *:nth-child(4) {
+  display: flex !important; /* Override trade.css which hides nth-child(4) on mobile */
+}
+
+.market-header.watchlist-row > *:nth-child(2),
+.market-header.watchlist-row > *:nth-child(3),
+.market-header.watchlist-row > *:nth-child(4) {
+  display: block !important;
 }
 
 @media (max-width: 768px) {
   .watchlist-row {
-    grid-template-columns: 2fr 1fr 1fr 1.2fr !important;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr !important;
   }
 }
 

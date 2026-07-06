@@ -13,8 +13,9 @@ import (
 	"stock-trading/internal/market/service"
 	"stock-trading/internal/routes"
 	"stock-trading/internal/trade"
-	"stock-trading/internal/wallet"
 	"stock-trading/internal/profile"
+	"stock-trading/internal/support"
+	"stock-trading/internal/wallet"
 	watchlistpkg "stock-trading/internal/watchlist"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,7 @@ func main() {
 		&trade.Share{},
 		&trade.Trade{},
 		&profile.FileUpload{},
+		&support.SupportMessage{},
 	); err != nil {
 		log.Fatalf("Failed to auto-migrate: %v", err)
 	}

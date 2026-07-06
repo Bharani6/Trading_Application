@@ -27,5 +27,9 @@ export const adminApi = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+
+  getSupportMessages: () => {
+    return api.get('/admin/support')
   }
 }

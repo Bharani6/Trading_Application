@@ -37,7 +37,8 @@ const routes = [
       { path: '', redirect: '/admin/dashboard' },
       { path: 'dashboard', name: 'AdminDashboard', component: () => import('../views/AdminDashboard.vue') },
       { path: 'users', name: 'UserManagement', component: () => import('../views/UserManagement.vue') },
-      { path: 'stocks', name: 'AdminStockUpload', component: () => import('../views/AdminStockUpload.vue') }
+      { path: 'stocks', name: 'AdminStockUpload', component: () => import('../views/AdminStockUpload.vue') },
+      { path: 'support', name: 'AdminSupportMessages', component: () => import('../views/AdminSupportMessages.vue') }
     ]
   }
 ]

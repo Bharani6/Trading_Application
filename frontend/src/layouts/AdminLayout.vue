@@ -41,6 +41,10 @@
           <i class="fas fa-file-csv nav-icon"></i>
           <span>Stock Management</span>
         </router-link>
+        <router-link to="/admin/support" class="nav-item" active-class="active">
+          <i class="fas fa-envelope nav-icon"></i>
+          <span>Support</span>
+        </router-link>
       </nav>
 
       <div class="page-container">

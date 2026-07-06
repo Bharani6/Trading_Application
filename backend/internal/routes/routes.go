@@ -5,6 +5,7 @@ import (
 	"stock-trading/internal/auth"
 	"stock-trading/internal/middleware"
 	"stock-trading/internal/profile"
+	"stock-trading/internal/support"
 	"stock-trading/internal/trade"
 	"stock-trading/internal/utils"
 	"stock-trading/internal/wallet"
@@ -21,6 +22,7 @@ func SetupRouter(r *gin.Engine) {
 	tradeController := trade.NewTradeController()
 	adminController := admin.NewAdminController()
 	utilsController := utils.NewUtilsController()
+	supportController := support.NewSupportController()
 
 	api := r.Group("/api/v1")
 	{
@@ -40,6 +42,8 @@ func SetupRouter(r *gin.Engine) {
 			utils.GET("/ifsc/:code", utilsController.FetchIFSC)
 			utils.GET("/pincode/:code", utilsController.FetchPincode)
 		}
+
+		api.POST("/support", supportController.SubmitMessage)
 
 		// Protected routes
 		secure := api.Group("/")
@@ -79,6 +83,7 @@ func SetupRouter(r *gin.Engine) {
 				admin.PUT("/users/:id/block", adminController.BlockUser)
 				admin.POST("/shares/upload", adminController.UploadShares)
 				admin.DELETE("/shares", adminController.DeleteAllShares)
+				admin.GET("/support", supportController.GetMessages)
 			}
 			
 			watchlistController := watchlist.NewWatchlistController()
