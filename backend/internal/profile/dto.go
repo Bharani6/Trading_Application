@@ -10,6 +10,7 @@ type KYCSubmitRequest struct {
 	Address      string           `json:"address"`
 	Pincode      string           `json:"pincode"`
 	IncomeRange  string           `json:"income_range"`
+	Occupation   string           `json:"occupation"`
 	BankAccounts []BankAccountDTO `json:"bank_accounts" binding:"dive"`
 	Nominees     []NomineeDTO     `json:"nominees" binding:"omitempty,max=3,dive"`
 }

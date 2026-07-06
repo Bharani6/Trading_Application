@@ -152,6 +152,12 @@ func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
 		if req.Mobile != "" {
 			updateData["mobile"] = req.Mobile
 		}
+		if req.IncomeRange != "" {
+			updateData["income_range"] = req.IncomeRange
+		}
+		if req.Occupation != "" {
+			updateData["occupation"] = req.Occupation
+		}
 		if err := tx.Model(&user.User{}).Where("id = ?", userID).Updates(updateData).Error; err != nil {
 			return err
 		}
