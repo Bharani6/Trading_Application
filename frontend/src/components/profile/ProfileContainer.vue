@@ -14,7 +14,10 @@
     <!-- User Info Card -->
     <div class="user-info-card">
       <div class="avatar-wrap">
-        <div class="avatar-circle">
+        <div v-if="authStore.state.user?.ipv_photo" style="width: 120px; height: 120px; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid var(--primary); flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <img :src="authStore.state.user?.ipv_photo" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        <div v-else class="avatar-circle">
           <span>{{ initials }}</span>
         </div>
         <div class="avatar-details">
@@ -112,6 +115,23 @@
                 <option value="1-5 Lakhs">1-5 Lakhs</option>
                 <option value="5-10 Lakhs">5-10 Lakhs</option>
                 <option value="Above 10 Lakhs">Above 10 Lakhs</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="flex-row-between">
+                <label class="form-label">Occupation</label>
+                <i v-if="editingField !== 'occupation'" class="fas fa-pencil-alt text-green cursor-pointer" @click="editingField = 'occupation'"></i>
+                <i v-else class="fas fa-check text-green cursor-pointer" @click="editingField = null"></i>
+              </div>
+              <div v-if="editingField !== 'occupation'" class="static-value">{{ kycForm.occupation || 'Not Provided' }}</div>
+              <select v-else class="form-input" v-model="kycForm.occupation">
+                <option value="" disabled>Select Occupation</option>
+                <option value="Private Sector">Private Sector</option>
+                <option value="Public Sector">Public Sector</option>
+                <option value="Government Service">Government Service</option>
+                <option value="Business Professional">Business Professional</option>
+                <option value="Student">Student</option>
+                <option value="Others">Others</option>
               </select>
             </div>
             
@@ -415,6 +435,7 @@ const kycForm = reactive({
   motherName: '',
   dob: '',
   incomeRange: '',
+  occupation: '',
   country: '',
   state: '',
   city: '',
@@ -523,6 +544,7 @@ const populateForm = (user) => {
   kycForm.city = user.city || ''
   kycForm.pincode = user.pincode || ''
   kycForm.incomeRange = user.income_range || user.incomeRange || ''
+  kycForm.occupation = user.occupation || ''
   kycForm.pan = user.pan || ''
   kycForm.aadhaar = user.aadhaar || ''
   
@@ -659,6 +681,7 @@ const saveProfile = async () => {
       mother_name: kycForm.motherName,
       date_of_birth: kycForm.dob,
       income_range: kycForm.incomeRange,
+      occupation: kycForm.occupation,
       country: kycForm.country,
       state: kycForm.state,
       city: kycForm.city,

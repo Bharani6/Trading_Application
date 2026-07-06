@@ -45,6 +45,7 @@ func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
 	req.Aadhaar = strings.TrimSpace(req.Aadhaar)
 	req.Address = strings.TrimSpace(req.Address)
 	req.IncomeRange = strings.TrimSpace(req.IncomeRange)
+	req.Occupation = strings.TrimSpace(req.Occupation)
 
 	if req.Name == "" {
 		return nil, errors.New("Name is required")
@@ -66,6 +67,15 @@ func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
 	}
 	if req.IncomeRange == "" {
 		return nil, errors.New("Income range is required")
+	}
+	if req.Occupation == "" {
+		return nil, errors.New("Occupation is required")
+	}
+	if req.IPVPhoto == "" {
+		return nil, errors.New("IPV Photo is required")
+	}
+	if req.IPVLatitude == "" || req.IPVLongitude == "" {
+		return nil, errors.New("IPV Location coordinates are required")
 	}
 
 	if len(req.Name) < 3 {
@@ -155,6 +165,10 @@ func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
 		Aadhaar:      req.Aadhaar,
 		Address:      req.Address,
 		IncomeRange:  req.IncomeRange,
+		Occupation:   req.Occupation,
+		IPVPhoto:     req.IPVPhoto,
+		IPVLatitude:  req.IPVLatitude,
+		IPVLongitude: req.IPVLongitude,
 		DOB:          dob,
 		Role:         "user",
 		Status:       "pending",
@@ -338,6 +352,10 @@ func (s *authService) GetMe(userID string) (*UserResponse, error) {
 		PAN:          user.PAN,
 		Aadhaar:      user.Aadhaar,
 		IncomeRange:  user.IncomeRange,
+		Occupation:   user.Occupation,
+		IPVPhoto:     user.IPVPhoto,
+		IPVLatitude:  user.IPVLatitude,
+		IPVLongitude: user.IPVLongitude,
 		FatherName:   pd.FatherName,
 		MotherName:   pd.MotherName,
 		Country:      pd.Country,

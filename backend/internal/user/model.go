@@ -20,6 +20,10 @@ type User struct {
 	DOB          time.Time      `json:"dob" gorm:"type:date;not null"`
 	Role         string         `json:"role" gorm:"type:varchar(20);default:'user'"`
 	Status       string         `json:"status" gorm:"type:varchar(20);default:'pending'"`
+	Occupation   string         `json:"occupation" gorm:"type:varchar(50)"`
+	IPVPhoto     string         `json:"ipv_photo" gorm:"type:text"`
+	IPVLatitude  string         `json:"ipv_latitude" gorm:"type:varchar(50)"`
+	IPVLongitude string         `json:"ipv_longitude" gorm:"type:varchar(50)"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `json:"deleted_at" gorm:"index"`

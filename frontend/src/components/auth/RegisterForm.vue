@@ -9,21 +9,26 @@
     <div class="right-panel">
       <div class="auth-card" style="max-width: 600px; width: 100%;">
         <div class="auth-card-header">
-          <div class="brand-header">
-            <img src="../../assets/icons/favicon.svg" alt="MoneymakePro" class="auth-brand-logo" />
-            <span class="auth-brand-name">MoneymakePro</span>
+          <div style="position: relative;">
+            <button type="button" class="btn btn-outline" style="position: absolute; left: 0; top: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; padding: 0; z-index: 10;" @click="goBack">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="brand-header" style="justify-content: center; width: 100%;">
+              <img src="../../assets/icons/favicon.svg" alt="MoneymakePro" class="auth-brand-logo" />
+              <span class="auth-brand-name">MoneymakePro</span>
+            </div>
           </div>
-          <h1 class="auth-title">Create Account</h1>
+          <h1 class="auth-title" style="text-align: center; margin-top: 15px;">Create Account</h1>
           
           <!-- Stepper -->
           <div class="wizard-stepper">
             <div class="step" :class="{ active: currentStep === 1, completed: currentStep > 1 }">1. Personal</div>
             <div class="step-divider"></div>
-            <div class="step" :class="{ active: currentStep === 2, completed: currentStep > 2 }">2. Identity</div>
+            <div class="step" :class="{ active: currentStep === 2, completed: currentStep > 2 }">2. Identity Proof</div>
             <div class="step-divider"></div>
-            <div class="step" :class="{ active: currentStep === 3, completed: currentStep > 3 }">3. Bank</div>
+            <div class="step" :class="{ active: currentStep === 3 || currentStep === 4, completed: currentStep > 4 }">3. Bank</div>
             <div class="step-divider"></div>
-            <div class="step" :class="{ active: currentStep === 4, completed: currentStep > 4 }">4. Nominee</div>
+            <div class="step" :class="{ active: currentStep === 5, completed: currentStep > 5 }">4. IPV</div>
           </div>
         </div>
 
@@ -59,17 +64,25 @@
             <div class="form-group">
               <label class="form-label">Date of birth <span class="required-star">*</span></label>
               <div class="input-wrapper">
-                <input type="date" class="form-input" v-model="form.dob" :max="maxDate" @click="$event.target.showPicker()" style="cursor: pointer" />
+                <input type="date" class="form-input" v-model="form.dob" :max="maxDate" style="cursor: pointer" @click="openDatePicker" @focus="openDatePicker" />
               </div>
             </div>
 
-            <div class="form-group full-width">
+            <div class="form-group">
               <label class="form-label">Password <span class="required-star">*</span></label>
               <div class="input-wrapper">
                 <input :type="showPassword ? 'text' : 'password'" class="form-input" v-model="form.password" placeholder="Min. 8 characters" autocomplete="new-password" />
                 <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'" class="password-toggle-icon" @click="showPassword = !showPassword"></i>
               </div>
               <span class="password-hint">Use at least 8 characters with uppercase, lowercase, number & special character</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Re-enter Password <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <input :type="showConfirmPassword ? 'text' : 'password'" class="form-input" v-model="form.confirm_password" placeholder="Re-enter Password" autocomplete="new-password" />
+                <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'" class="password-toggle-icon" @click="showConfirmPassword = !showConfirmPassword"></i>
+              </div>
             </div>
 
             <div class="form-group full-width">
@@ -85,6 +98,21 @@
                 <button type="button" v-for="range in ['< ₹1L', '₹1L - ₹5L', '₹5L - ₹10L', '> ₹10L']" :key="range" :class="['income-chip', { active: form.income_range === range }]" @click="form.income_range = range">
                   {{ range }}
                 </button>
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label class="form-label">Occupation <span class="required-star">*</span></label>
+              <div class="input-wrapper">
+                <select class="form-input" v-model="form.occupation">
+                  <option value="" disabled>Select Occupation</option>
+                  <option value="Private Sector">Private Sector</option>
+                  <option value="Public Sector">Public Sector</option>
+                  <option value="Government Service">Government Service</option>
+                  <option value="Business Professional">Business Professional</option>
+                  <option value="Student">Student</option>
+                  <option value="Others">Others</option>
+                </select>
               </div>
             </div>
           </div>
@@ -191,7 +219,7 @@
               <div class="form-group">
                 <label class="form-label">Date of Birth <span class="required-star">*</span></label>
                 <div class="input-wrapper">
-                  <input type="date" class="form-input" v-model="form.nominees[0].dob" @click="$event.target.showPicker()" style="cursor: pointer" />
+                  <input type="date" class="form-input" v-model="form.nominees[0].dob" @click="openDatePicker" @focus="openDatePicker" style="cursor: pointer" />
                 </div>
               </div>
               
@@ -219,24 +247,47 @@
                 <div class="form-group">
                   <label class="form-label">Guardian DOB <span class="required-star">*</span></label>
                   <div class="input-wrapper">
-                    <input type="date" class="form-input" v-model="form.nominees[0].guardian_dob" :max="maxDate" />
+                    <input type="date" class="form-input" v-model="form.nominees[0].guardian_dob" :max="maxDate" @click="openDatePicker" @focus="openDatePicker" style="cursor: pointer" />
                   </div>
                 </div>
               </template>
             </template>
           </div>
 
-          <p class="terms-note" v-if="currentStep === 4">
+          <!-- STEP 5: IPV (In-Person Verification) -->
+          <div v-if="currentStep === 5" class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">In-Person Verification <span class="required-star">*</span></label>
+              <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Please allow camera and location access to complete your KYC. Ensure your face is clearly visible.</p>
+              
+              <div v-if="!form.ipv_photo" class="camera-container" style="display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                <video ref="videoElement" autoplay playsinline style="width: 100%; max-width: 320px; border-radius: 8px; margin-bottom: 15px; background: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"></video>
+                <button type="button" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #ffffff; border: none; border-radius: 8px; padding: 12px 24px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); display: flex; align-items: center; gap: 8px;" @click="capturePhotoAndLocation" :disabled="isCapturing" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)';">
+                  <i class="fas fa-camera"></i> {{ isCapturing ? 'Capturing...' : 'Capture Photo & Location' }}
+                </button>
+                <canvas ref="canvasElement" style="display: none;"></canvas>
+              </div>
+
+              <div v-else class="preview-container" style="display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                <img :src="form.ipv_photo" alt="Captured IPV" style="width: 100%; max-width: 320px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #10b981;" />
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; text-align: center;">
+                  <i class="fas fa-map-marker-alt text-green mr-1"></i> Location: {{ form.ipv_latitude }}, {{ form.ipv_longitude }}
+                </div>
+                <button type="button" class="btn-text-red" @click="retakePhoto">
+                  <i class="fas fa-redo mr-2"></i> Retake Photo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p class="terms-note" v-if="currentStep === 5">
             By creating an account, you agree to our
             <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
           </p>
 
           <div style="display: flex; gap: 15px; margin-top: 20px;">
-            <button type="button" class="btn btn-outline" style="flex: 0 0 50px; display: flex; justify-content: center; align-items: center;" v-if="currentStep > 1" @click="currentStep--">
-              <i class="fas fa-arrow-left"></i>
-            </button>
             <button type="submit" class="submit-btn" style="flex: 1;" :disabled="loading">
-              <span v-if="!loading">{{ currentStep < 4 ? 'Continue' : 'Create Account' }}</span>
+              <span v-if="!loading">{{ currentStep < 5 ? 'Continue' : 'Create Account' }}</span>
               <i v-else class="fa fa-spinner fa-spin"></i>
             </button>
           </div>
@@ -268,6 +319,12 @@ const errorMessage = ref('')
 const panError = ref('')
 const aadhaarError = ref('')
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const videoElement = ref(null)
+const canvasElement = ref(null)
+const mediaStream = ref(null)
+const isCapturing = ref(false)
 
 const form = reactive({
   name: '',
@@ -277,7 +334,12 @@ const form = reactive({
   pan: '',
   aadhaar: '',
   income_range: '',
+  occupation: '',
+  ipv_photo: '',
+  ipv_latitude: '',
+  ipv_longitude: '',
   password: '',
+  confirm_password: '',
   address: '',
   bank_accounts: [{
     account_type: 'savings',
@@ -304,6 +366,14 @@ const form = reactive({
 
 const today = new Date()
 const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0]
+
+const openDatePicker = (e) => {
+  try {
+    e.target.showPicker()
+  } catch (err) {
+    // browser doesn't support showPicker, fallback to default behavior
+  }
+}
 
 const showError = (msg) => {
   errorMessage.value = msg
@@ -357,9 +427,11 @@ const validateStep = (step) => {
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(form.password)) {
       return 'Password must be at least 8 chars long with uppercase, lowercase, numeric, and special characters.'
     }
+    if (form.password !== form.confirm_password) return 'Passwords do not match.'
 
     if (!form.address) return 'Residential address is required.'
     if (!form.income_range) return 'Income range is required.'
+    if (!form.occupation) return 'Occupation is required.'
     return true
   }
   
@@ -410,7 +482,93 @@ const validateStep = (step) => {
     return true
   }
   
+  if (step === 5) {
+    if (!form.ipv_photo || !form.ipv_latitude || !form.ipv_longitude) {
+      return 'Please complete the IPV step by capturing your photo and location.'
+    }
+    return true
+  }
+  
   return true
+}
+
+const stopCamera = () => {
+  if (mediaStream.value) {
+    mediaStream.value.getTracks().forEach(track => track.stop())
+    mediaStream.value = null
+  }
+}
+
+const startCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+    mediaStream.value = stream
+    if (videoElement.value) {
+      videoElement.value.srcObject = stream
+    }
+  } catch (err) {
+    toast.error('Camera access denied or unavailable.')
+  }
+}
+
+watch(currentStep, async (newStep) => {
+  if (newStep === 5) {
+    await startCamera()
+  } else {
+    stopCamera()
+  }
+})
+
+const goBack = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  } else {
+    router.push('/login')
+  }
+}
+
+const capturePhotoAndLocation = () => {
+  isCapturing.value = true
+  
+  if (!navigator.geolocation) {
+    isCapturing.value = false
+    toast.error("Geolocation is not supported by this browser.")
+    return
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      form.ipv_latitude = position.coords.latitude.toString()
+      form.ipv_longitude = position.coords.longitude.toString()
+      
+      // Capture Photo
+      if (videoElement.value && canvasElement.value) {
+        const video = videoElement.value
+        const canvas = canvasElement.value
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+        
+        // Convert to base64
+        form.ipv_photo = canvas.toDataURL('image/jpeg', 0.8)
+        stopCamera()
+        toast.success("IPV Captured successfully!")
+      }
+      isCapturing.value = false
+    },
+    (error) => {
+      isCapturing.value = false
+      toast.error("Location access denied or unavailable.")
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  )
+}
+
+const retakePhoto = async () => {
+  form.ipv_photo = ''
+  form.ipv_latitude = ''
+  form.ipv_longitude = ''
+  await startCamera()
 }
 
 const formatBackendError = (errObj) => {
@@ -425,12 +583,12 @@ const handleNextOrSubmit = async () => {
     return
   }
 
-  if (currentStep.value < 4) {
+  if (currentStep.value < 5) {
     currentStep.value++
     return
   }
 
-  // Step 4 Complete: Submit Payload
+  // Step 5 Complete: Submit Payload
   loading.value = true
   errorMessage.value = ''
 
@@ -443,6 +601,10 @@ const handleNextOrSubmit = async () => {
       pan: form.pan.toUpperCase(),
       aadhaar: form.aadhaar,
       income_range: form.income_range,
+      occupation: form.occupation,
+      ipv_photo: form.ipv_photo,
+      ipv_latitude: form.ipv_latitude,
+      ipv_longitude: form.ipv_longitude,
       password: form.password,
       address: form.address,
       bank_accounts: [{

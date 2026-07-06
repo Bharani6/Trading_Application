@@ -47,7 +47,7 @@ This project is being developed as a production-oriented learning and portfolio 
 This project is currently under active development.
 
 ### Core Modules Completed
-- User Authentication
+- User Authentication & IPV KYC Flow
 - Wallet Management
 - Stock Trading
 - Profile Management
@@ -69,9 +69,10 @@ This project is currently under active development.
 
 ### 🔐 Authentication & Security
 - Secure user registration and login
+- **In-Person Verification (IPV)** & comprehensive KYC flow
 - JWT-based authentication
 - Password reset and forgot password flow
-- Comprehensive profile management
+- Comprehensive profile management (Occupation, Address, Bank details)
 
 ### 💰 Wallet & Orders
 - **Wallet Management** — Maintain balances and transaction history
