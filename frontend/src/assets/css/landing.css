@@ -453,6 +453,23 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .footer-cta h2 { font-size: 48px; margin-bottom: 20px; line-height: 1.1; }
 .footer-cta p { color: #8B949E; margin-bottom: 40px; font-size: 18px; }
+
+.footer-disclaimer {
+  max-width: 1000px;
+  margin: 40px auto 20px auto;
+  font-size: 12px;
+  color: #8B949E;
+  text-align: left;
+  line-height: 1.6;
+  padding: 0 20px;
+}
+.footer-disclaimer p {
+  margin-bottom: 10px;
+}
+.footer-disclaimer strong {
+  color: #10B981;
+}
+
 .footer-bottom {
   margin-top: 100px;
   display: flex; justify-content: space-between; align-items: center;
