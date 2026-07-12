@@ -10,6 +10,8 @@ import (
 	"stock-trading/internal/utils"
 	"stock-trading/internal/wallet"
 	"stock-trading/internal/watchlist"
+	market_controller "stock-trading/internal/market/controller"
+	market_service "stock-trading/internal/market/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +21,17 @@ func SetupRouter(r *gin.Engine) {
 	authController := auth.NewAuthController()
 	profileController := profile.NewProfileController()
 	walletController := wallet.NewWalletController()
-	tradeController := trade.NewTradeController()
 	adminController := admin.NewAdminController()
 	utilsController := utils.NewUtilsController()
 	supportController := support.NewSupportController()
+
+	// Trade Dependencies
+	tradeRepo := trade.NewTradeRepository()
+	walletRepo := wallet.NewWalletRepository()
+	marketSvc := market_service.NewYahooFinanceService()
+	tradeService := trade.NewTradeService(tradeRepo, walletRepo, marketSvc)
+	tradeController := trade.NewTradeController(tradeService)
+	marketController := market_controller.NewMarketController(marketSvc)
 
 	api := r.Group("/api/v1")
 	{
@@ -41,6 +50,11 @@ func SetupRouter(r *gin.Engine) {
 		{
 			utils.GET("/ifsc/:code", utilsController.FetchIFSC)
 			utils.GET("/pincode/:code", utilsController.FetchPincode)
+		}
+
+		market := api.Group("/market")
+		{
+			market.GET("/indices", marketController.GetIndices)
 		}
 
 		api.POST("/support", supportController.SubmitMessage)

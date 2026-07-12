@@ -14,8 +14,8 @@ type TradeController struct {
 	svc TradeService
 }
 
-func NewTradeController() *TradeController {
-	return &TradeController{svc: NewTradeService()}
+func NewTradeController(svc TradeService) *TradeController {
+	return &TradeController{svc: svc}
 }
 
 // ========================== GET SHARES ==========================

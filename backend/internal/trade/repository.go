@@ -1,6 +1,7 @@
 package trade
 
 import (
+	"errors"
 	"stock-trading/internal/database"
 	"strings"
 
@@ -13,6 +14,7 @@ type TradeRepository interface {
 	GetShareForUpdate(tx *gorm.DB, shareID string) (*Share, error)
 	FirstOrCreateShare(share *Share) error
 	UpdateShare(tx *gorm.DB, share *Share) error
+	UpdateShareWithVersion(tx *gorm.DB, share *Share) error
 	CreateTrade(tx *gorm.DB, trade *Trade) error
 	GetTradesByUser(userID string) ([]Trade, error)
 	RunInTransaction(fn func(tx *gorm.DB) error) error
@@ -53,6 +55,21 @@ func (r *tradeRepository) UpdateShare(tx *gorm.DB, share *Share) error {
 	return tx.Save(share).Error
 }
 
+func (r *tradeRepository) UpdateShareWithVersion(tx *gorm.DB, share *Share) error {
+	result := tx.Model(share).Where("version = ?", share.Version).Updates(map[string]interface{}{
+		"available_shares": share.AvailableShares,
+		"version":          share.Version + 1,
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("optimistic lock failed for share")
+	}
+	share.Version++
+	return nil
+}
+
 func (r *tradeRepository) CreateTrade(tx *gorm.DB, trade *Trade) error {
 	return tx.Create(trade).Error
 }
@@ -64,5 +81,18 @@ func (r *tradeRepository) GetTradesByUser(userID string) ([]Trade, error) {
 }
 
 func (r *tradeRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
-	return r.db.Transaction(fn)
+	tx := r.db.Begin()
+	defer func() {
+		if rec := recover(); rec != nil {
+			tx.Rollback()
+			panic(rec) // re-throw panic after rollback
+		}
+	}()
+
+	if err := fn(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

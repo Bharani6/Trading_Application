@@ -11,6 +11,7 @@ type Wallet struct {
 	WalletBalance    float64   `json:"wallet_balance" gorm:"type:decimal(15,2);default:0.00"`
 	BlockedBalance   float64   `json:"blocked_balance" gorm:"type:decimal(15,2);default:0.00"`
 	AvailableBalance float64   `json:"available_balance" gorm:"type:decimal(15,2);default:0.00"`
+	Version          int       `json:"version" gorm:"default:1"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
