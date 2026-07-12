@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"errors"
 	"stock-trading/internal/database"
 
 	"gorm.io/gorm"
@@ -12,6 +13,7 @@ type WalletRepository interface {
 	GetWalletForUpdate(tx *gorm.DB, userID string) (*Wallet, error)
 	CreateWallet(tx *gorm.DB, wallet *Wallet) error
 	UpdateWallet(tx *gorm.DB, wallet *Wallet) error
+	UpdateWalletWithVersion(tx *gorm.DB, wallet *Wallet) error
 	CreateTransaction(tx *gorm.DB, transaction *Transaction) error
 	GetTransactionsByUser(userID string) ([]Transaction, error)
 	RunInTransaction(fn func(tx *gorm.DB) error) error
@@ -44,6 +46,23 @@ func (r *walletRepository) CreateWallet(tx *gorm.DB, wallet *Wallet) error {
 
 func (r *walletRepository) UpdateWallet(tx *gorm.DB, wallet *Wallet) error {
 	return tx.Save(wallet).Error
+}
+
+func (r *walletRepository) UpdateWalletWithVersion(tx *gorm.DB, wallet *Wallet) error {
+	result := tx.Model(wallet).Where("version = ?", wallet.Version).Updates(map[string]interface{}{
+		"wallet_balance":    wallet.WalletBalance,
+		"blocked_balance":   wallet.BlockedBalance,
+		"available_balance": wallet.AvailableBalance,
+		"version":           wallet.Version + 1,
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("optimistic lock failed for wallet")
+	}
+	wallet.Version++
+	return nil
 }
 
 func (r *walletRepository) CreateTransaction(tx *gorm.DB, transaction *Transaction) error {

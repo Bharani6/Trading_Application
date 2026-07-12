@@ -263,7 +263,7 @@
 .dashboardpage .dashboard-tabs {
   display: flex;
   gap: 24px;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 10px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 4px;
 }
@@ -301,7 +301,8 @@
    2 COLUMN GRID
    ======================================================== */
 .dashboardpage .dashboard-grid-2col {
-  display: block; /* Removed 2-column layout to make it full width */
+  display: block;
+  /* Removed 2-column layout to make it full width */
 }
 
 /* ========================================================
@@ -394,9 +395,18 @@
   font-size: 12px;
   font-weight: 600;
 }
-.dashboardpage .status-completed { color: var(--profit-color); }
-.dashboardpage .status-pending { color: var(--orange-color); }
-.dashboardpage .status-cancelled { color: var(--text-muted); }
+
+.dashboardpage .status-completed {
+  color: var(--profit-color);
+}
+
+.dashboardpage .status-pending {
+  color: var(--orange-color);
+}
+
+.dashboardpage .status-cancelled {
+  color: var(--text-muted);
+}
 
 /* ========================================================
    CHARTS SECTION
@@ -492,7 +502,7 @@
   border-radius: 16px;
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
-  box-shadow: -4px 10px 40px rgba(0,0,0,0.6);
+  box-shadow: -4px 10px 40px rgba(0, 0, 0, 0.6);
   z-index: 2000;
   transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
@@ -509,7 +519,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0, 0, 0, 0.6);
   z-index: 1999;
   opacity: 0;
   pointer-events: none;
@@ -655,6 +665,7 @@
   font-size: 12px;
   margin-bottom: 10px;
 }
+
 .dashboardpage .trade-info-row:last-child {
   margin-bottom: 0;
 }
@@ -698,8 +709,9 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
+
 .dashboardpage .clickable-row:hover {
-  background-color: rgba(255,255,255,0.03);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* ========================================================
@@ -932,7 +944,7 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
-  border-bottom: 1px dashed rgba(255,255,255,0.1);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
   padding-bottom: 16px;
 }
 
@@ -959,7 +971,8 @@
   gap: 12px;
 }
 
-.holdings-summary-icon-btn, .holdings-summary-btn {
+.holdings-summary-icon-btn,
+.holdings-summary-btn {
   background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
@@ -974,7 +987,8 @@
   transition: background 0.2s;
 }
 
-.holdings-summary-icon-btn:hover, .holdings-summary-btn:hover {
+.holdings-summary-icon-btn:hover,
+.holdings-summary-btn:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -1022,17 +1036,36 @@
 .holdings-list-col {
   flex: 1;
 }
-.holdings-list-col.holdings-list-company { flex: 1.5; }
-.holdings-list-col.holdings-list-chart { flex: 0.8; display: flex; align-items: center; justify-content: center; }
-.holdings-list-col.holdings-list-market { flex: 1.2; }
-.holdings-list-col.holdings-list-returns { flex: 1.2; }
-.holdings-list-col.holdings-list-current { flex: 1.2; }
+
+.holdings-list-col.holdings-list-company {
+  flex: 1.5;
+}
+
+.holdings-list-col.holdings-list-chart {
+  flex: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.holdings-list-col.holdings-list-market {
+  flex: 1.2;
+}
+
+.holdings-list-col.holdings-list-returns {
+  flex: 1.2;
+}
+
+.holdings-list-col.holdings-list-current {
+  flex: 1.2;
+}
 
 .holdings-list-header .holdings-list-col {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 .holdings-list-header .holdings-list-col.text-right {
   justify-content: flex-end;
 }
@@ -1043,6 +1076,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   align-items: center;
 }
+
 .holdings-list-row:last-child {
   border-bottom: none;
 }
@@ -1069,6 +1103,11 @@
   width: 100%;
   height: 24px;
 }
-.spark-green polyline { stroke: var(--profit-color); }
-.spark-red polyline { stroke: var(--loss-color); }
 
+.spark-green polyline {
+  stroke: var(--profit-color);
+}
+
+.spark-red polyline {
+  stroke: var(--loss-color);
+}

@@ -55,10 +55,13 @@ func main() {
 	// database.InitRedis()
 
 	// 4. Setup Services & Background Workers
-	tradeSvc := trade.NewTradeService()
+	tradeRepo := trade.NewTradeRepository()
+	walletRepo := wallet.NewWalletRepository()
+	marketSvc := service.NewYahooFinanceService()
+	
+	tradeSvc := trade.NewTradeService(tradeRepo, walletRepo, marketSvc)
 	trade.StartTradeWorker(tradeSvc)
 
-	marketSvc := service.NewYahooFinanceService()
 	market.StartMarketDataWorker(database.DB, marketSvc)
 
 	// 5. Setup Router

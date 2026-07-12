@@ -28,11 +28,11 @@ type tradeService struct {
 	marketDataService market_service.MarketDataService
 }
 
-func NewTradeService() TradeService {
+func NewTradeService(repo TradeRepository, walletRepo wallet.WalletRepository, marketDataService market_service.MarketDataService) TradeService {
 	return &tradeService{
-		repo:              NewTradeRepository(),
-		walletRepo:        wallet.NewWalletRepository(),
-		marketDataService: market_service.NewYahooFinanceService(),
+		repo:              repo,
+		walletRepo:        walletRepo,
+		marketDataService: marketDataService,
 	}
 }
 
@@ -155,14 +155,14 @@ func (s *tradeService) BuyShare(userID string, req TradeRequest, isPending bool)
 			wallet.WalletBalance -= totalCost
 			wallet.AvailableBalance -= totalCost
 		}
-		if err := s.walletRepo.UpdateWallet(tx, wallet); err != nil {
+		if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
 			return err
 		}
 
 		// 4. Update share count (only if not pending)
 		if !isPending {
 			share.AvailableShares -= req.Quantity
-			if err := s.repo.UpdateShare(tx, share); err != nil {
+			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
 				return err
 			}
 		}
@@ -245,7 +245,7 @@ func (s *tradeService) SellShare(userID string, req TradeRequest, isPending bool
 		if !isPending {
 			wallet.WalletBalance += totalGain
 			wallet.AvailableBalance += totalGain
-			if err := s.walletRepo.UpdateWallet(tx, wallet); err != nil {
+			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
 				return err
 			}
 		}
@@ -253,7 +253,7 @@ func (s *tradeService) SellShare(userID string, req TradeRequest, isPending bool
 		// 4. Update share market count (only if completed)
 		if !isPending {
 			share.AvailableShares += req.Quantity
-			if err := s.repo.UpdateShare(tx, share); err != nil {
+			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
 				return err
 			}
 		}
@@ -344,10 +344,10 @@ func (s *tradeService) ExecutePendingTrades() error {
 			}
 
 			// Update records
-			if err := s.walletRepo.UpdateWallet(tx, wallet); err != nil {
+			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
 				continue
 			}
-			if err := s.repo.UpdateShare(tx, share); err != nil {
+			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
 				continue
 			}
 
@@ -402,7 +402,7 @@ func (s *tradeService) CancelTrade(userID string, tradeID string) error {
 			refundAmount := trade.Price * float64(trade.Quantity)
 			wallet.BlockedBalance -= refundAmount
 			wallet.AvailableBalance += refundAmount
-			if err := s.walletRepo.UpdateWallet(tx, wallet); err != nil {
+			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
 				return err
 			}
 		}

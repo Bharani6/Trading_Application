@@ -10,6 +10,20 @@
       <router-link :to="{ query: { tab: 'watchlist' } }" class="tab-item" :class="{ active: activeTab === 'watchlist' }">Watchlist</router-link>
     </div>
 
+    <!-- MARKET INDICES BANNER -->
+    <div class="market-indices-banner" v-if="marketIndices.length">
+      <div class="marquee-content">
+        <div v-for="(idx, i) in marketIndices" :key="i" class="index-item">
+          <span class="index-name">{{ idx.name }}:</span>
+          <span class="index-val">{{ formatNumber(idx.current) }}</span>
+          <span :class="['index-change', idx.change >= 0 ? 'text-green' : 'text-red']">
+            ({{ idx.change >= 0 ? '+' : '' }}{{ formatNumber(idx.change) }}, 
+            {{ idx.change >= 0 ? '+' : '' }}{{ formatNumber(idx.change_pct) }}%)
+          </span>
+        </div>
+      </div>
+    </div>
+
     <!-- 2 COLUMN GRID -->
     <div class="dashboard-grid-2col">
       <!-- LEFT COLUMN -->
@@ -304,6 +318,7 @@ import { useAuthStore } from '../../store'
 import { useToast } from 'vue-toastification'
 import { formatNumber, formatDate } from '../../utils/formatters'
 import Watchlist from '../../views/Watchlist.vue'
+import api from '../../services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -320,6 +335,24 @@ let chartInstance = null
 
 const activeTab = computed(() => route.query.tab || 'explore')
 const timeFrame = ref('ALL')
+const marketIndices = ref([
+  { name: 'NIFTY', current: 0, change: 0, change_pct: 0 },
+  { name: 'SENSEX', current: 0, change: 0, change_pct: 0 },
+  { name: 'BANKNIFTY', current: 0, change: 0, change_pct: 0 },
+  { name: 'MIDCPNIFTY', current: 0, change: 0, change_pct: 0 },
+  { name: 'FINNIFTY', current: 0, change: 0, change_pct: 0 }
+])
+
+const fetchMarketIndices = async () => {
+  try {
+    const res = await api.get('/market/indices')
+    if (res.data && res.data.data) {
+      marketIndices.value = res.data.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch market indices:', error)
+  }
+}
 
 const showValues = ref(true)
 const showAnalyse = ref(false)
@@ -768,6 +801,8 @@ onMounted(async () => {
     tradeStore.fetchShares(),
     tradeStore.fetchHistory()
   ])
+  fetchMarketIndices()
+  setInterval(fetchMarketIndices, 60000)
   if (activeTab.value === 'explore') {
     buildChart()
   }
@@ -788,6 +823,61 @@ watch(activeTab, async (newTab) => {
 </script>
 
 <style scoped>
+.chart-toggles {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.market-indices-banner {
+  background: rgba(15, 23, 42, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.marquee-content {
+  display: inline-flex;
+  gap: 30px;
+  animation: marquee 25s linear infinite;
+}
+
+.market-indices-banner:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+.index-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.index-name {
+  color: #94a3b8;
+}
+
+.index-val {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.index-change {
+  font-size: 12px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
 .chart-toggles {
   display: flex;
   gap: 4px;

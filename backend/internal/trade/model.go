@@ -22,6 +22,7 @@ type Share struct {
 	Segment         Segment        `json:"segment" gorm:"foreignKey:SegmentID"`
 	TotalShares     int            `json:"total_shares"`
 	AvailableShares int            `json:"available_shares"`
+	Version         int            `json:"version" gorm:"default:1"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `json:"deleted_at" gorm:"index"`
