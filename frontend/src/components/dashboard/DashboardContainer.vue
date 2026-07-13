@@ -175,8 +175,8 @@
                   </div>
                   <div class="holdings-list-col holdings-list-market text-right">
                     <div class="holdings-list-val">₹{{ formatNumber(h.currentPrice) }}</div>
-                    <div class="holdings-list-sub" :class="h.returns >= 0 ? 'text-green' : 'text-red'">
-                      {{ h.returns >= 0 ? '+' : '' }}₹0.00 (0.00%)
+                    <div class="holdings-list-sub" :class="h.oneDayRet >= 0 ? 'text-green' : 'text-red'">
+                      {{ h.oneDayRet >= 0 ? '+' : '' }}₹{{ formatNumber(h.oneDayRet) }} ({{ h.oneDayRet >= 0 ? '+' : '' }}{{ formatNumber(h.oneDayRetPct) }}%)
                     </div>
                   </div>
                   <div class="holdings-list-col holdings-list-returns text-right">
@@ -556,30 +556,48 @@ const portfolioStats = computed(() => {
   // Sort history chronologically
   const sortedHistory = [...history].sort((a, b) => new Date(a.CreatedAt || a.created_at) - new Date(b.CreatedAt || b.created_at))
   
+  const todayStr = new Date().toDateString()
+  
   sortedHistory.forEach(t => {
     const type = (t.Type || t.type || '').toLowerCase()
     const status = (t.Status || t.status || '').toLowerCase()
     const qty = t.Quantity || t.quantity || 0
     const price = t.Price || t.price || 0
     const shareId = t.ShareID || t.share_id || (t.Share ? (t.Share.ID || t.Share.id) : null)
+    const isToday = new Date(t.CreatedAt || t.created_at).toDateString() === todayStr
     
     if (status === 'completed' && shareId) {
       if (!holdings[shareId]) {
-        holdings[shareId] = { qty: 0, totalCost: 0 }
+        holdings[shareId] = { qty: 0, totalCost: 0, qtyToday: 0, costToday: 0 }
       }
       
       const holding = holdings[shareId]
       if (type === 'buy') {
         holding.qty += qty
         holding.totalCost += (qty * price)
+        if (isToday) {
+           holding.qtyToday += qty
+           holding.costToday += (qty * price)
+        }
       } else if (type === 'sell') {
         if (holding.qty > 0) {
           const avgPrice = holding.totalCost / holding.qty
           holding.totalCost -= (qty * avgPrice)
           holding.qty -= qty
+          
+          if (holding.qty < holding.qtyToday) {
+             if (holding.qtyToday > 0) {
+                 const avgToday = holding.costToday / holding.qtyToday
+                 holding.qtyToday = holding.qty
+                 holding.costToday = holding.qtyToday * avgToday
+             }
+          }
+          
           if (holding.qty <= 0) {
             holding.qty = 0
             holding.totalCost = 0
+            holding.qtyToday = 0
+            holding.costToday = 0
           }
         }
       }
@@ -588,18 +606,29 @@ const portfolioStats = computed(() => {
   
   let currentVal = 0
   let totalInvested = 0
+  let totalOneDayRet = 0
   
   const holdingsList = Object.entries(holdings).filter(([id, h]) => h.qty > 0).map(([id, h]) => {
      const share = shares.find(s => (s.ID || s.id) === id)
      const currentPrice = parseFloat((share ? (share.Price || share.price) : (h.totalCost / h.qty)).toFixed(2))
+     const prevPrice = parseFloat((share ? (share.PreviousPrice || share.previous_price || share.Price || share.price) : (h.totalCost / h.qty)).toFixed(2))
      const avgPrice = parseFloat((h.totalCost / h.qty).toFixed(2))
      const currentValue = parseFloat((h.qty * currentPrice).toFixed(2))
      const invested = parseFloat(h.totalCost.toFixed(2))
      const returns = parseFloat((currentValue - invested).toFixed(2))
      const returnsPct = invested > 0 ? parseFloat(((returns / invested) * 100).toFixed(2)) : 0
      
+     const qtyBeforeToday = h.qty - (h.qtyToday || 0)
+     const oneDayRetBeforeToday = (currentPrice - prevPrice) * qtyBeforeToday
+     const oneDayRetToday = (currentPrice * (h.qtyToday || 0)) - (h.costToday || 0)
+     const oneDayRetForHolding = oneDayRetBeforeToday + oneDayRetToday
+     const oneDayRet = parseFloat(oneDayRetForHolding.toFixed(2))
+     const prevVal = currentValue - oneDayRet
+     const oneDayRetPct = prevVal > 0 ? parseFloat(((oneDayRet / prevVal) * 100).toFixed(2)) : 0
+     
      currentVal += currentValue
      totalInvested += invested
+     totalOneDayRet += oneDayRetForHolding
      
      return {
        id,
@@ -611,15 +640,18 @@ const portfolioStats = computed(() => {
        currentPrice,
        currentValue,
        returns,
-       returnsPct
+       returnsPct,
+       oneDayRet,
+       oneDayRetPct
      }
   })
   
   const totalRet = parseFloat((currentVal - totalInvested).toFixed(2))
   const totalRetPct = totalInvested > 0 ? parseFloat(((totalRet / totalInvested) * 100).toFixed(2)) : 0
   
-  const oneDayRet = 0
-  const oneDayRetPct = 0
+  const prevTotalVal = currentVal - totalOneDayRet
+  const oneDayRet = parseFloat(totalOneDayRet.toFixed(2))
+  const oneDayRetPct = prevTotalVal > 0 ? parseFloat(((totalOneDayRet / prevTotalVal) * 100).toFixed(2)) : 0
   
   return {
     invested: totalInvested,
