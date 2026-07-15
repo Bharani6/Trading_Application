@@ -39,79 +39,55 @@
           </div>
 
           <!-- STEP 1: Personal Information -->
-<<<<<<< Updated upstream
           <div v-if="currentStep === 1" class="form-grid">
             <div class="form-group">
               <label class="form-label">Full name <span class="required-star">*</span></label>
               <div class="input-wrapper">
                 <input type="text" class="form-input" v-model="form.name" placeholder="John Doe" autocomplete="name" />
-=======
-          <div v-if="currentStep === 1">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Full name <span class="required-star">*</span></label>
-                <div class="input-wrapper">
-                  <input type="text" class="form-input" v-model="form.name" placeholder="John Doe" autocomplete="name" />
-                </div>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Email address <span class="required-star">*</span></label>
-                <div class="input-wrapper" style="display: flex; gap: 10px;">
-                  <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" :disabled="emailOtpVerified" />
-                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendEmailOtp" :disabled="emailOtpVerified || isSendingEmailOtp || !form.email">
-                    <span v-if="isSendingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
-                    <span v-else>{{ emailOtpSent ? 'Resend OTP' : 'Send OTP' }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 0; grid-column: span 3;" v-if="emailOtpSent && !emailOtpVerified">
-                <label class="form-label">Enter Email OTP <span class="required-star">*</span></label>
-                <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
-                  <input type="text" class="form-input" v-model="form.emailOtp" placeholder="123456" maxlength="6" @input="form.emailOtp = form.emailOtp.replace(/[^0-9]/g, '')" />
-                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyEmailOtp" :disabled="isVerifyingEmailOtp || form.emailOtp.length !== 6">
-                    <span v-if="isVerifyingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
-                    <span v-else>Verify</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Mobile number <span class="required-star">*</span></label>
-                <div class="input-wrapper" style="display: flex; gap: 10px;">
-                  <input type="tel" class="form-input" v-model="form.mobile" placeholder="9876543210" autocomplete="tel" maxlength="10" @input="form.mobile = form.mobile.replace(/[^0-9]/g, '')" :disabled="otpVerified" />
-                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendOtp" :disabled="otpVerified || isSendingOtp || form.mobile.length !== 10">
-                    <span v-if="isSendingOtp"><i class="fa fa-spinner fa-spin"></i></span>
-                    <span v-else>{{ otpSent ? 'Resend OTP' : 'Send OTP' }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 0; grid-column: span 3;" v-if="otpSent && !otpVerified">
-                <label class="form-label">Enter OTP <span class="required-star">*</span></label>
-                <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
-                  <input type="text" class="form-input" v-model="form.otp" placeholder="123456" maxlength="6" @input="form.otp = form.otp.replace(/[^0-9]/g, '')" />
-                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyOtp" :disabled="isVerifyingOtp || form.otp.length !== 6">
-                    <span v-if="isVerifyingOtp"><i class="fa fa-spinner fa-spin"></i></span>
-                    <span v-else>Verify</span>
-                  </button>
-                </div>
->>>>>>> Stashed changes
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Email address <span class="required-star">*</span></label>
-              <div class="input-wrapper">
-                <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" />
+              <div class="input-wrapper" style="display: flex; gap: 10px;">
+                <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" :disabled="emailOtpVerified" />
+                <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendEmailOtp" :disabled="emailOtpVerified || isSendingEmailOtp || !form.email">
+                  <span v-if="isSendingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                  <span v-else>{{ emailOtpSent ? 'Resend OTP' : 'Send OTP' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group full-width" v-if="emailOtpSent && !emailOtpVerified">
+              <label class="form-label">Enter Email OTP <span class="required-star">*</span></label>
+              <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
+                <input type="text" class="form-input" v-model="form.emailOtp" placeholder="123456" maxlength="6" @input="form.emailOtp = form.emailOtp.replace(/[^0-9]/g, '')" />
+                <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyEmailOtp" :disabled="isVerifyingEmailOtp || form.emailOtp.length !== 6">
+                  <span v-if="isVerifyingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                  <span v-else>Verify</span>
+                </button>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Mobile number <span class="required-star">*</span></label>
-              <div class="input-wrapper">
-                <input type="tel" class="form-input" v-model="form.mobile" placeholder="9876543210" autocomplete="tel" maxlength="10" @input="form.mobile = form.mobile.replace(/[^0-9]/g, '')" />
+              <div class="input-wrapper" style="display: flex; gap: 10px;">
+                <input type="tel" class="form-input" v-model="form.mobile" placeholder="9876543210" autocomplete="tel" maxlength="10" @input="form.mobile = form.mobile.replace(/[^0-9]/g, '')" :disabled="otpVerified" />
+                <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendOtp" :disabled="otpVerified || isSendingOtp || form.mobile.length !== 10">
+                  <span v-if="isSendingOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                  <span v-else>{{ otpSent ? 'Resend OTP' : 'Send OTP' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group full-width" v-if="otpSent && !otpVerified">
+              <label class="form-label">Enter OTP <span class="required-star">*</span></label>
+              <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
+                <input type="text" class="form-input" v-model="form.otp" placeholder="123456" maxlength="6" @input="form.otp = form.otp.replace(/[^0-9]/g, '')" />
+                <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyOtp" :disabled="isVerifyingOtp || form.otp.length !== 6">
+                  <span v-if="isVerifyingOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                  <span v-else>Verify</span>
+                </button>
               </div>
             </div>
 
@@ -559,12 +535,9 @@ const validateStep = (step) => {
     if (!form.email) return 'Email address is required.'
     if (!emailOtpVerified.value) return 'Please verify your email address with OTP.'
     if (!form.mobile || form.mobile.length !== 10) return 'Valid 10-digit mobile number is required.'
-<<<<<<< Updated upstream
     if (!form.dob) return 'Date of birth is required.'
     if (calculateAge(form.dob) < 18) return 'You must be at least 18 years old.'
-=======
     if (!otpVerified.value) return 'Please verify your mobile number with OTP.'
->>>>>>> Stashed changes
     
     if (!form.password) return 'Password is required.'
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(form.password)) {
