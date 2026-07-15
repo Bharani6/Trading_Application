@@ -49,7 +49,6 @@ func main() {
 			{"BAJAJFINSV.NS", "Bajaj Finserv", nse.ID},
 			{"MARUTI.NS", "Maruti Suzuki", nse.ID},
 			{"M&M.NS", "Mahindra & Mahindra", nse.ID},
-			{"TATAMOTORS.NS", "Tata Motors", nse.ID},
 			{"SUNPHARMA.NS", "Sun Pharmaceutical", nse.ID},
 			{"ULTRACEMCO.NS", "UltraTech Cement", nse.ID},
 			{"ASIANPAINT.NS", "Asian Paints", nse.ID},

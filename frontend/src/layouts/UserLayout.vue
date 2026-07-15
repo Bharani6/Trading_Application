@@ -4,7 +4,7 @@
     <header class="top-header">
       <div class="header-left">
         <div class="logo-area">
-          <i class="fas fa-chart-line logo-icon"></i>
+          <img src="../assets/icons/favicon.svg" alt="MoneymakePro" class="brand-logo" style="width: 24px; height: 24px; margin-right: 8px;" />
           <h2 class="logo-text">MoneymakePro</h2>
         </div>
         <nav class="top-nav">
