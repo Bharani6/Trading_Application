@@ -39,11 +39,65 @@
           </div>
 
           <!-- STEP 1: Personal Information -->
+<<<<<<< Updated upstream
           <div v-if="currentStep === 1" class="form-grid">
             <div class="form-group">
               <label class="form-label">Full name <span class="required-star">*</span></label>
               <div class="input-wrapper">
                 <input type="text" class="form-input" v-model="form.name" placeholder="John Doe" autocomplete="name" />
+=======
+          <div v-if="currentStep === 1">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Full name <span class="required-star">*</span></label>
+                <div class="input-wrapper">
+                  <input type="text" class="form-input" v-model="form.name" placeholder="John Doe" autocomplete="name" />
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Email address <span class="required-star">*</span></label>
+                <div class="input-wrapper" style="display: flex; gap: 10px;">
+                  <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" :disabled="emailOtpVerified" />
+                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendEmailOtp" :disabled="emailOtpVerified || isSendingEmailOtp || !form.email">
+                    <span v-if="isSendingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span v-else>{{ emailOtpSent ? 'Resend OTP' : 'Send OTP' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0; grid-column: span 3;" v-if="emailOtpSent && !emailOtpVerified">
+                <label class="form-label">Enter Email OTP <span class="required-star">*</span></label>
+                <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
+                  <input type="text" class="form-input" v-model="form.emailOtp" placeholder="123456" maxlength="6" @input="form.emailOtp = form.emailOtp.replace(/[^0-9]/g, '')" />
+                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyEmailOtp" :disabled="isVerifyingEmailOtp || form.emailOtp.length !== 6">
+                    <span v-if="isVerifyingEmailOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span v-else>Verify</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Mobile number <span class="required-star">*</span></label>
+                <div class="input-wrapper" style="display: flex; gap: 10px;">
+                  <input type="tel" class="form-input" v-model="form.mobile" placeholder="9876543210" autocomplete="tel" maxlength="10" @input="form.mobile = form.mobile.replace(/[^0-9]/g, '')" :disabled="otpVerified" />
+                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="sendOtp" :disabled="otpVerified || isSendingOtp || form.mobile.length !== 10">
+                    <span v-if="isSendingOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span v-else>{{ otpSent ? 'Resend OTP' : 'Send OTP' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0; grid-column: span 3;" v-if="otpSent && !otpVerified">
+                <label class="form-label">Enter OTP <span class="required-star">*</span></label>
+                <div class="input-wrapper" style="display: flex; gap: 10px; max-width: 300px;">
+                  <input type="text" class="form-input" v-model="form.otp" placeholder="123456" maxlength="6" @input="form.otp = form.otp.replace(/[^0-9]/g, '')" />
+                  <button type="button" class="submit-btn" style="white-space: nowrap; padding: 0 15px; width: auto;" @click="verifyOtp" :disabled="isVerifyingOtp || form.otp.length !== 6">
+                    <span v-if="isVerifyingOtp"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span v-else>Verify</span>
+                  </button>
+                </div>
+>>>>>>> Stashed changes
               </div>
             </div>
 
@@ -321,6 +375,16 @@ const aadhaarError = ref('')
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
+const otpSent = ref(false)
+const otpVerified = ref(false)
+const isSendingOtp = ref(false)
+const isVerifyingOtp = ref(false)
+
+const emailOtpSent = ref(false)
+const emailOtpVerified = ref(false)
+const isSendingEmailOtp = ref(false)
+const isVerifyingEmailOtp = ref(false)
+
 const videoElement = ref(null)
 const canvasElement = ref(null)
 const mediaStream = ref(null)
@@ -329,7 +393,9 @@ const isCapturing = ref(false)
 const form = reactive({
   name: '',
   email: '',
+  emailOtp: '',
   mobile: '',
+  otp: '',
   dob: '',
   pan: '',
   aadhaar: '',
@@ -393,6 +459,78 @@ const calculateAge = (dobString) => {
   return age
 }
 
+const sendOtp = async () => {
+  if (form.mobile.length !== 10) return
+  isSendingOtp.value = true
+  errorMessage.value = ''
+  try {
+    const res = await authApi.sendOTP({ mobile: form.mobile })
+    if (res.data.success) {
+      toast.success('OTP sent to mobile number.')
+      otpSent.value = true
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.error ? formatBackendError(error.response.data.error) : 'Failed to send OTP.'
+    toast.error(errorMessage.value)
+  } finally {
+    isSendingOtp.value = false
+  }
+}
+
+const verifyOtp = async () => {
+  if (form.otp.length !== 6) return
+  isVerifyingOtp.value = true
+  errorMessage.value = ''
+  try {
+    const res = await authApi.verifyOTP({ mobile: form.mobile, otp: form.otp })
+    if (res.data.success) {
+      toast.success('Mobile number verified.')
+      otpVerified.value = true
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.error ? formatBackendError(error.response.data.error) : 'Invalid OTP.'
+    toast.error(errorMessage.value)
+  } finally {
+    isVerifyingOtp.value = false
+  }
+}
+
+const sendEmailOtp = async () => {
+  if (!form.email) return
+  isSendingEmailOtp.value = true
+  errorMessage.value = ''
+  try {
+    const res = await authApi.sendEmailOTP({ email: form.email })
+    if (res.data.success) {
+      toast.success('OTP sent to email address.')
+      emailOtpSent.value = true
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.error ? formatBackendError(error.response.data.error) : 'Failed to send OTP.'
+    toast.error(errorMessage.value)
+  } finally {
+    isSendingEmailOtp.value = false
+  }
+}
+
+const verifyEmailOtp = async () => {
+  if (form.emailOtp.length !== 6) return
+  isVerifyingEmailOtp.value = true
+  errorMessage.value = ''
+  try {
+    const res = await authApi.verifyEmailOTP({ email: form.email, otp: form.emailOtp })
+    if (res.data.success) {
+      toast.success('Email address verified.')
+      emailOtpVerified.value = true
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.error ? formatBackendError(error.response.data.error) : 'Invalid OTP.'
+    toast.error(errorMessage.value)
+  } finally {
+    isVerifyingEmailOtp.value = false
+  }
+}
+
 let ifscTimeout = null
 const handleIfscInput = () => {
   const bank = form.bank_accounts[0]
@@ -419,9 +557,14 @@ const validateStep = (step) => {
     if (!form.name) return 'Full name is required.'
     if (!/^[a-zA-Z\s]+$/.test(form.name)) return 'Name must contain only letters and spaces.'
     if (!form.email) return 'Email address is required.'
+    if (!emailOtpVerified.value) return 'Please verify your email address with OTP.'
     if (!form.mobile || form.mobile.length !== 10) return 'Valid 10-digit mobile number is required.'
+<<<<<<< Updated upstream
     if (!form.dob) return 'Date of birth is required.'
     if (calculateAge(form.dob) < 18) return 'You must be at least 18 years old.'
+=======
+    if (!otpVerified.value) return 'Please verify your mobile number with OTP.'
+>>>>>>> Stashed changes
     
     if (!form.password) return 'Password is required.'
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(form.password)) {

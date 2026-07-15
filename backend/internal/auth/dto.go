@@ -79,3 +79,21 @@ type ResetPasswordRequest struct {
 	Token    string `json:"token" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type SendOTPRequest struct {
+	Mobile string `json:"mobile" binding:"required,min=10,max=10"`
+}
+
+type VerifyOTPRequest struct {
+	Mobile string `json:"mobile" binding:"required,min=10,max=10"`
+	OTP    string `json:"otp" binding:"required,len=6"`
+}
+
+type SendEmailOTPRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type VerifyEmailOTPRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	OTP   string `json:"otp" binding:"required,len=6"`
+}

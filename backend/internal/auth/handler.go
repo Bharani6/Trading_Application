@@ -1,12 +1,22 @@
 package auth
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"net/http"
+	"sync"
 
 	"stock-trading/internal/response"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	otpStore      = make(map[string]string)
+	otpMutex      sync.RWMutex
+	emailOtpStore = make(map[string]string)
+	emailOtpMutex sync.RWMutex
 )
 
 type AuthController struct {
@@ -268,4 +278,100 @@ func (c *AuthController) ResetPassword(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, http.StatusOK, "Password updated successfully", nil)
+}
+
+// ========================== OTP METHODS ==========================
+
+func (c *AuthController) SendOTP(ctx *gin.Context) {
+	var req SendOTPRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "OTP_GENERATION_FAILED", "Failed to generate secure OTP", err.Error())
+		return
+	}
+	otp := fmt.Sprintf("%06d", n.Int64())
+
+	otpMutex.Lock()
+	otpStore[req.Mobile] = otp
+	otpMutex.Unlock()
+
+	// In production, an SMS gateway would be integrated here.
+	response.Success(ctx, http.StatusOK, "OTP sent successfully", gin.H{"mock_otp": otp})
+}
+
+func (c *AuthController) VerifyOTP(ctx *gin.Context) {
+	var req VerifyOTPRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	otpMutex.RLock()
+	storedOTP, exists := otpStore[req.Mobile]
+	otpMutex.RUnlock()
+
+	if !exists || storedOTP != req.OTP {
+		response.Error(ctx, http.StatusBadRequest, "INVALID_OTP", "The OTP entered is incorrect or expired", nil)
+		return
+	}
+
+	// Remove OTP after verification
+	otpMutex.Lock()
+	delete(otpStore, req.Mobile)
+	otpMutex.Unlock()
+
+	response.Success(ctx, http.StatusOK, "OTP verified successfully", nil)
+}
+
+func (c *AuthController) SendEmailOTP(ctx *gin.Context) {
+	var req SendEmailOTPRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "OTP_GENERATION_FAILED", "Failed to generate secure OTP", err.Error())
+		return
+	}
+	otp := fmt.Sprintf("%06d", n.Int64())
+
+	emailOtpMutex.Lock()
+	emailOtpStore[req.Email] = otp
+	emailOtpMutex.Unlock()
+
+	// In production, an email service would be integrated here (e.g. SendGrid, AWS SES).
+	response.Success(ctx, http.StatusOK, "OTP sent successfully to email", gin.H{"mock_otp": otp})
+}
+
+func (c *AuthController) VerifyEmailOTP(ctx *gin.Context) {
+	var req VerifyEmailOTPRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+		return
+	}
+
+	emailOtpMutex.RLock()
+	storedOTP, exists := emailOtpStore[req.Email]
+	emailOtpMutex.RUnlock()
+
+	if !exists || storedOTP != req.OTP {
+		response.Error(ctx, http.StatusBadRequest, "INVALID_OTP", "The OTP entered is incorrect or expired", nil)
+		return
+	}
+
+	// Remove OTP after verification
+	emailOtpMutex.Lock()
+	delete(emailOtpStore, req.Email)
+	emailOtpMutex.Unlock()
+
+	response.Success(ctx, http.StatusOK, "Email OTP verified successfully", nil)
 }
