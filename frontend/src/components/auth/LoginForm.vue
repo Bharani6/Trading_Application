@@ -1,11 +1,13 @@
 <template>
   <div class="auth-card">
-    <div class="auth-card-header">
-      <div class="brand-header">
-        <img src="../../assets/icons/favicon.svg" alt="MoneymakePro" class="auth-brand-logo" />
-        <span class="auth-brand-name">MoneymakePro</span>
+    <div class="auth-card-header" style="margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 8px;">
+        <div style="width: 56px; height: 56px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.05);">
+          <i class="far fa-user" style="color: #a5b4fc; font-size: 24px;"></i>
+        </div>
+        <h1 style="margin: 0; text-align: left; font-size: 32px; color: #ffffff; font-weight: 700; letter-spacing: -1px;">Welcome back</h1>
       </div>
-      <h1 class="auth-title">Welcome back</h1>
+      <p style="color: #94a3b8; font-size: 15px; margin: 0 0 0 72px; text-align: left;">Login to continue to your account</p>
     </div>
 
     <form @submit.prevent="handleLogin" class="auth-form" novalidate>
@@ -38,7 +40,7 @@
             :type="showPassword ? 'text' : 'password'"
             class="form-input"
             v-model="form.password"
-            placeholder="••••••••"
+            placeholder="********"
             required
             autocomplete="current-password"
           />
@@ -58,9 +60,9 @@
         <router-link to="/forgot-password" class="forgot-link">Forgot Password?</router-link>
       </div>
 
-      <button type="submit" class="submit-btn" :disabled="loading">
+      <button type="submit" class="submit-btn" :disabled="loading" style="background: linear-gradient(90deg, #8B5CF6, #3B82F6); color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: 600; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <span v-if="!loading">
-          <i class="fa fa-sign-in-alt" style="margin-right:8px;"></i>Sign In
+          <i class="fas fa-sign-in-alt"></i> Sign In
         </span>
         <i v-else class="fa fa-spinner fa-spin"></i>
       </button>
@@ -69,6 +71,7 @@
     <div class="register-prompt">
       Don't have an account? 
       <router-link to="/register" class="register-link">Create one free</router-link>
+      
     </div>
   </div>
 </template>
