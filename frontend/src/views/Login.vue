@@ -1,5 +1,5 @@
 <template>
-  <div class="loginpage" style="display: flex; min-height: 100vh; width: 100%; background-color: #000000; color: #E2E8F0; font-family: 'Outfit', sans-serif; position: relative; overflow: hidden; align-items: stretch; justify-content: flex-start; padding: 0;">
+  <div class="loginpage" style="display: flex; min-height: 100vh; width: 100%; background-color: #000000; color: #E2E8F0; font-family: 'Outfit', sans-serif; position: relative; overflow: hidden; align-items: stretch; justify-content: center; padding: 0;">
     <!-- Animated Background Particles -->
     <div class="bg-particles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none; display: block;">
       <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div><div class="particle p4"></div>
@@ -7,7 +7,7 @@
     </div>
 
     <!-- LEFT PANEL -->
-    <div class="left-panel" style="flex: 1; background: transparent; padding: 60px 80px 60px 105px; display: flex; flex-direction: column; position: relative; z-index: 2; border-right: 1px solid rgba(255, 255, 255, 0.05); max-width: 470px;">
+    <div class="left-panel" style="flex: 0 0 470px; background: transparent; padding: 60px 80px 60px 80px; display: flex; flex-direction: column; position: relative; z-index: 2; border-right: 1px solid rgba(255, 255, 255, 0.05);">
       <div class="brand-logo" style="font-size: 28px; font-weight: 800; color: #FFFFFF; display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; justify-content: flex-start; width: 100%;">
         <img src="../assets/icons/favicon.svg" alt="MoneymakePro" style="width: 28px; height: 28px;" />
         MoneymakePro
@@ -29,7 +29,7 @@
     </div>
 
     <!-- RIGHT PANEL -->
-    <div class="right-panel" style="flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 40px; z-index: 2;">
+    <div class="right-panel" style="flex: 0 0 560px; position: relative; display: flex; align-items: center; justify-content: center; padding: 40px; z-index: 2;">
       <div class="auth-section" style="width: 100%; max-width: 440px;">
         <LoginForm />
       </div>
