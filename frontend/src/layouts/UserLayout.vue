@@ -25,6 +25,11 @@
             <i class="fas fa-file-invoice-dollar nav-icon"></i>
             <span>Billing</span>
           </router-link>
+          
+          <a href="#" class="nav-item" @click.prevent="isSupportModalOpen = true" title="24/7 Support">
+            <i class="fas fa-life-ring nav-icon"></i>
+            <span>Support</span>
+          </a>
         </nav>
       </div>
 
@@ -105,6 +110,7 @@
         <router-view></router-view>
       </main>
     </div>
+    <SupportModal :isOpen="isSupportModalOpen" @close="isSupportModalOpen = false" />
   </div>
 </template>
 
@@ -114,11 +120,14 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../store'
 import { useToast } from 'vue-toastification'
+import SupportModal from '../components/common/SupportModal.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
+
+const isSupportModalOpen = ref(false)
 
 const activeSection = ref(route.query.tab || 'personal-details')
 
