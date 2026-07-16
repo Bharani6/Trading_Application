@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: #010202; /* Match landing page */
+  background-color: #000000; /* Match register page darkness */
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -74,13 +74,11 @@
 
 /* ── Floating Dark Glass Card ── */
 .loginpage .auth-card {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: none;
   border-radius: 24px;
-  padding: 48px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(79, 70, 229, 0.1);
+  padding: 0px;
+  box-shadow: none;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;

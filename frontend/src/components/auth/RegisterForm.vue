@@ -35,7 +35,7 @@
     <div class="right-panel" style="flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 40px;">
       
       <!-- Top Right Login Link -->
-      <div style="position: absolute; top: 40px; right: 40px; font-size: 14px; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+      <div class="top-login-link" style="position: absolute; top: 40px; right: 40px; font-size: 14px; color: #94a3b8; display: flex; align-items: center; gap: 8px; z-index: 50;">
         Already have an account?
         <router-link to="/login" style="color: #a5b4fc; font-weight: 600; text-decoration: none; padding: 6px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.2s;">
           Sign in
@@ -54,7 +54,8 @@
           
           <!-- Stepper -->
           <div class="wizard-stepper custom-stepper" style="margin-top: 2.5rem; margin-bottom: 2.5rem; display: flex; align-items: flex-start; justify-content: space-between; position: relative;">
-            <div class="stepper-line" style="position: absolute; top: 16px; left: 5%; right: 5%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1;"></div>
+            <div class="stepper-line" style="position: absolute; top: 16px; left: 12.5%; right: 12.5%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1;"></div>
+            <div class="stepper-line-active" :style="{ width: (currentStep > 5 ? 75 : currentStep > 3 ? 50 : currentStep > 2 ? 25 : 0) + '%' }" style="position: absolute; top: 16px; left: 12.5%; height: 2px; background: #6366f1; z-index: 1; transition: width 0.3s ease;"></div>
             
             <div class="step-item" style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;">
               <div class="step-circle" :class="{ active: currentStep === 1 || currentStep === 2, completed: currentStep > 2 }">1</div>
@@ -101,7 +102,7 @@
                 <div class="input-wrapper custom-input">
                   <i class="far fa-envelope input-icon-left"></i>
                   <input type="email" class="form-input" v-model="form.email" placeholder="you@example.com" autocomplete="email" />
-                  <i class="fas fa-check input-icon-right text-green" v-if="form.email.includes('@')"></i>
+                  <i class="fas fa-check input-icon-right text-green" v-if="/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email)"></i>
                 </div>
               </div>
 
@@ -359,6 +360,14 @@
           <i class="fas fa-shield-alt" style="color: #a5b4fc;"></i>
           Your data is safe and secure with us
         </div>
+
+        <!-- Bottom Login Link (Fallback for mobile/small screens) -->
+        <div class="bottom-login-link" style="margin-top: 20px; text-align: center; font-size: 14px; color: #94a3b8; display: none;">
+          Already have an account? 
+          <router-link to="/login" style="color: #a5b4fc; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+            Sign in
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -481,6 +490,7 @@ const validateStep = (step) => {
     if (!form.name) return 'Full name is required.'
     if (!/^[a-zA-Z\s]+$/.test(form.name)) return 'Name must contain only letters and spaces.'
     if (!form.email) return 'Email address is required.'
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email)) return 'Please enter a valid email address.'
     if (!form.mobile || form.mobile.length !== 10) return 'Valid 10-digit mobile number is required.'
     
     if (!form.password) return 'Password is required.'
@@ -772,5 +782,14 @@ const handleNextOrSubmit = async () => {
 }
 .text-green {
   color: #10b981;
+}
+
+@media (max-width: 768px) {
+  .top-login-link {
+    display: none !important;
+  }
+  .bottom-login-link {
+    display: block !important;
+  }
 }
 </style>
