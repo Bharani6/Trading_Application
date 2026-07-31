@@ -56,6 +56,12 @@ func StartMarketDataWorker(db *gorm.DB, marketSvc service.MarketDataService) {
 	WorkerStatus = "Running"
 	go func() {
 		log.Printf("Market Data Worker started, interval: %s\n", interval.String())
+		
+		// Fetch prices immediately on startup so they aren't 0.0
+		if err := updateStockPrices(db, marketSvc); err != nil {
+			log.Printf("Failed to initial update stock prices: %v\n", err)
+		}
+
 		for range ticker.C {
 			if !IsIndianMarketOpen() {
 				// Market is closed, do nothing

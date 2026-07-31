@@ -13,11 +13,13 @@ type TradeRepository interface {
 	GetAllShares(search string) ([]Share, error)
 	GetShareForUpdate(tx *gorm.DB, shareID string) (*Share, error)
 	FirstOrCreateShare(share *Share) error
+	FirstOrCreateSegment(segment *Segment) error
 	UpdateShare(tx *gorm.DB, share *Share) error
 	UpdateShareWithVersion(tx *gorm.DB, share *Share) error
 	CreateTrade(tx *gorm.DB, trade *Trade) error
 	GetTradesByUser(userID string) ([]Trade, error)
 	RunInTransaction(fn func(tx *gorm.DB) error) error
+	GetSegmentByName(name string) (*Segment, error)
 }
 
 type tradeRepository struct {
@@ -41,6 +43,12 @@ func (r *tradeRepository) GetAllShares(search string) ([]Share, error) {
 	return shares, err
 }
 
+func (r *tradeRepository) GetSegmentByName(name string) (*Segment, error) {
+	var segment Segment
+	err := r.db.Where("name = ?", name).First(&segment).Error
+	return &segment, err
+}
+
 func (r *tradeRepository) GetShareForUpdate(tx *gorm.DB, shareID string) (*Share, error) {
 	var share Share
 	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", shareID).First(&share).Error
@@ -49,6 +57,10 @@ func (r *tradeRepository) GetShareForUpdate(tx *gorm.DB, shareID string) (*Share
 
 func (r *tradeRepository) FirstOrCreateShare(share *Share) error {
 	return r.db.Where("symbol = ?", share.Symbol).FirstOrCreate(share).Error
+}
+
+func (r *tradeRepository) FirstOrCreateSegment(segment *Segment) error {
+	return r.db.Where("name = ?", segment.Name).FirstOrCreate(segment).Error
 }
 
 func (r *tradeRepository) UpdateShare(tx *gorm.DB, share *Share) error {
