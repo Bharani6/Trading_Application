@@ -92,12 +92,14 @@ func SetupRouter(r *gin.Engine) {
 			admin.Use(middleware.RoleMiddleware("admin"))
 			{
 				admin.GET("/users", adminController.GetUsers)
+				admin.GET("/users/:id/details", adminController.GetUserDetails)
 				admin.PUT("/users/:id/approve", adminController.ApproveUser)
 				admin.PUT("/users/:id/reject", adminController.RejectUser)
 				admin.PUT("/users/:id/block", adminController.BlockUser)
 				admin.POST("/shares/upload", adminController.UploadShares)
 				admin.DELETE("/shares", adminController.DeleteAllShares)
 				admin.GET("/support", supportController.GetMessages)
+				admin.PUT("/support/:id/status", supportController.UpdateStatus)
 			}
 			
 			watchlistController := watchlist.NewWatchlistController()

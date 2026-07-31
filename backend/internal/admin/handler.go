@@ -25,6 +25,16 @@ func (c *AdminController) GetUsers(ctx *gin.Context) {
 	response.Success(ctx, http.StatusOK, "Users retrieved", users)
 }
 
+func (c *AdminController) GetUserDetails(ctx *gin.Context) {
+	id := ctx.Param("id")
+	userDetails, err := c.svc.GetUserDetails(id)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to fetch user details", err.Error())
+		return
+	}
+	response.Success(ctx, http.StatusOK, "User details retrieved", userDetails)
+}
+
 func (c *AdminController) ApproveUser(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if err := c.svc.ApproveUser(id); err != nil {
