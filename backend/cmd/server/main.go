@@ -52,6 +52,11 @@ func main() {
 	); err != nil {
 		log.Fatalf("Failed to auto-migrate: %v", err)
 	}
+	
+	// Automatically seed the database on startup
+	if err := SeedData(database.DB); err != nil {
+		zap.L().Warn("Failed to seed initial data", zap.Error(err))
+	}
 	// database.InitRedis()
 
 	// 4. Setup Services & Background Workers

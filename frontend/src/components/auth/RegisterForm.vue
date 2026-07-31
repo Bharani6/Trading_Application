@@ -34,21 +34,23 @@
     <!-- RIGHT PANEL -->
     <div class="right-panel" style="flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 40px;">
       
-      <!-- Top Right Login Link -->
-      <div class="top-login-link" style="position: absolute; top: 40px; right: 40px; font-size: 14px; color: #94a3b8; display: flex; align-items: center; gap: 8px; z-index: 50;">
-        Already have an account?
-        <router-link to="/login" style="color: #a5b4fc; font-weight: 600; text-decoration: none; padding: 6px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.2s;">
-          Sign in
-        </router-link>
-      </div>
-
       <div class="auth-card" style="max-width: 800px; width: 100%; background: transparent; border: none; box-shadow: none; padding: 0;">
         <div class="auth-card-header" style="margin-bottom: 2rem;">
-          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 8px;">
-            <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-              <i class="fas fa-user-plus" style="color: #a5b4fc; font-size: 20px;"></i>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 300px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user-plus" style="color: #a5b4fc; font-size: 20px;"></i>
+              </div>
+              <h1 class="auth-title" style="margin: 0; text-align: left; font-size: 28px;">Create Account</h1>
             </div>
-            <h1 class="auth-title" style="margin: 0; text-align: left; font-size: 28px;">Create Account</h1>
+            
+            <!-- Top Right Login Link (Moved here to avoid overlapping) -->
+            <div class="top-login-link" style="font-size: 14px; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+              Already have an account?
+              <router-link to="/login" style="color: #a5b4fc; font-weight: 600; text-decoration: none; padding: 6px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.2s;">
+                Sign in
+              </router-link>
+            </div>
           </div>
           <p style="color: #94a3b8; font-size: 15px; margin: 0 0 0 64px;">Let's get you started with your account</p>
           
@@ -143,35 +145,38 @@
           </div>
 
           <!-- STEP 2: Demographics -->
-          <div v-if="currentStep === 2" class="form-grid">
-            <div class="form-group full-width">
+          <div v-if="currentStep === 2">
+            <div class="form-group" style="margin-bottom: 20px;">
               <label class="form-label">Residential address <span class="required-star">*</span></label>
               <div class="input-wrapper">
-                <textarea class="form-input" v-model="form.address" placeholder="Enter your full residential address" rows="2"></textarea>
+                <textarea class="form-input" v-model="form.address" placeholder="Enter your full residential address" rows="3"></textarea>
               </div>
             </div>
             
-            <div class="form-group full-width">
-              <label class="form-label">Income range <span class="required-star">*</span></label>
-              <div class="income-chips">
-                <button type="button" v-for="range in ['< ₹1L', '₹1L - ₹5L', '₹5L - ₹10L', '> ₹10L']" :key="range" :class="['income-chip', { active: form.income_range === range }]" @click="form.income_range = range">
-                  {{ range }}
-                </button>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Income range <span class="required-star">*</span></label>
+                <div class="income-chips" style="grid-template-columns: repeat(2, 1fr);">
+                  <button type="button" v-for="range in ['< ₹1L', '₹1L - ₹5L', '₹5L - ₹10L', '> ₹10L']" :key="range" :class="['income-chip', { active: form.income_range === range }]" @click="form.income_range = range">
+                    {{ range }}
+                  </button>
+                </div>
               </div>
-            </div>
-            
-            <div class="form-group full-width">
-              <label class="form-label">Occupation <span class="required-star">*</span></label>
-              <div class="input-wrapper">
-                <select class="form-input" v-model="form.occupation">
-                  <option value="" disabled>Select Occupation</option>
-                  <option value="Private Sector">Private Sector</option>
-                  <option value="Public Sector">Public Sector</option>
-                  <option value="Government Service">Government Service</option>
-                  <option value="Business Professional">Business Professional</option>
-                  <option value="Student">Student</option>
-                  <option value="Others">Others</option>
-                </select>
+              
+              <div class="form-group">
+                <label class="form-label">Occupation <span class="required-star">*</span></label>
+                <div class="input-wrapper custom-select">
+                  <select class="form-input" v-model="form.occupation">
+                    <option value="" disabled>Select Occupation</option>
+                    <option value="Private Sector">Private Sector</option>
+                    <option value="Public Sector">Public Sector</option>
+                    <option value="Government Service">Government Service</option>
+                    <option value="Business Professional">Business Professional</option>
+                    <option value="Student">Student</option>
+                    <option value="Others">Others</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -185,7 +190,7 @@
               </div>
             </div>
 
-            <div class="form-group full-width">
+            <div class="form-group">
               <label class="form-label">PAN Number <span class="required-star">*</span></label>
               <div class="input-wrapper">
                 <input type="text" class="form-input" v-model="form.pan" placeholder="ABCDE1234F" style="text-transform: uppercase" maxlength="10" @input="form.pan = form.pan.toUpperCase().replace(/[^A-Z0-9]/g, '')" />
@@ -193,7 +198,7 @@
               <span v-if="panError" class="error-text" style="color: #f43f5e; font-size: 12px; margin-top: 4px; display: block;">{{ panError }}</span>
             </div>
             
-            <div class="form-group full-width">
+            <div class="form-group">
               <label class="form-label">Aadhaar Number <span class="required-star">*</span></label>
               <div class="input-wrapper">
                 <input type="text" class="form-input" v-model="form.aadhaar" placeholder="12 Digit Aadhaar" maxlength="12" @input="form.aadhaar = form.aadhaar.replace(/[^0-9]/g, '')" />
@@ -267,7 +272,7 @@
               
               <div class="form-group">
                 <label class="form-label">Relationship <span class="required-star">*</span></label>
-                <div class="input-wrapper">
+                <div class="input-wrapper custom-select">
                   <select class="form-input" v-model="form.nominees[0].relationship">
                     <option value="" disabled>Select Relationship</option>
                     <option value="Spouse">Spouse</option>
@@ -279,6 +284,7 @@
                     <option value="Sister">Sister</option>
                     <option value="Other">Other</option>
                   </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
               </div>
               
@@ -384,7 +390,9 @@ import { utilsApi } from '../../api/utils.api'
 const router = useRouter()
 const toast = useToast()
 
-const currentStep = ref(1)
+const savedStep = sessionStorage.getItem('registerStep')
+const currentStep = ref(savedStep ? parseInt(savedStep) : 1)
+
 const loading = ref(false)
 const errorMessage = ref('')
 const panError = ref('')
@@ -397,7 +405,7 @@ const canvasElement = ref(null)
 const mediaStream = ref(null)
 const isCapturing = ref(false)
 
-const form = reactive({
+const defaultForm = {
   name: '',
   email: '',
   mobile: '',
@@ -433,7 +441,18 @@ const form = reactive({
     guardian_relationship: '',
     guardian_pan: ''
   }]
+}
+
+const savedForm = sessionStorage.getItem('registerForm')
+const form = reactive(savedForm ? JSON.parse(savedForm) : defaultForm)
+
+watch(currentStep, (newStep) => {
+  sessionStorage.setItem('registerStep', newStep.toString())
 })
+
+watch(form, (newForm) => {
+  sessionStorage.setItem('registerForm', JSON.stringify(newForm))
+}, { deep: true })
 
 const today = new Date()
 const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0]
@@ -705,6 +724,8 @@ const handleNextOrSubmit = async () => {
 
     const res = await authApi.register(payload)
     if (res.data.success) {
+      sessionStorage.removeItem('registerStep')
+      sessionStorage.removeItem('registerForm')
       toast.success('Registration successful! Please log in.')
       router.push('/login')
     }

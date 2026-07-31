@@ -63,8 +63,8 @@ func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
 		return nil, errors.New("failed to retrieve shares")
 	}
 
-	// Trigger dynamic market search if local results are few and a search query is provided
-	if len(shares) < 3 && search != "" {
+	// Trigger dynamic market search if a search query is provided
+	if search != "" {
 		if results, err := s.marketDataService.SearchSymbol(search); err == nil && len(results) > 0 {
 			var newSymbols []string
 			for _, res := range results {
@@ -73,17 +73,40 @@ func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
 			// Fetch prices for the newly discovered symbols
 			prices, err := s.marketDataService.GetLatestPrices(newSymbols)
 			if err == nil {
+				// Initialize the segments
+				nseSeg := &Segment{Name: "NSE"}
+				s.repo.FirstOrCreateSegment(nseSeg)
+				
+				nasdaqSeg := &Segment{Name: "NASDAQ"}
+				s.repo.FirstOrCreateSegment(nasdaqSeg)
+				
+				bseSeg := &Segment{Name: "BSE"}
+				s.repo.FirstOrCreateSegment(bseSeg)
+				
 				for _, res := range results {
 					priceData := prices[res.Symbol]
 					
-					// Assuming Segment ID 1 is NSE
+					var segID uint
+					var seg Segment
+					// Simple heuristic for segment
+					if len(res.Symbol) > 3 && res.Symbol[len(res.Symbol)-3:] == ".NS" {
+						segID = nseSeg.ID
+						seg = *nseSeg
+					} else if len(res.Symbol) > 3 && res.Symbol[len(res.Symbol)-3:] == ".BO" {
+						segID = bseSeg.ID
+						seg = *bseSeg
+					} else {
+						segID = nasdaqSeg.ID
+						seg = *nasdaqSeg
+					}
+					
 					newShare := &Share{
 						ID:              uuid.New(),
 						Symbol:          res.Symbol,
 						Name:            res.LongName,
 						Price:           priceData.Current,
 						PreviousPrice:   priceData.Previous,
-						SegmentID:       1,
+						SegmentID:       segID,
 						TotalShares:     1000000,
 						AvailableShares: 1000000,
 					}
@@ -92,9 +115,21 @@ func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
 						newShare.Name = res.ShortName
 					}
 					
+					// FirstOrCreateShare returns the DB record if it exists
 					if err := s.repo.FirstOrCreateShare(newShare); err == nil {
-						// Append to the list of shares to return
-						shares = append(shares, *newShare)
+						// Only append if it wasn't already in our local search results
+						alreadyExists := false
+						for _, existing := range shares {
+							if existing.Symbol == newShare.Symbol {
+								alreadyExists = true
+								break
+							}
+						}
+						
+						if !alreadyExists {
+							newShare.Segment = seg
+							shares = append(shares, *newShare)
+						}
 					}
 				}
 			}
