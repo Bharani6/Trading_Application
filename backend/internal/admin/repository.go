@@ -10,6 +10,7 @@ import (
 
 type AdminRepository interface {
 	GetAllUsers() ([]userpkg.User, error)
+	GetUserDetails(userID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error)
 	UpdateUserStatus(userID string, status string) error
 	GetOrCreateSegment(name string) (*trade.Segment, error)
 	BulkInsertShares(shares []trade.Share) error
@@ -28,6 +29,24 @@ func (r *adminRepository) GetAllUsers() ([]userpkg.User, error) {
 	var users []userpkg.User
 	err := r.db.Find(&users).Error
 	return users, err
+}
+
+func (r *adminRepository) GetUserDetails(userID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error) {
+	var user userpkg.User
+	if err := r.db.Where("id = ?", userID).First(&user).Error; err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	var personal userpkg.PersonalDetails
+	r.db.Where("user_id = ?", userID).First(&personal) // ignore error as they might not exist yet
+
+	var banks []userpkg.BankDetails
+	r.db.Where("user_id = ?", userID).Find(&banks)
+
+	var nominees []userpkg.NomineeDetails
+	r.db.Where("user_id = ?", userID).Find(&nominees)
+
+	return &user, &personal, banks, nominees, nil
 }
 
 func (r *adminRepository) UpdateUserStatus(userID string, status string) error {

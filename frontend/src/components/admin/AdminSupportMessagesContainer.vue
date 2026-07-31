@@ -46,7 +46,19 @@
                 <div class="message-content">{{ msg.message }}</div>
               </td>
               <td>
-                <span :class="['status-badge', getStatusClass(msg.status)]">{{ msg.status || 'Open' }}</span>
+                <select 
+                  class="status-select" 
+                  :class="getStatusClass(msg.status)"
+                  v-model="msg.status"
+                  @change="updateStatus(msg.id, msg.status)"
+                  :disabled="updating === msg.id"
+                >
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                </select>
+                <i v-if="updating === msg.id" class="fas fa-spinner fa-spin status-spinner"></i>
               </td>
               <td>{{ formatDate(msg.createdAt) }}</td>
             </tr>
@@ -65,6 +77,7 @@ import { useToast } from 'vue-toastification'
 const messages = ref([])
 const loading = ref(false)
 const error = ref(null)
+const updating = ref(null)
 const toast = useToast()
 
 const fetchMessages = async () => {
@@ -79,6 +92,21 @@ const fetchMessages = async () => {
     toast.error(error.value)
   } finally {
     loading.value = false
+  }
+}
+
+const updateStatus = async (id, newStatus) => {
+  updating.value = id
+  try {
+    await adminApi.updateSupportStatus(id, newStatus)
+    toast.success('Status updated successfully')
+  } catch (err) {
+    console.error("Failed to update status", err)
+    toast.error('Failed to update status')
+    // Revert status on UI if it failed (reload)
+    await fetchMessages()
+  } finally {
+    updating.value = null
   }
 }
 
@@ -223,6 +251,38 @@ onMounted(() => {
 .status-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .status-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .status-default { background: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+
+.status-select {
+  padding: 0.25rem 1.5rem 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1em;
+  transition: all 0.2s;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.status-select option {
+  background: var(--bg-card, #1a1a24);
+  color: var(--text-primary, #fff);
+}
+
+.status-spinner {
+  margin-left: 0.5rem;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

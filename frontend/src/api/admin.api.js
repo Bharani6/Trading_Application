@@ -5,6 +5,10 @@ export const adminApi = {
     return api.get('/admin/users')
   },
   
+  getUserDetails: (userId) => {
+    return api.get(`/admin/users/${userId}/details`)
+  },
+  
   approveUser: (userId) => {
     return api.put(`/admin/users/${userId}/approve`)
   },
@@ -31,5 +35,9 @@ export const adminApi = {
 
   getSupportMessages: () => {
     return api.get('/admin/support')
+  },
+
+  updateSupportStatus: (id, status) => {
+    return api.put(`/admin/support/${id}/status`, { status })
   }
 }
