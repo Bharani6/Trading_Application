@@ -103,6 +103,10 @@
             <i class="fas fa-users nav-icon"></i>
             <span>Nominee Details</span>
           </a>
+          <a href="#" class="nav-item" :class="{ active: activeSection === 'active-devices' }" @click.prevent="changeTab('active-devices')">
+            <i class="fas fa-mobile-alt nav-icon"></i>
+            <span>Active Devices</span>
+          </a>
         </nav>
       </aside>
 

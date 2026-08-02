@@ -102,6 +102,9 @@
             <span>Estimated Total:</span>
             <span class="highlight-val">₹{{ (modalQuantity * modalStock.price).toFixed(2) }}</span>
           </div>
+          <div v-if="modalQuantity > 0 && modalAction === 'Buy' && (modalQuantity * modalStock.price) > walletStore.state.balance.available_balance" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; text-align: right;">
+            Available amount is enough for {{ Math.floor(walletStore.state.balance.available_balance / modalStock.price) }} shares
+          </div>
         </div>
         <div class="modal-footer">
           <button class="cancel-btn" @click="closeModal">Cancel</button>

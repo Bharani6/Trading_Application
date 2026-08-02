@@ -17,6 +17,8 @@ type UserRepository interface {
 	GetSessionByRefreshToken(token string) (*Session, error)
 	DeleteSession(token string) error
 	DeleteAllSessions(userID string) error
+	GetSessionsByUserID(userID string) ([]Session, error)
+	DeleteSessionByID(sessionID string) error
 	GetUserBanks(userID string) ([]BankDetails, error)
 	GetUserNominees(userID string) ([]NomineeDetails, error)
 	GetUserPersonalDetails(userID string) (*PersonalDetails, error)
@@ -111,6 +113,16 @@ func (r *userRepository) DeleteSession(token string) error {
 
 func (r *userRepository) DeleteAllSessions(userID string) error {
 	return r.db.Where("user_id = ?", userID).Delete(&Session{}).Error
+}
+
+func (r *userRepository) GetSessionsByUserID(userID string) ([]Session, error) {
+	var sessions []Session
+	err := r.db.Where("user_id = ?", userID).Find(&sessions).Error
+	return sessions, err
+}
+
+func (r *userRepository) DeleteSessionByID(sessionID string) error {
+	return r.db.Where("id = ?", sessionID).Delete(&Session{}).Error
 }
 
 func (r *userRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {

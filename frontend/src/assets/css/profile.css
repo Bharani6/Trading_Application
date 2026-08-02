@@ -398,3 +398,91 @@
     justify-content: center;
   }
 }
+
+/* ========================================================
+   ACTIVE DEVICES
+   ======================================================== */
+.profilepage .device-section-subtitle {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin-top: 4px;
+  margin-bottom: 2rem;
+}
+
+.profilepage .device-section-title {
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 1rem;
+  font-size: var(--font-size-base);
+}
+
+.profilepage .device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profilepage .device-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.profilepage .device-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profilepage .device-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #2D2D2D;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: var(--font-size-lg);
+  border: 1px solid var(--border-color);
+}
+
+.profilepage .device-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profilepage .device-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--text-main);
+}
+
+.profilepage .device-status {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.profilepage .active-status {
+  color: var(--text-main);
+}
+
+.profilepage .btn-logout {
+  background: none;
+  border: none;
+  color: var(--profit-color);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px;
+  transition: all var(--transition-base);
+}
+
+.profilepage .btn-logout:hover {
+  opacity: 0.8;
+}

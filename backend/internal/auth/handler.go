@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"stock-trading/internal/response"
 
@@ -263,9 +264,47 @@ func (c *AuthController) ResetPassword(ctx *gin.Context) {
 	}
 
 	if err := c.svc.ResetPassword(req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "RESET_PASSWORD_ERROR", err.Error(), nil)
+		response.Error(ctx, http.StatusInternalServerError, "RESET_PASSWORD_ERROR", err.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Password updated successfully", nil)
+	response.Success(ctx, http.StatusOK, "Password reset successful", nil)
+}
+
+func (c *AuthController) GetSessions(ctx *gin.Context) {
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		response.Error(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "User not logged in", nil)
+		return
+	}
+
+	tokenString := ""
+	authHeader := ctx.GetHeader("Authorization")
+	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+	}
+	if tokenString == "" {
+		cookie, err := ctx.Cookie("access_token")
+		if err == nil {
+			tokenString = cookie
+		}
+	}
+
+	sessions, err := c.svc.GetActiveSessions(userID.(string), tokenString)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "SESSIONS_ERROR", "Failed to retrieve sessions", err.Error())
+		return
+	}
+
+	response.Success(ctx, http.StatusOK, "Sessions retrieved successfully", sessions)
+}
+
+func (c *AuthController) RevokeSession(ctx *gin.Context) {
+	sessionID := ctx.Param("id")
+	if err := c.svc.RevokeSession(sessionID); err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "REVOKE_SESSION_ERROR", "Failed to revoke session", err.Error())
+		return
+	}
+
+	response.Success(ctx, http.StatusOK, "Session revoked successfully", nil)
 }

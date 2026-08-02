@@ -34,6 +34,14 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type SessionDTO struct {
+	ID        string `json:"id"`
+	IPAddress string `json:"ip_address"`
+	UserAgent string `json:"user_agent"`
+	CreatedAt string `json:"created_at"`
+	IsCurrent bool   `json:"is_current"`
+}
+
 type UserResponse struct {
 	ID           string                   `json:"id"`
 	Name         string                   `json:"name"`

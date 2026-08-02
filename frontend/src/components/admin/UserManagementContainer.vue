@@ -70,12 +70,20 @@
                   <i class="fas fa-eye"></i> View
                 </button>
                 <button 
-                  v-if="user.status === 'pending_approval' || user.status === 'pending' || user.status === 'rejected' || user.status === 'blocked'"
+                  v-if="user.status === 'pending_approval' || user.status === 'pending' || user.status === 'rejected'"
                   class="btn-action btn-approve"
                   @click="updateStatus(user.id, 'approve')"
                   :disabled="actionLoading === user.id"
                 >
                   <i class="fas fa-check"></i> Approve
+                </button>
+                <button
+                  v-if="user.status === 'blocked' && user.role !== 'admin'"
+                  class="btn-action btn-approve"
+                  @click="updateStatus(user.id, 'approve')"
+                  :disabled="actionLoading === user.id"
+                >
+                  <i class="fas fa-check"></i> Activate
                 </button>
                 <button 
                   v-if="user.status === 'pending_approval' || user.status === 'pending'"
@@ -85,7 +93,15 @@
                 >
                   <i class="fas fa-times"></i> Reject
                 </button>
-                <span v-if="user.status === 'active'" style="color: var(--text-muted); font-size: 12px;">
+                <button
+                  v-if="user.status === 'active' && user.role !== 'admin'"
+                  class="btn-action btn-reject"
+                  @click="updateStatus(user.id, 'block')"
+                  :disabled="actionLoading === user.id"
+                >
+                  <i class="fas fa-ban"></i> Deactivate
+                </button>
+                <span v-if="(user.status === 'active' || user.status === 'blocked') && user.role === 'admin'" style="color: var(--text-muted); font-size: 12px;">
                   No actions
                 </span>
               </td>
@@ -245,7 +261,9 @@ const updateStatus = async (userId, action) => {
       // Optimistically update the list
       const u = users.value.find(x => x.id === userId)
       if (u) {
-        u.status = action === 'approve' ? 'active' : 'rejected'
+        if (action === 'approve') u.status = 'active'
+        else if (action === 'reject') u.status = 'rejected'
+        else if (action === 'block') u.status = 'blocked'
       }
     }
   } catch (err) {

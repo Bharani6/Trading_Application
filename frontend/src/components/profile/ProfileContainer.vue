@@ -208,8 +208,8 @@
 
             <template v-for="(bank, index) in kycForm.bankAccounts" :key="index">
               <div class="full-width bank-header">
-                <h4>{{ bank.accountType === 'primary' ? 'Primary' : 'Secondary' }} Bank Account</h4>
-                <button v-if="bank.accountType === 'secondary'" type="button" class="btn-text-red" @click="removeSecondaryBank(index)">
+                <h4>{{ index === 0 ? 'Primary' : 'Secondary' }} Bank Account</h4>
+                <button v-if="index !== 0" type="button" class="btn-text-red" @click="removeSecondaryBank(index)">
                   <i class="fas fa-trash"></i> Remove
                 </button>
               </div>
@@ -243,6 +243,12 @@
               <div class="form-group">
                 <label class="form-label">Branch Name</label>
                 <div class="static-value">{{ bank.branch || 'Not Provided' }}</div>
+              </div>
+              <div class="form-group" v-if="bank.accountNumber && bank.ifsc && bank.bankName">
+                <label class="form-label">Status</label>
+                <div class="static-value" style="color: #10b981; font-weight: 500;">
+                  <i class="fas fa-check-circle"></i> Verified
+                </div>
               </div>
               <div class="full-width"><br/></div>
             </template>
@@ -384,8 +390,72 @@
               </template>
             </template>
           </template>
+          <!-- ACTIVE DEVICES TAB -->
+          <template v-if="activeTab === 'active-devices'">
+            <div class="full-width" style="padding-bottom: 2rem;">
+              <h3 class="section-title" style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                Active devices
+                <button type="button" class="btn-text" @click="fetchSessions" style="font-size: 0.9rem; color: var(--primary);">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+              </h3>
+              <p class="device-section-subtitle">
+                You're currently logged-in on these devices. Multiple active sessions on the same device indicates you've opened the app on more than one browser.
+              </p>
 
-          <div class="form-actions full-width mt-4 text-right" v-if="activeTab !== 'change-password'">
+              <div v-if="loadingSessions" class="text-center" style="padding: 2rem;">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+              <div v-else-if="sessions.length === 0" class="text-center text-muted" style="padding: 2rem;">
+                No active sessions found.
+              </div>
+              <template v-else>
+                <!-- Current Device Section -->
+                <div v-if="sessions.some(s => s.is_current)" style="margin-bottom: 2rem;">
+                  <h4 class="device-section-title">Current device</h4>
+                  <div class="device-list">
+                    <div v-for="session in sessions.filter(s => s.is_current)" :key="session.id" class="device-item">
+                      <div class="device-info-wrapper">
+                        <div class="device-icon-circle">
+                          <i :class="getDeviceIcon(session.user_agent)"></i>
+                        </div>
+                        <div class="device-details">
+                          <h4 class="device-name">{{ getDeviceName(session.user_agent) }}</h4>
+                          <p class="device-status active-status">Active Now</p>
+                        </div>
+                      </div>
+                      <button type="button" @click="revokeSession(session.id)" class="btn-logout">
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Other Devices Section -->
+                <div v-if="sessions.some(s => !s.is_current)">
+                  <h4 class="device-section-title">Active devices</h4>
+                  <div class="device-list">
+                    <div v-for="session in sessions.filter(s => !s.is_current)" :key="session.id" class="device-item">
+                      <div class="device-info-wrapper">
+                        <div class="device-icon-circle">
+                          <i :class="getDeviceIcon(session.user_agent)"></i>
+                        </div>
+                        <div class="device-details">
+                          <h4 class="device-name">{{ getDeviceName(session.user_agent) }}</h4>
+                          <p class="device-status">Logged on {{ formatSessionDate(session.created_at) }}</p>
+                        </div>
+                      </div>
+                      <button type="button" @click="revokeSession(session.id)" class="btn-logout">
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <div class="form-actions full-width mt-4 text-right" v-if="activeTab !== 'change-password' && activeTab !== 'active-devices'">
             <button type="submit" class="submit-btn" :disabled="loading || (kycForm.nomineeEnabled && activeTab === 'nominee-details' && totalNomineePercentage !== 100)">
               <span v-if="!loading"><i class="fas fa-save"></i> Save Changes</span>
               <i v-else class="fas fa-spinner fa-spin"></i>
@@ -408,6 +478,7 @@ import { useToast } from 'vue-toastification'
 import { useRoute } from 'vue-router'
 import { userApi } from '../../api/user.api'
 import { utilsApi } from '../../api/utils.api'
+import { authApi } from '../../api/auth.api'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -415,7 +486,67 @@ const toast = useToast()
 const loading = ref(false)
 const editingField = ref(null)
 
+const sessions = ref([])
+const loadingSessions = ref(false)
+
+const getDeviceName = (userAgent) => {
+  if (!userAgent) return 'Unknown Device'
+  if (userAgent.includes('Windows') && userAgent.includes('Chrome')) return 'Chrome, Windows'
+  if (userAgent.includes('Windows')) return 'Windows PC'
+  if (userAgent.includes('Macintosh')) return 'Mac'
+  if (userAgent.includes('Linux')) return 'Linux PC'
+  if (userAgent.includes('iPhone')) return 'iPhone'
+  if (userAgent.includes('iPad')) return 'iPad'
+  if (userAgent.includes('Android')) return 'Android Device'
+  return 'Web Browser'
+}
+
+const getDeviceIcon = (userAgent) => {
+  if (!userAgent) return 'fas fa-desktop'
+  if (userAgent.includes('iPhone') || userAgent.includes('Android') || userAgent.includes('Mobile')) return 'fas fa-mobile-alt'
+  if (userAgent.includes('iPad')) return 'fas fa-tablet-alt'
+  return 'fas fa-laptop'
+}
+
+const formatSessionDate = (dateStr) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleString('en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+}
+
+const fetchSessions = async () => {
+  try {
+    loadingSessions.value = true
+    const res = await authApi.getSessions()
+    if (res.data && res.data.success) {
+      sessions.value = res.data.data || []
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to fetch sessions')
+  } finally {
+    loadingSessions.value = false
+  }
+}
+
+const revokeSession = async (id) => {
+  try {
+    const res = await authApi.revokeSession(id)
+    if (res.data && res.data.success) {
+      toast.success('Session logged out successfully')
+      fetchSessions()
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to logout session')
+  }
+}
+
 const activeTab = computed(() => route.query.tab || 'personal-details')
+
+watch(activeTab, (newVal) => {
+  if (newVal === 'active-devices') {
+    fetchSessions()
+  }
+})
 
 const newNomineeObj = () => ({
   name: '',

@@ -26,6 +26,8 @@ type AuthService interface {
 	ForgotPassword(req ForgotPasswordRequest) (string, error)
 	VerifyResetToken(req VerifyResetTokenRequest) error
 	ResetPassword(req ResetPasswordRequest) error
+	GetActiveSessions(userID string, currentToken string) ([]SessionDTO, error)
+	RevokeSession(sessionID string) error
 }
 
 type authService struct {
@@ -461,4 +463,27 @@ func (s *authService) ResetPassword(req ResetPasswordRequest) error {
 	s.repo.DeleteAllSessions(token.UserID.String())
 
 	return nil
+}
+
+func (s *authService) GetActiveSessions(userID string, currentToken string) ([]SessionDTO, error) {
+	sessions, err := s.repo.GetSessionsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []SessionDTO
+	for _, session := range sessions {
+		dtos = append(dtos, SessionDTO{
+			ID:        session.ID.String(),
+			IPAddress: session.IPAddress,
+			UserAgent: session.UserAgent,
+			CreatedAt: session.CreatedAt.Format("2006-01-02 15:04:05"),
+			IsCurrent: session.AccessToken == currentToken,
+		})
+	}
+	return dtos, nil
+}
+
+func (s *authService) RevokeSession(sessionID string) error {
+	return s.repo.DeleteSessionByID(sessionID)
 }
