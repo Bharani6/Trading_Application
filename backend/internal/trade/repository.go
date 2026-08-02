@@ -30,81 +30,81 @@ func NewTradeRepository() TradeRepository {
 	return &tradeRepository{db: database.DB}
 }
 
-func (r *tradeRepository) GetAllShares(search string) ([]Share, error) {
-	var shares []Share = make([]Share, 0)
-	query := r.db.Preload("Segment")
+func (pRepo *tradeRepository) GetAllShares(pSearch string) ([]Share, error) {
+	var lShares []Share = make([]Share, 0)
+	lQuery := pRepo.db.Preload("Segment")
 	
-	search = strings.TrimSpace(search)
-	if search != "" {
-		searchTerm := "%" + search + "%"
-		query = query.Where("name ILIKE ? OR symbol ILIKE ?", searchTerm, searchTerm)
+	pSearch = strings.TrimSpace(pSearch)
+	if pSearch != "" {
+		lSearchTerm := "%" + pSearch + "%"
+		lQuery = lQuery.Where("name ILIKE ? OR symbol ILIKE ?", lSearchTerm, lSearchTerm)
 	}
-	err := query.Find(&shares).Error
-	return shares, err
+	lErr := lQuery.Find(&lShares).Error
+	return lShares, lErr
 }
 
-func (r *tradeRepository) GetSegmentByName(name string) (*Segment, error) {
-	var segment Segment
-	err := r.db.Where("name = ?", name).First(&segment).Error
-	return &segment, err
+func (pRepo *tradeRepository) GetSegmentByName(pName string) (*Segment, error) {
+	var lSegment Segment
+	lErr := pRepo.db.Where("name = ?", pName).First(&lSegment).Error
+	return &lSegment, lErr
 }
 
-func (r *tradeRepository) GetShareForUpdate(tx *gorm.DB, shareID string) (*Share, error) {
-	var share Share
-	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", shareID).First(&share).Error
-	return &share, err
+func (pRepo *tradeRepository) GetShareForUpdate(pTx *gorm.DB, pShareID string) (*Share, error) {
+	var lShare Share
+	lErr := pTx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", pShareID).First(&lShare).Error
+	return &lShare, lErr
 }
 
-func (r *tradeRepository) FirstOrCreateShare(share *Share) error {
-	return r.db.Where("symbol = ?", share.Symbol).FirstOrCreate(share).Error
+func (pRepo *tradeRepository) FirstOrCreateShare(pShare *Share) error {
+	return pRepo.db.Where("symbol = ?", pShare.Symbol).FirstOrCreate(pShare).Error
 }
 
-func (r *tradeRepository) FirstOrCreateSegment(segment *Segment) error {
-	return r.db.Where("name = ?", segment.Name).FirstOrCreate(segment).Error
+func (pRepo *tradeRepository) FirstOrCreateSegment(pSegment *Segment) error {
+	return pRepo.db.Where("name = ?", pSegment.Name).FirstOrCreate(pSegment).Error
 }
 
-func (r *tradeRepository) UpdateShare(tx *gorm.DB, share *Share) error {
-	return tx.Save(share).Error
+func (pRepo *tradeRepository) UpdateShare(pTx *gorm.DB, pShare *Share) error {
+	return pTx.Save(pShare).Error
 }
 
-func (r *tradeRepository) UpdateShareWithVersion(tx *gorm.DB, share *Share) error {
-	result := tx.Model(share).Where("version = ?", share.Version).Updates(map[string]interface{}{
-		"available_shares": share.AvailableShares,
-		"version":          share.Version + 1,
+func (pRepo *tradeRepository) UpdateShareWithVersion(pTx *gorm.DB, pShare *Share) error {
+	lResult := pTx.Model(pShare).Where("version = ?", pShare.Version).Updates(map[string]interface{}{
+		"available_shares": pShare.AvailableShares,
+		"version":          pShare.Version + 1,
 	})
-	if result.Error != nil {
-		return result.Error
+	if lResult.Error != nil {
+		return lResult.Error
 	}
-	if result.RowsAffected == 0 {
+	if lResult.RowsAffected == 0 {
 		return errors.New("optimistic lock failed for share")
 	}
-	share.Version++
+	pShare.Version++
 	return nil
 }
 
-func (r *tradeRepository) CreateTrade(tx *gorm.DB, trade *Trade) error {
-	return tx.Create(trade).Error
+func (pRepo *tradeRepository) CreateTrade(pTx *gorm.DB, pTrade *Trade) error {
+	return pTx.Create(pTrade).Error
 }
 
-func (r *tradeRepository) GetTradesByUser(userID string) ([]Trade, error) {
-	var trades []Trade
-	err := r.db.Preload("Share").Where("user_id = ?", userID).Order("created_at desc").Find(&trades).Error
-	return trades, err
+func (pRepo *tradeRepository) GetTradesByUser(pUserID string) ([]Trade, error) {
+	var lTrades []Trade
+	lErr := pRepo.db.Preload("Share").Where("user_id = ?", pUserID).Order("created_at desc").Find(&lTrades).Error
+	return lTrades, lErr
 }
 
-func (r *tradeRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
-	tx := r.db.Begin()
+func (pRepo *tradeRepository) RunInTransaction(pFn func(pTx *gorm.DB) error) error {
+	lTx := pRepo.db.Begin()
 	defer func() {
-		if rec := recover(); rec != nil {
-			tx.Rollback()
-			panic(rec) // re-throw panic after rollback
+		if lRec := recover(); lRec != nil {
+			lTx.Rollback()
+			panic(lRec) // re-throw panic after rollback
 		}
 	}()
 
-	if err := fn(tx); err != nil {
-		tx.Rollback()
-		return err
+	if lErr := pFn(lTx); lErr != nil {
+		lTx.Rollback()
+		return lErr
 	}
 
-	return tx.Commit().Error
+	return lTx.Commit().Error
 }

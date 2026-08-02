@@ -19,23 +19,23 @@ type ErrorResponse struct {
 	Error   interface{} `json:"error"`
 }
 
-func Success(c *gin.Context, statusCode int, message string, data interface{}) {
-	c.JSON(statusCode, SuccessResponse{
+func Success(pCtx *gin.Context, pStatusCode int, pMessage string, pData interface{}) {
+	pCtx.JSON(pStatusCode, SuccessResponse{
 		Success: true,
-		Message: message,
-		Data:    data,
+		Message: pMessage,
+		Data:    pData,
 	})
 }
 
-func Error(c *gin.Context, statusCode int, code string, message string, err interface{}) {
-	c.JSON(statusCode, ErrorResponse{
+func Error(pCtx *gin.Context, pStatusCode int, pCode string, pMessage string, pErr interface{}) {
+	pCtx.JSON(pStatusCode, ErrorResponse{
 		Success: false,
-		Code:    code,
-		Message: message,
-		Error:   err,
+		Code:    pCode,
+		Message: pMessage,
+		Error:   pErr,
 	})
 }
 
-func InternalServerError(c *gin.Context, err error) {
-	Error(c, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "An unexpected error occurred", err.Error())
+func InternalServerError(pCtx *gin.Context, pErr error) {
+	Error(pCtx, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "An unexpected error occurred", pErr.Error())
 }

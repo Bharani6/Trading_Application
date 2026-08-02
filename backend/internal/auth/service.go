@@ -38,181 +38,181 @@ func NewAuthService() AuthService {
 	return &authService{repo: user.NewUserRepository()}
 }
 
-func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
+func (pService *authService) Register(pReq RegisterRequest) (*UserResponse, error) {
 	// Trim all string inputs - reject whitespace-only values
-	req.Name = strings.TrimSpace(req.Name)
-	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
-	req.Mobile = strings.TrimSpace(req.Mobile)
-	req.PAN = strings.TrimSpace(strings.ToUpper(req.PAN))
-	req.Aadhaar = strings.TrimSpace(req.Aadhaar)
-	req.Address = strings.TrimSpace(req.Address)
-	req.IncomeRange = strings.TrimSpace(req.IncomeRange)
-	req.Occupation = strings.TrimSpace(req.Occupation)
+	pReq.Name = strings.TrimSpace(pReq.Name)
+	pReq.Email = strings.TrimSpace(strings.ToLower(pReq.Email))
+	pReq.Mobile = strings.TrimSpace(pReq.Mobile)
+	pReq.PAN = strings.TrimSpace(strings.ToUpper(pReq.PAN))
+	pReq.Aadhaar = strings.TrimSpace(pReq.Aadhaar)
+	pReq.Address = strings.TrimSpace(pReq.Address)
+	pReq.IncomeRange = strings.TrimSpace(pReq.IncomeRange)
+	pReq.Occupation = strings.TrimSpace(pReq.Occupation)
 
-	if req.Name == "" {
+	if pReq.Name == "" {
 		return nil, errors.New("Name is required")
 	}
-	if req.Email == "" {
+	if pReq.Email == "" {
 		return nil, errors.New("Email is required")
 	}
-	if req.Mobile == "" {
+	if pReq.Mobile == "" {
 		return nil, errors.New("Mobile is required")
 	}
-	if req.PAN == "" {
+	if pReq.PAN == "" {
 		return nil, errors.New("PAN is required")
 	}
-	if req.Aadhaar == "" {
+	if pReq.Aadhaar == "" {
 		return nil, errors.New("Aadhaar is required")
 	}
-	if req.Address == "" {
+	if pReq.Address == "" {
 		return nil, errors.New("Address is required")
 	}
-	if req.IncomeRange == "" {
+	if pReq.IncomeRange == "" {
 		return nil, errors.New("Income range is required")
 	}
-	if req.Occupation == "" {
+	if pReq.Occupation == "" {
 		return nil, errors.New("Occupation is required")
 	}
-	if req.IPVPhoto == "" {
+	if pReq.IPVPhoto == "" {
 		return nil, errors.New("IPV Photo is required")
 	}
-	if req.IPVLatitude == "" || req.IPVLongitude == "" {
+	if pReq.IPVLatitude == "" || pReq.IPVLongitude == "" {
 		return nil, errors.New("IPV Location coordinates are required")
 	}
 
-	if len(req.Name) < 3 {
+	if len(pReq.Name) < 3 {
 		return nil, errors.New("Name is invalid (minimum 3 letters should be there)")
 	}
 
-	if len(req.Mobile) != 10 {
+	if len(pReq.Mobile) != 10 {
 		return nil, errors.New("Phone number must be exactly 10 digits")
 	}
-	if !regexp.MustCompile(`^[6-9]`).MatchString(req.Mobile) {
+	if !regexp.MustCompile(`^[6-9]`).MatchString(pReq.Mobile) {
 		return nil, errors.New("Phone number must start with a digit between 6 to 9")
 	}
 
 	// Validate Password complexity
-	if len(req.Password) < 8 {
+	if len(pReq.Password) < 8 {
 		return nil, errors.New("password must be at least 8 characters long")
 	}
-	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(req.Password)
-	hasLower := regexp.MustCompile(`[a-z]`).MatchString(req.Password)
-	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(req.Password)
-	hasSpecial := regexp.MustCompile(`[\W_]`).MatchString(req.Password)
+	lHasUpper := regexp.MustCompile(`[A-Z]`).MatchString(pReq.Password)
+	lHasLower := regexp.MustCompile(`[a-z]`).MatchString(pReq.Password)
+	lHasDigit := regexp.MustCompile(`[0-9]`).MatchString(pReq.Password)
+	lHasSpecial := regexp.MustCompile(`[\W_]`).MatchString(pReq.Password)
 
-	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+	if !lHasUpper || !lHasLower || !lHasDigit || !lHasSpecial {
 		return nil, errors.New("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 	}
 
-	if !regexp.MustCompile(`^[A-Z]{5}[0-9]{4}[A-Z]{1}$`).MatchString(req.PAN) {
+	if !regexp.MustCompile(`^[A-Z]{5}[0-9]{4}[A-Z]{1}$`).MatchString(pReq.PAN) {
 		return nil, errors.New("PAN Number should be like ABCDE1234F")
 	}
 
-	if !regexp.MustCompile(`^\d{12}$`).MatchString(req.Aadhaar) {
+	if !regexp.MustCompile(`^\d{12}$`).MatchString(pReq.Aadhaar) {
 		return nil, errors.New("Aadhaar Number must be exactly 12 digits")
 	}
 
-	nameRegex := regexp.MustCompile(`^[a-zA-Z\s]+$`)
-	if !nameRegex.MatchString(req.Name) {
+	lNameRegex := regexp.MustCompile(`^[a-zA-Z\s]+$`)
+	if !lNameRegex.MatchString(pReq.Name) {
 		return nil, errors.New("invalid Name format. Only letters and spaces are allowed")
 	}
 
-	dob, err := time.Parse("2006-01-02", req.DOB)
-	if err != nil {
+	lDOB, lErr := time.Parse("2006-01-02", pReq.DOB)
+	if lErr != nil {
 		return nil, errors.New("invalid date of birth format, expected YYYY-MM-DD")
 	}
 
 	// Calculate age
-	age := time.Now().Year() - dob.Year()
-	if time.Now().YearDay() < dob.YearDay() {
-		age--
+	lAge := time.Now().Year() - lDOB.Year()
+	if time.Now().YearDay() < lDOB.YearDay() {
+		lAge--
 	}
-	if age < 18 {
+	if lAge < 18 {
 		return nil, errors.New("you must be at least 18 years old to register")
 	}
 
 	// Check existing user
-	_, err = s.repo.GetUserByEmail(req.Email)
-	if err == nil {
+	_, lErr = pService.repo.GetUserByEmail(pReq.Email)
+	if lErr == nil {
 		return nil, errors.New("email already in use")
 	}
 
-	_, err = s.repo.GetUserByMobile(req.Mobile)
-	if err == nil {
+	_, lErr = pService.repo.GetUserByMobile(pReq.Mobile)
+	if lErr == nil {
 		return nil, errors.New("mobile number already in use")
 	}
 
-	_, err = s.repo.GetUserByPAN(req.PAN)
-	if err == nil {
+	_, lErr = pService.repo.GetUserByPAN(pReq.PAN)
+	if lErr == nil {
 		return nil, errors.New("PAN already in use")
 	}
 
-	_, err = s.repo.GetUserByAadhaar(req.Aadhaar)
-	if err == nil {
+	_, lErr = pService.repo.GetUserByAadhaar(pReq.Aadhaar)
+	if lErr == nil {
 		return nil, errors.New("Aadhaar already in use")
 	}
 
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		zap.L().Error("Failed to hash password", zap.Error(err))
+	lHashedPassword, lErr := utils.HashPassword(pReq.Password)
+	if lErr != nil {
+		zap.L().Error("Failed to hash password", zap.Error(lErr))
 		return nil, errors.New("internal server error")
 	}
 
-	user := &user.User{
-		Name:         req.Name,
-		Mobile:       req.Mobile,
-		Email:        req.Email,
-		PasswordHash: hashedPassword,
-		PAN:          req.PAN,
-		Aadhaar:      req.Aadhaar,
-		Address:      req.Address,
-		IncomeRange:  req.IncomeRange,
-		Occupation:   req.Occupation,
-		IPVPhoto:     req.IPVPhoto,
-		IPVLatitude:  req.IPVLatitude,
-		IPVLongitude: req.IPVLongitude,
-		DOB:          dob,
+	lUser := &user.User{
+		Name:         pReq.Name,
+		Mobile:       pReq.Mobile,
+		Email:        pReq.Email,
+		PasswordHash: lHashedPassword,
+		PAN:          pReq.PAN,
+		Aadhaar:      pReq.Aadhaar,
+		Address:      pReq.Address,
+		IncomeRange:  pReq.IncomeRange,
+		Occupation:   pReq.Occupation,
+		IPVPhoto:     pReq.IPVPhoto,
+		IPVLatitude:  pReq.IPVLatitude,
+		IPVLongitude: pReq.IPVLongitude,
+		DOB:          lDOB,
 		Role:         "user",
 		Status:       "pending",
 	}
 
-	var bankAccounts []userpkg.BankDetails
-	var nominees []userpkg.NomineeDetails
-	var totalPercentage float64 = 0
+	var lBankAccounts []userpkg.BankDetails
+	var lNominees []userpkg.NomineeDetails
+	var lTotalPercentage float64 = 0
 
-	err = s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		if err := tx.Create(user).Error; err != nil {
-			return err
+	lErr = pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		if lTxErr := pTx.Create(lUser).Error; lTxErr != nil {
+			return lTxErr
 		}
 
-		ifscRegex := regexp.MustCompile(`^[A-Z]{4}0[A-Z0-9]{6}$`)
+		lIfscRegex := regexp.MustCompile(`^[A-Z]{4}0[A-Z0-9]{6}$`)
 		// Insert bank accounts
-		for _, b := range req.BankAccounts {
-			if !ifscRegex.MatchString(b.IFSC) {
+		for _, lBank := range pReq.BankAccounts {
+			if !lIfscRegex.MatchString(lBank.IFSC) {
 				return errors.New("invalid IFSC format")
 			}
-			bankAccounts = append(bankAccounts, userpkg.BankDetails{
-				UserID:        user.ID,
-				AccountType:   b.AccountType,
-				IFSC:          b.IFSC,
-				BankName:      b.BankName,
-				Branch:        b.Branch,
-				AccountNumber: b.AccountNumber,
-				IncomeRange:   req.IncomeRange,
+			lBankAccounts = append(lBankAccounts, userpkg.BankDetails{
+				UserID:        lUser.ID,
+				AccountType:   lBank.AccountType,
+				IFSC:          lBank.IFSC,
+				BankName:      lBank.BankName,
+				Branch:        lBank.Branch,
+				AccountNumber: lBank.AccountNumber,
+				IncomeRange:   pReq.IncomeRange,
 			})
 		}
-		for i := range bankAccounts {
-			if err := tx.Create(&bankAccounts[i]).Error; err != nil {
-				return err
+		for lIdx := range lBankAccounts {
+			if lTxErr := pTx.Create(&lBankAccounts[lIdx]).Error; lTxErr != nil {
+				return lTxErr
 			}
 		}
 
 		// Insert nominees
-		for _, n := range req.Nominees {
-			if n.GuardianName != "" {
-				if n.GuardianDOB != "" {
-					gDob, err := time.Parse("2006-01-02", n.GuardianDOB)
-					if err != nil || time.Since(gDob).Hours() < 18*365*24 {
+		for _, lNominee := range pReq.Nominees {
+			if lNominee.GuardianName != "" {
+				if lNominee.GuardianDOB != "" {
+					lGDob, lGDobErr := time.Parse("2006-01-02", lNominee.GuardianDOB)
+					if lGDobErr != nil || time.Since(lGDob).Hours() < 18*365*24 {
 						return errors.New("guardian must be at least 18 years old")
 					}
 				} else {
@@ -220,156 +220,156 @@ func (s *authService) Register(req RegisterRequest) (*UserResponse, error) {
 				}
 			}
 
-			nominees = append(nominees, userpkg.NomineeDetails{
-				UserID:               user.ID,
-				Name:                 n.Name,
-				DOB:                  n.DOB,
-				PAN:                  n.PAN,
-				Relationship:         n.Relationship,
-				Percentage:           n.Percentage,
-				GuardianName:         n.GuardianName,
-				GuardianRelationship: n.GuardianRelationship,
-				GuardianPAN:          n.GuardianPAN,
-				GuardianDOB:          n.GuardianDOB,
+			lNominees = append(lNominees, userpkg.NomineeDetails{
+				UserID:               lUser.ID,
+				Name:                 lNominee.Name,
+				DOB:                  lNominee.DOB,
+				PAN:                  lNominee.PAN,
+				Relationship:         lNominee.Relationship,
+				Percentage:           lNominee.Percentage,
+				GuardianName:         lNominee.GuardianName,
+				GuardianRelationship: lNominee.GuardianRelationship,
+				GuardianPAN:          lNominee.GuardianPAN,
+				GuardianDOB:          lNominee.GuardianDOB,
 			})
-			totalPercentage += n.Percentage
+			lTotalPercentage += lNominee.Percentage
 		}
 
-		if len(nominees) > 0 && totalPercentage != 100 {
+		if len(lNominees) > 0 && lTotalPercentage != 100 {
 			return errors.New("total nominee percentage allocation must equal exactly 100")
 		}
 
-		for i := range nominees {
-			if err := tx.Create(&nominees[i]).Error; err != nil {
-				return err
+		for lIdx := range lNominees {
+			if lTxErr := pTx.Create(&lNominees[lIdx]).Error; lTxErr != nil {
+				return lTxErr
 			}
 		}
 
 		return nil
 	})
 
-	if err != nil {
-		zap.L().Error("Failed to create user and details", zap.Error(err))
-		return nil, errors.New("failed to register user: " + err.Error())
+	if lErr != nil {
+		zap.L().Error("Failed to create user and details", zap.Error(lErr))
+		return nil, errors.New("failed to register user: " + lErr.Error())
 	}
 
-	return s.GetMe(user.ID.String())
+	return pService.GetMe(lUser.ID.String())
 }
 
-func (s *authService) Login(req LoginRequest, ip string, userAgent string) (*LoginResponse, error) {
-	user, err := s.repo.GetUserByEmail(req.Email)
-	if err != nil {
+func (pService *authService) Login(pReq LoginRequest, pIP string, pUserAgent string) (*LoginResponse, error) {
+	lUser, lErr := pService.repo.GetUserByEmail(pReq.Email)
+	if lErr != nil {
 		return nil, errors.New("invalid credentials")
 	}
 
-	if !utils.CheckPasswordHash(req.Password, user.PasswordHash) {
+	if !utils.CheckPasswordHash(pReq.Password, lUser.PasswordHash) {
 		return nil, errors.New("invalid credentials")
 	}
 
-	if user.Status == "closed" {
+	if lUser.Status == "closed" {
 		return nil, errors.New("invalid credentials")
 	}
 
-	if user.Status == "blocked" {
+	if lUser.Status == "blocked" {
 		return nil, errors.New("account blocked")
 	}
 
-	access, refresh, err := utils.GenerateTokens(user.ID, user.Role)
-	if err != nil {
-		zap.L().Error("Token generation failed", zap.Error(err))
+	lAccess, lRefresh, lErr := utils.GenerateTokens(lUser.ID, lUser.Role)
+	if lErr != nil {
+		zap.L().Error("Token generation failed", zap.Error(lErr))
 		return nil, errors.New("internal server error")
 	}
 
-	session := &userpkg.Session{
-		UserID:       user.ID,
-		AccessToken:  access,
-		RefreshToken: refresh,
+	lSession := &userpkg.Session{
+		UserID:       lUser.ID,
+		AccessToken:  lAccess,
+		RefreshToken: lRefresh,
 		ExpiresAt:    time.Now().Add(time.Duration(config.App.JWT.ExpirationHours) * time.Hour * 24 * 7),
-		IPAddress:    ip,
-		UserAgent:    userAgent,
+		IPAddress:    pIP,
+		UserAgent:    pUserAgent,
 	}
 
-	if err := s.repo.CreateSession(session); err != nil {
-		zap.L().Error("Failed to save session", zap.Error(err))
+	if lErr := pService.repo.CreateSession(lSession); lErr != nil {
+		zap.L().Error("Failed to save session", zap.Error(lErr))
 		return nil, errors.New("internal server error")
 	}
 
-	userResp, err := s.GetMe(user.ID.String())
-	if err != nil {
+	lUserResp, lErr := pService.GetMe(lUser.ID.String())
+	if lErr != nil {
 		return nil, errors.New("failed to fetch user details")
 	}
 
 	return &LoginResponse{
-		AccessToken:  access,
-		RefreshToken: refresh,
-		User:         userResp,
+		AccessToken:  lAccess,
+		RefreshToken: lRefresh,
+		User:         lUserResp,
 	}, nil
 }
 
-func (s *authService) GetMe(userID string) (*UserResponse, error) {
-	user, err := s.repo.GetUserByID(userID)
-	if err != nil {
+func (pService *authService) GetMe(pUserID string) (*UserResponse, error) {
+	lUser, lErr := pService.repo.GetUserByID(pUserID)
+	if lErr != nil {
 		return nil, errors.New("user not found")
 	}
 
-	banks, _ := s.repo.GetUserBanks(userID)
+	lBanks, _ := pService.repo.GetUserBanks(pUserID)
 
-	var bankDTOs []profile.BankAccountDTO
-	for _, b := range banks {
-		bankDTOs = append(bankDTOs, profile.BankAccountDTO{
-			AccountType:   b.AccountType,
-			IFSC:          b.IFSC,
-			BankName:      b.BankName,
-			Branch:        b.Branch,
-			AccountNumber: b.AccountNumber,
+	var lBankDTOs []profile.BankAccountDTO
+	for _, lBank := range lBanks {
+		lBankDTOs = append(lBankDTOs, profile.BankAccountDTO{
+			AccountType:   lBank.AccountType,
+			IFSC:          lBank.IFSC,
+			BankName:      lBank.BankName,
+			Branch:        lBank.Branch,
+			AccountNumber: lBank.AccountNumber,
 		})
 	}
 
-	nominees, _ := s.repo.GetUserNominees(userID)
-	var nomineeDTOs []profile.NomineeDTO
-	for _, n := range nominees {
-		nomineeDTOs = append(nomineeDTOs, profile.NomineeDTO{
-			Name:                 n.Name,
-			DOB:                  n.DOB,
-			PAN:                  n.PAN,
-			Relationship:         n.Relationship,
-			Percentage:           n.Percentage,
-			GuardianName:         n.GuardianName,
-			GuardianRelationship: n.GuardianRelationship,
-			GuardianPAN:          n.GuardianPAN,
-			GuardianDOB:          n.GuardianDOB,
+	lNominees, _ := pService.repo.GetUserNominees(pUserID)
+	var lNomineeDTOs []profile.NomineeDTO
+	for _, lNominee := range lNominees {
+		lNomineeDTOs = append(lNomineeDTOs, profile.NomineeDTO{
+			Name:                 lNominee.Name,
+			DOB:                  lNominee.DOB,
+			PAN:                  lNominee.PAN,
+			Relationship:         lNominee.Relationship,
+			Percentage:           lNominee.Percentage,
+			GuardianName:         lNominee.GuardianName,
+			GuardianRelationship: lNominee.GuardianRelationship,
+			GuardianPAN:          lNominee.GuardianPAN,
+			GuardianDOB:          lNominee.GuardianDOB,
 		})
 	}
 
-	pd, _ := s.repo.GetUserPersonalDetails(userID)
-	if pd == nil {
-		pd = &userpkg.PersonalDetails{}
+	lPD, _ := pService.repo.GetUserPersonalDetails(pUserID)
+	if lPD == nil {
+		lPD = &userpkg.PersonalDetails{}
 	}
 
 	return &UserResponse{
-		ID:           user.ID.String(),
-		Name:         user.Name,
-		Email:        user.Email,
-		Mobile:       user.Mobile,
-		Role:         user.Role,
-		Status:       user.Status,
-		DOB:          user.DOB.Format("2006-01-02"),
-		Address:      pd.Address,
-		PAN:          user.PAN,
-		Aadhaar:      user.Aadhaar,
-		IncomeRange:  user.IncomeRange,
-		Occupation:   user.Occupation,
-		IPVPhoto:     user.IPVPhoto,
-		IPVLatitude:  user.IPVLatitude,
-		IPVLongitude: user.IPVLongitude,
-		FatherName:   pd.FatherName,
-		MotherName:   pd.MotherName,
-		Country:      pd.Country,
-		State:        pd.State,
-		City:         pd.City,
-		Pincode:      pd.Pincode,
-		BankAccounts: bankDTOs,
-		Nominees:     nomineeDTOs,
+		ID:           lUser.ID.String(),
+		Name:         lUser.Name,
+		Email:        lUser.Email,
+		Mobile:       lUser.Mobile,
+		Role:         lUser.Role,
+		Status:       lUser.Status,
+		DOB:          lUser.DOB.Format("2006-01-02"),
+		Address:      lPD.Address,
+		PAN:          lUser.PAN,
+		Aadhaar:      lUser.Aadhaar,
+		IncomeRange:  lUser.IncomeRange,
+		Occupation:   lUser.Occupation,
+		IPVPhoto:     lUser.IPVPhoto,
+		IPVLatitude:  lUser.IPVLatitude,
+		IPVLongitude: lUser.IPVLongitude,
+		FatherName:   lPD.FatherName,
+		MotherName:   lPD.MotherName,
+		Country:      lPD.Country,
+		State:        lPD.State,
+		City:         lPD.City,
+		Pincode:      lPD.Pincode,
+		BankAccounts: lBankDTOs,
+		Nominees:     lNomineeDTOs,
 	}, nil
 }
 
@@ -381,113 +381,113 @@ func generateCryptoToken() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func (s *authService) ForgotPassword(req ForgotPasswordRequest) (string, error) {
-	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
-	if req.Email == "" {
+func (pService *authService) ForgotPassword(pReq ForgotPasswordRequest) (string, error) {
+	pReq.Email = strings.TrimSpace(strings.ToLower(pReq.Email))
+	if pReq.Email == "" {
 		return "", errors.New("Email is required")
 	}
 
-	u, err := s.repo.GetUserByEmail(req.Email)
-	if err != nil {
+	lUser, lErr := pService.repo.GetUserByEmail(pReq.Email)
+	if lErr != nil {
 		// As per security best practices, do not reveal if email exists.
 		return "", nil 
 	}
 
-	tokenStr, err := generateCryptoToken()
-	if err != nil {
+	lTokenStr, lErr := generateCryptoToken()
+	if lErr != nil {
 		return "", errors.New("failed to generate reset token")
 	}
 
-	resetToken := &userpkg.PasswordResetToken{
-		UserID:    u.ID,
-		Token:     tokenStr,
+	lResetToken := &userpkg.PasswordResetToken{
+		UserID:    lUser.ID,
+		Token:     lTokenStr,
 		ExpiresAt: time.Now().Add(15 * time.Minute),
 	}
 
-	if err := s.repo.CreatePasswordResetToken(resetToken); err != nil {
+	if lErr := pService.repo.CreatePasswordResetToken(lResetToken); lErr != nil {
 		return "", errors.New("failed to save reset token")
 	}
 
 	// Returning the token here to mock the email sending process
-	return tokenStr, nil
+	return lTokenStr, nil
 }
 
-func (s *authService) VerifyResetToken(req VerifyResetTokenRequest) error {
-	tokenStr := strings.TrimSpace(req.Token)
-	if tokenStr == "" {
+func (pService *authService) VerifyResetToken(pReq VerifyResetTokenRequest) error {
+	lTokenStr := strings.TrimSpace(pReq.Token)
+	if lTokenStr == "" {
 		return errors.New("Token is required")
 	}
 
-	token, err := s.repo.GetPasswordResetToken(tokenStr)
-	if err != nil {
+	lToken, lErr := pService.repo.GetPasswordResetToken(lTokenStr)
+	if lErr != nil {
 		return errors.New("invalid or expired token")
 	}
 
-	if time.Now().After(token.ExpiresAt) {
-		s.repo.DeletePasswordResetToken(tokenStr)
+	if time.Now().After(lToken.ExpiresAt) {
+		pService.repo.DeletePasswordResetToken(lTokenStr)
 		return errors.New("invalid or expired token")
 	}
 
 	return nil
 }
 
-func (s *authService) ResetPassword(req ResetPasswordRequest) error {
-	if err := s.VerifyResetToken(VerifyResetTokenRequest{Token: req.Token}); err != nil {
-		return err
+func (pService *authService) ResetPassword(pReq ResetPasswordRequest) error {
+	if lErr := pService.VerifyResetToken(VerifyResetTokenRequest{Token: pReq.Token}); lErr != nil {
+		return lErr
 	}
 
-	token, _ := s.repo.GetPasswordResetToken(req.Token)
+	lToken, _ := pService.repo.GetPasswordResetToken(pReq.Token)
 
 	// Validate Password complexity
-	if len(req.Password) < 8 {
+	if len(pReq.Password) < 8 {
 		return errors.New("password must be at least 8 characters long")
 	}
-	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(req.Password)
-	hasLower := regexp.MustCompile(`[a-z]`).MatchString(req.Password)
-	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(req.Password)
-	hasSpecial := regexp.MustCompile(`[\W_]`).MatchString(req.Password)
+	lHasUpper := regexp.MustCompile(`[A-Z]`).MatchString(pReq.Password)
+	lHasLower := regexp.MustCompile(`[a-z]`).MatchString(pReq.Password)
+	lHasDigit := regexp.MustCompile(`[0-9]`).MatchString(pReq.Password)
+	lHasSpecial := regexp.MustCompile(`[\W_]`).MatchString(pReq.Password)
 
-	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+	if !lHasUpper || !lHasLower || !lHasDigit || !lHasSpecial {
 		return errors.New("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 	}
 
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
+	lHashedPassword, lErr := utils.HashPassword(pReq.Password)
+	if lErr != nil {
 		return errors.New("internal server error")
 	}
 
-	if err := s.repo.UpdatePassword(token.UserID.String(), hashedPassword); err != nil {
+	if lErr := pService.repo.UpdatePassword(lToken.UserID.String(), lHashedPassword); lErr != nil {
 		return errors.New("failed to reset password")
 	}
 
 	// Invalidate the token
-	s.repo.DeletePasswordResetToken(req.Token)
+	pService.repo.DeletePasswordResetToken(pReq.Token)
     
 	// invalidate all existing sessions
-	s.repo.DeleteAllSessions(token.UserID.String())
+	pService.repo.DeleteAllSessions(lToken.UserID.String())
 
 	return nil
 }
 
-func (s *authService) GetActiveSessions(userID string, currentToken string) ([]SessionDTO, error) {
-	sessions, err := s.repo.GetSessionsByUserID(userID)
-	if err != nil {
-		return nil, err
+func (pService *authService) GetActiveSessions(pUserID string, pCurrentToken string) ([]SessionDTO, error) {
+	lSessions, lErr := pService.repo.GetSessionsByUserID(pUserID)
+	if lErr != nil {
+		return nil, lErr
 	}
 
-	var dtos []SessionDTO
-	for _, session := range sessions {
-		dtos = append(dtos, SessionDTO{
-			ID:        session.ID.String(),
-			IPAddress: session.IPAddress,
-			UserAgent: session.UserAgent,
-			CreatedAt: session.CreatedAt.Format("2006-01-02 15:04:05"),
-			IsCurrent: session.AccessToken == currentToken,
+	var lDTOs []SessionDTO
+	for _, lSession := range lSessions {
+		lDTOs = append(lDTOs, SessionDTO{
+			ID:        lSession.ID.String(),
+			IPAddress: lSession.IPAddress,
+			UserAgent: lSession.UserAgent,
+			CreatedAt: lSession.CreatedAt.Format("2006-01-02 15:04:05"),
+			IsCurrent: lSession.AccessToken == pCurrentToken,
 		})
 	}
-	return dtos, nil
+	return lDTOs, nil
 }
 
-func (s *authService) RevokeSession(sessionID string) error {
-	return s.repo.DeleteSessionByID(sessionID)
+func (pService *authService) RevokeSession(pSessionID string) error {
+	return pService.repo.DeleteSessionByID(pSessionID)
 }

@@ -18,41 +18,41 @@ func NewWatchlistService(repo *WatchlistRepository) *WatchlistService {
 	return &WatchlistService{repo: repo}
 }
 
-func (s *WatchlistService) AddStock(userID string, req AddWatchlistRequest) error {
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		return err
+func (pService *WatchlistService) AddStock(pUserID string, pReq AddWatchlistRequest) error {
+	lUserUUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
+		return lErr
 	}
-	shareUUID, err := uuid.Parse(req.StockID)
-	if err != nil {
-		return err
+	lShareUUID, lErr := uuid.Parse(pReq.StockID)
+	if lErr != nil {
+		return lErr
 	}
 
-	watchlist := &Watchlist{
-		UserID:  userUUID,
-		ShareID: shareUUID,
+	lWatchlist := &Watchlist{
+		UserID:  lUserUUID,
+		ShareID: lShareUUID,
 	}
 	
-	err = s.repo.Create(watchlist)
-	if err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) || strings.Contains(err.Error(), "idx_user_share") || strings.Contains(err.Error(), "duplicate key value") {
+	lErr = pService.repo.Create(lWatchlist)
+	if lErr != nil {
+		if errors.Is(lErr, gorm.ErrDuplicatedKey) || strings.Contains(lErr.Error(), "idx_user_share") || strings.Contains(lErr.Error(), "duplicate key value") {
 			return errors.New("Stock already in watchlist")
 		}
-		return err
+		return lErr
 	}
 	return nil
 }
 
-func (s *WatchlistService) RemoveStock(userID string, id string) error {
-	return s.repo.Delete(id, userID)
+func (pService *WatchlistService) RemoveStock(pUserID string, pID string) error {
+	return pService.repo.Delete(pID, pUserID)
 }
 
-func (s *WatchlistService) UpdateFavorite(userID string, id string, isFavorite bool) error {
-	return s.repo.UpdateFavorite(id, userID, isFavorite)
+func (pService *WatchlistService) UpdateFavorite(pUserID string, pID string, pIsFavorite bool) error {
+	return pService.repo.UpdateFavorite(pID, pUserID, pIsFavorite)
 }
 
-func (s *WatchlistService) GetUserWatchlist(userID string) ([]WatchlistResponse, error) {
+func (pService *WatchlistService) GetUserWatchlist(pUserID string) ([]WatchlistResponse, error) {
 	// Let's implement joining in repository, or do it here with db.
 	// We will create a specific query in the repo for this to keep it clean.
-	return s.repo.GetUserWatchlistWithDetails(userID)
+	return pService.repo.GetUserWatchlistWithDetails(pUserID)
 }

@@ -16,90 +16,90 @@ func NewAdminController() *AdminController {
 	return &AdminController{svc: NewAdminService()}
 }
 
-func (c *AdminController) GetUsers(ctx *gin.Context) {
-	users, err := c.svc.GetUsers()
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to fetch users", err.Error())
+func (pController *AdminController) GetUsers(pContext *gin.Context) {
+	lUsers, lErr := pController.svc.GetUsers()
+	if lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to fetch users", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "Users retrieved", users)
+	response.Success(pContext, http.StatusOK, "Users retrieved", lUsers)
 }
 
-func (c *AdminController) GetUserDetails(ctx *gin.Context) {
-	id := ctx.Param("id")
-	userDetails, err := c.svc.GetUserDetails(id)
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to fetch user details", err.Error())
+func (pController *AdminController) GetUserDetails(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	lUserDetails, lErr := pController.svc.GetUserDetails(lID)
+	if lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to fetch user details", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "User details retrieved", userDetails)
+	response.Success(pContext, http.StatusOK, "User details retrieved", lUserDetails)
 }
 
-func (c *AdminController) ApproveUser(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := c.svc.ApproveUser(id); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to approve user", err.Error())
+func (pController *AdminController) ApproveUser(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	if lErr := pController.svc.ApproveUser(lID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to approve user", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "User approved", nil)
+	response.Success(pContext, http.StatusOK, "User approved", nil)
 }
 
-func (c *AdminController) RejectUser(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := c.svc.RejectUser(id); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to reject user", err.Error())
+func (pController *AdminController) RejectUser(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	if lErr := pController.svc.RejectUser(lID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to reject user", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "User rejected", nil)
+	response.Success(pContext, http.StatusOK, "User rejected", nil)
 }
 
-func (c *AdminController) BlockUser(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := c.svc.BlockUser(id); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to block user", err.Error())
+func (pController *AdminController) BlockUser(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	if lErr := pController.svc.BlockUser(lID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to block user", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "User blocked", nil)
+	response.Success(pContext, http.StatusOK, "User blocked", nil)
 }
 
-func (c *AdminController) CloseAccount(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := c.svc.CloseAccount(id); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to close account", err.Error())
+func (pController *AdminController) CloseAccount(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	if lErr := pController.svc.CloseAccount(lID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to close account", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "Account closed successfully", nil)
+	response.Success(pContext, http.StatusOK, "Account closed successfully", nil)
 }
 
-func (c *AdminController) RejectClosure(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := c.svc.RejectClosure(id); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to reject closure", err.Error())
+func (pController *AdminController) RejectClosure(pContext *gin.Context) {
+	lID := pContext.Param("id")
+	if lErr := pController.svc.RejectClosure(lID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to reject closure", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "Account closure rejected", nil)
+	response.Success(pContext, http.StatusOK, "Account closure rejected", nil)
 }
 
-func (c *AdminController) UploadShares(ctx *gin.Context) {
-	file, _, err := ctx.Request.FormFile("file")
-	if err != nil {
-		response.Error(ctx, http.StatusBadRequest, "UPLOAD_ERROR", "Failed to parse file", err.Error())
+func (pController *AdminController) UploadShares(pContext *gin.Context) {
+	lFile, _, lErr := pContext.Request.FormFile("file")
+	if lErr != nil {
+		response.Error(pContext, http.StatusBadRequest, "UPLOAD_ERROR", "Failed to parse file", lErr.Error())
 		return
 	}
-	defer file.Close()
+	defer lFile.Close()
 
-	if err := c.svc.UploadShares(file); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "UPLOAD_ERROR", "Failed to process shares upload", err.Error())
+	if lErr := pController.svc.UploadShares(lFile); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "UPLOAD_ERROR", "Failed to process shares upload", lErr.Error())
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Shares uploaded successfully", nil)
+	response.Success(pContext, http.StatusOK, "Shares uploaded successfully", nil)
 }
 
-func (c *AdminController) DeleteAllShares(ctx *gin.Context) {
-	if err := c.svc.DeleteAllShares(); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to delete shares", err.Error())
+func (pController *AdminController) DeleteAllShares(pContext *gin.Context) {
+	if lErr := pController.svc.DeleteAllShares(); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to delete shares", lErr.Error())
 		return
 	}
-	response.Success(ctx, http.StatusOK, "All shares deleted successfully", nil)
+	response.Success(pContext, http.StatusOK, "All shares deleted successfully", nil)
 }

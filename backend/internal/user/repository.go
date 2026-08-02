@@ -37,114 +37,114 @@ func NewUserRepository() UserRepository {
 	return &userRepository{db: database.DB}
 }
 
-func (r *userRepository) CreateUser(user *User) error {
-	return r.db.Create(user).Error
+func (pRepo *userRepository) CreateUser(pUser *User) error {
+	return pRepo.db.Create(pUser).Error
 }
 
-func (r *userRepository) GetUserByEmail(email string) (*User, error) {
-	var user User
-	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, err
+func (pRepo *userRepository) GetUserByEmail(pEmail string) (*User, error) {
+	var lUser User
+	if lErr := pRepo.db.Where("email = ?", pEmail).First(&lUser).Error; lErr != nil {
+		return nil, lErr
 	}
-	return &user, nil
+	return &lUser, nil
 }
 
-func (r *userRepository) GetUserByMobile(mobile string) (*User, error) {
-	var user User
-	if err := r.db.Where("mobile = ?", mobile).First(&user).Error; err != nil {
-		return nil, err
+func (pRepo *userRepository) GetUserByMobile(pMobile string) (*User, error) {
+	var lUser User
+	if lErr := pRepo.db.Where("mobile = ?", pMobile).First(&lUser).Error; lErr != nil {
+		return nil, lErr
 	}
-	return &user, nil
+	return &lUser, nil
 }
 
-func (r *userRepository) GetUserByPAN(pan string) (*User, error) {
-	var user User
-	if err := r.db.Where("pan = ?", pan).First(&user).Error; err != nil {
-		return nil, err
+func (pRepo *userRepository) GetUserByPAN(pPan string) (*User, error) {
+	var lUser User
+	if lErr := pRepo.db.Where("pan = ?", pPan).First(&lUser).Error; lErr != nil {
+		return nil, lErr
 	}
-	return &user, nil
+	return &lUser, nil
 }
 
-func (r *userRepository) GetUserByAadhaar(aadhaar string) (*User, error) {
-	var user User
-	if err := r.db.Where("aadhaar = ?", aadhaar).First(&user).Error; err != nil {
-		return nil, err
+func (pRepo *userRepository) GetUserByAadhaar(pAadhaar string) (*User, error) {
+	var lUser User
+	if lErr := pRepo.db.Where("aadhaar = ?", pAadhaar).First(&lUser).Error; lErr != nil {
+		return nil, lErr
 	}
-	return &user, nil
+	return &lUser, nil
 }
 
-func (r *userRepository) GetUserByID(id string) (*User, error) {
-	var user User
-	err := r.db.Where("id = ?", id).First(&user).Error
-	return &user, err
+func (pRepo *userRepository) GetUserByID(pID string) (*User, error) {
+	var lUser User
+	lErr := pRepo.db.Where("id = ?", pID).First(&lUser).Error
+	return &lUser, lErr
 }
 
-func (r *userRepository) GetUserBanks(userID string) ([]BankDetails, error) {
-	var banks []BankDetails
-	err := r.db.Where("user_id = ?", userID).Find(&banks).Error
-	return banks, err
+func (pRepo *userRepository) GetUserBanks(pUserID string) ([]BankDetails, error) {
+	var lBanks []BankDetails
+	lErr := pRepo.db.Where("user_id = ?", pUserID).Find(&lBanks).Error
+	return lBanks, lErr
 }
 
-func (r *userRepository) GetUserNominees(userID string) ([]NomineeDetails, error) {
-	var nominees []NomineeDetails
-	err := r.db.Where("user_id = ?", userID).Find(&nominees).Error
-	return nominees, err
+func (pRepo *userRepository) GetUserNominees(pUserID string) ([]NomineeDetails, error) {
+	var lNominees []NomineeDetails
+	lErr := pRepo.db.Where("user_id = ?", pUserID).Find(&lNominees).Error
+	return lNominees, lErr
 }
 
-func (r *userRepository) GetUserPersonalDetails(userID string) (*PersonalDetails, error) {
-	var pd PersonalDetails
-	err := r.db.Where("user_id = ?", userID).First(&pd).Error
-	return &pd, err
+func (pRepo *userRepository) GetUserPersonalDetails(pUserID string) (*PersonalDetails, error) {
+	var lPd PersonalDetails
+	lErr := pRepo.db.Where("user_id = ?", pUserID).First(&lPd).Error
+	return &lPd, lErr
 }
 
-func (r *userRepository) CreateSession(session *Session) error {
-	return r.db.Create(session).Error
+func (pRepo *userRepository) CreateSession(pSession *Session) error {
+	return pRepo.db.Create(pSession).Error
 }
 
-func (r *userRepository) GetSessionByRefreshToken(token string) (*Session, error) {
-	var session Session
-	err := r.db.Where("refresh_token = ?", token).First(&session).Error
-	return &session, err
+func (pRepo *userRepository) GetSessionByRefreshToken(pToken string) (*Session, error) {
+	var lSession Session
+	lErr := pRepo.db.Where("refresh_token = ?", pToken).First(&lSession).Error
+	return &lSession, lErr
 }
 
-func (r *userRepository) DeleteSession(token string) error {
-	return r.db.Where("refresh_token = ?", token).Delete(&Session{}).Error
+func (pRepo *userRepository) DeleteSession(pToken string) error {
+	return pRepo.db.Where("refresh_token = ?", pToken).Delete(&Session{}).Error
 }
 
-func (r *userRepository) DeleteAllSessions(userID string) error {
-	return r.db.Where("user_id = ?", userID).Delete(&Session{}).Error
+func (pRepo *userRepository) DeleteAllSessions(pUserID string) error {
+	return pRepo.db.Where("user_id = ?", pUserID).Delete(&Session{}).Error
 }
 
-func (r *userRepository) GetSessionsByUserID(userID string) ([]Session, error) {
-	var sessions []Session
-	err := r.db.Where("user_id = ?", userID).Find(&sessions).Error
-	return sessions, err
+func (pRepo *userRepository) GetSessionsByUserID(pUserID string) ([]Session, error) {
+	var lSessions []Session
+	lErr := pRepo.db.Where("user_id = ?", pUserID).Find(&lSessions).Error
+	return lSessions, lErr
 }
 
-func (r *userRepository) DeleteSessionByID(sessionID string) error {
-	return r.db.Where("id = ?", sessionID).Delete(&Session{}).Error
+func (pRepo *userRepository) DeleteSessionByID(pSessionID string) error {
+	return pRepo.db.Where("id = ?", pSessionID).Delete(&Session{}).Error
 }
 
-func (r *userRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
-	return r.db.Transaction(fn)
+func (pRepo *userRepository) RunInTransaction(pFn func(pTx *gorm.DB) error) error {
+	return pRepo.db.Transaction(pFn)
 }
 
-func (r *userRepository) CreatePasswordResetToken(token *PasswordResetToken) error {
-	return r.db.Create(token).Error
+func (pRepo *userRepository) CreatePasswordResetToken(pToken *PasswordResetToken) error {
+	return pRepo.db.Create(pToken).Error
 }
 
-func (r *userRepository) GetPasswordResetToken(tokenStr string) (*PasswordResetToken, error) {
-	var token PasswordResetToken
-	if err := r.db.Where("token = ?", tokenStr).First(&token).Error; err != nil {
-		return nil, err
+func (pRepo *userRepository) GetPasswordResetToken(pTokenStr string) (*PasswordResetToken, error) {
+	var lToken PasswordResetToken
+	if lErr := pRepo.db.Where("token = ?", pTokenStr).First(&lToken).Error; lErr != nil {
+		return nil, lErr
 	}
-	return &token, nil
+	return &lToken, nil
 }
 
-func (r *userRepository) DeletePasswordResetToken(tokenStr string) error {
-	return r.db.Where("token = ?", tokenStr).Delete(&PasswordResetToken{}).Error
+func (pRepo *userRepository) DeletePasswordResetToken(pTokenStr string) error {
+	return pRepo.db.Where("token = ?", pTokenStr).Delete(&PasswordResetToken{}).Error
 }
 
-func (r *userRepository) UpdatePassword(userID string, hashedPassword string) error {
-	return r.db.Model(&User{}).Where("id = ?", userID).Update("password_hash", hashedPassword).Error
+func (pRepo *userRepository) UpdatePassword(pUserID string, pHashedPassword string) error {
+	return pRepo.db.Model(&User{}).Where("id = ?", pUserID).Update("password_hash", pHashedPassword).Error
 }

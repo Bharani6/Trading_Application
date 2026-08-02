@@ -40,98 +40,98 @@ func NewTradeService(repo TradeRepository, walletRepo wallet.WalletRepository, m
 }
 
 func IsMarketOpen() bool {
-	loc, err := time.LoadLocation("Asia/Kolkata")
-	if err != nil {
-		loc = time.FixedZone("IST", 5*3600+1800)
+	lLoc, lErr := time.LoadLocation("Asia/Kolkata")
+	if lErr != nil {
+		lLoc = time.FixedZone("IST", 5*3600+1800)
 	}
-	now := time.Now().In(loc)
+	lNow := time.Now().In(lLoc)
 
-	if now.Weekday() == time.Saturday || now.Weekday() == time.Sunday {
+	if lNow.Weekday() == time.Saturday || lNow.Weekday() == time.Sunday {
 		return false
 	}
 
-	hour := now.Hour()
-	min := now.Minute()
+	lHour := lNow.Hour()
+	lMin := lNow.Minute()
 
 	// Open between 9:00 and 15:30
-	if (hour > 9 || (hour == 9 && min >= 0)) && (hour < 15 || (hour == 15 && min <= 30)) {
+	if (lHour > 9 || (lHour == 9 && lMin >= 0)) && (lHour < 15 || (lHour == 15 && lMin <= 30)) {
 		return true
 	}
 	return false
 }
 
-func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
-	shares, err := s.repo.GetAllShares(search)
-	if err != nil {
+func (pService *tradeService) GetAllShares(pSearch string) ([]ShareResponse, error) {
+	lShares, lErr := pService.repo.GetAllShares(pSearch)
+	if lErr != nil {
 		return nil, errors.New("failed to retrieve shares")
 	}
 
 	// Trigger dynamic market search if a search query is provided
-	if search != "" {
-		if results, err := s.marketDataService.SearchSymbol(search); err == nil && len(results) > 0 {
-			var newSymbols []string
-			for _, res := range results {
-				newSymbols = append(newSymbols, res.Symbol)
+	if pSearch != "" {
+		if lResults, lErr := pService.marketDataService.SearchSymbol(pSearch); lErr == nil && len(lResults) > 0 {
+			var lNewSymbols []string
+			for _, lRes := range lResults {
+				lNewSymbols = append(lNewSymbols, lRes.Symbol)
 			}
 			// Fetch prices for the newly discovered symbols
-			prices, err := s.marketDataService.GetLatestPrices(newSymbols)
-			if err == nil {
+			lPrices, lErr := pService.marketDataService.GetLatestPrices(lNewSymbols)
+			if lErr == nil {
 				// Initialize the segments
-				nseSeg := &Segment{Name: "NSE"}
-				s.repo.FirstOrCreateSegment(nseSeg)
+				lNseSeg := &Segment{Name: "NSE"}
+				pService.repo.FirstOrCreateSegment(lNseSeg)
 				
-				nasdaqSeg := &Segment{Name: "NASDAQ"}
-				s.repo.FirstOrCreateSegment(nasdaqSeg)
+				lNasdaqSeg := &Segment{Name: "NASDAQ"}
+				pService.repo.FirstOrCreateSegment(lNasdaqSeg)
 				
-				bseSeg := &Segment{Name: "BSE"}
-				s.repo.FirstOrCreateSegment(bseSeg)
+				lBseSeg := &Segment{Name: "BSE"}
+				pService.repo.FirstOrCreateSegment(lBseSeg)
 				
-				for _, res := range results {
-					priceData := prices[res.Symbol]
+				for _, lRes := range lResults {
+					lPriceData := lPrices[lRes.Symbol]
 					
-					var segID uint
-					var seg Segment
+					var lSegID uint
+					var lSeg Segment
 					// Simple heuristic for segment
-					if len(res.Symbol) > 3 && res.Symbol[len(res.Symbol)-3:] == ".NS" {
-						segID = nseSeg.ID
-						seg = *nseSeg
-					} else if len(res.Symbol) > 3 && res.Symbol[len(res.Symbol)-3:] == ".BO" {
-						segID = bseSeg.ID
-						seg = *bseSeg
+					if len(lRes.Symbol) > 3 && lRes.Symbol[len(lRes.Symbol)-3:] == ".NS" {
+						lSegID = lNseSeg.ID
+						lSeg = *lNseSeg
+					} else if len(lRes.Symbol) > 3 && lRes.Symbol[len(lRes.Symbol)-3:] == ".BO" {
+						lSegID = lBseSeg.ID
+						lSeg = *lBseSeg
 					} else {
-						segID = nasdaqSeg.ID
-						seg = *nasdaqSeg
+						lSegID = lNasdaqSeg.ID
+						lSeg = *lNasdaqSeg
 					}
 					
-					newShare := &Share{
+					lNewShare := &Share{
 						ID:              uuid.New(),
-						Symbol:          res.Symbol,
-						Name:            res.LongName,
-						Price:           priceData.Current,
-						PreviousPrice:   priceData.Previous,
-						SegmentID:       segID,
+						Symbol:          lRes.Symbol,
+						Name:            lRes.LongName,
+						Price:           lPriceData.Current,
+						PreviousPrice:   lPriceData.Previous,
+						SegmentID:       lSegID,
 						TotalShares:     1000000,
 						AvailableShares: 1000000,
 					}
 					// If LongName is empty, fallback to ShortName
-					if newShare.Name == "" {
-						newShare.Name = res.ShortName
+					if lNewShare.Name == "" {
+						lNewShare.Name = lRes.ShortName
 					}
 					
 					// FirstOrCreateShare returns the DB record if it exists
-					if err := s.repo.FirstOrCreateShare(newShare); err == nil {
+					if lErr := pService.repo.FirstOrCreateShare(lNewShare); lErr == nil {
 						// Only append if it wasn't already in our local search results
-						alreadyExists := false
-						for _, existing := range shares {
-							if existing.Symbol == newShare.Symbol {
-								alreadyExists = true
+						lAlreadyExists := false
+						for _, lExisting := range lShares {
+							if lExisting.Symbol == lNewShare.Symbol {
+								lAlreadyExists = true
 								break
 							}
 						}
 						
-						if !alreadyExists {
-							newShare.Segment = seg
-							shares = append(shares, *newShare)
+						if !lAlreadyExists {
+							lNewShare.Segment = lSeg
+							lShares = append(lShares, *lNewShare)
 						}
 					}
 				}
@@ -139,284 +139,284 @@ func (s *tradeService) GetAllShares(search string) ([]ShareResponse, error) {
 		}
 	}
 
-	var res []ShareResponse
-	for _, share := range shares {
-		res = append(res, ShareResponse{
-			ID:              share.ID.String(),
-			Symbol:          share.Symbol,
-			Name:            share.Name,
-			Price:           share.Price,
-			PreviousPrice:   share.PreviousPrice,
-			Segment:         share.Segment.Name,
-			AvailableShares: share.AvailableShares,
+	var lRes []ShareResponse
+	for _, lShare := range lShares {
+		lRes = append(lRes, ShareResponse{
+			ID:              lShare.ID.String(),
+			Symbol:          lShare.Symbol,
+			Name:            lShare.Name,
+			Price:           lShare.Price,
+			PreviousPrice:   lShare.PreviousPrice,
+			Segment:         lShare.Segment.Name,
+			AvailableShares: lShare.AvailableShares,
 		})
 	}
-	return res, nil
+	return lRes, nil
 }
 
-func (s *tradeService) BuyShare(userID string, req TradeRequest, isPending bool) error {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+func (pService *tradeService) BuyShare(pUserID string, pReq TradeRequest, pIsPending bool) error {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user id")
 	}
 
-	u, err := s.userRepo.GetUserByID(userID)
-	if err != nil {
+	lU, lErr := pService.userRepo.GetUserByID(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user")
 	}
-	if u.Status == "closure_requested" {
+	if lU.Status == "closure_requested" {
 		return errors.New("account closure requested, trading not permitted")
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
 		// 1. Lock Share row
-		share, err := s.repo.GetShareForUpdate(tx, req.ShareID)
-		if err != nil {
+		lShare, lTxErr := pService.repo.GetShareForUpdate(pTx, pReq.ShareID)
+		if lTxErr != nil {
 			return errors.New("share not found")
 		}
 
-		if share.AvailableShares < req.Quantity {
+		if lShare.AvailableShares < pReq.Quantity {
 			return errors.New("insufficient shares available in market")
 		}
 
 		// 2. Lock Wallet row
-		wallet, err := s.walletRepo.GetWalletForUpdate(tx, userID)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+		lWallet, lTxErr := pService.walletRepo.GetWalletForUpdate(pTx, pUserID)
+		if lTxErr != nil {
+			if errors.Is(lTxErr, gorm.ErrRecordNotFound) {
 				return errors.New("insufficient wallet balance")
 			}
 			return errors.New("wallet not found")
 		}
 
-		totalCost := share.Price * float64(req.Quantity)
-		if wallet.AvailableBalance < totalCost {
+		lTotalCost := lShare.Price * float64(pReq.Quantity)
+		if lWallet.AvailableBalance < lTotalCost {
 			return errors.New("insufficient wallet balance")
 		}
 
 		// 3. Deduct from wallet
-		if isPending {
-			wallet.AvailableBalance -= totalCost
-			wallet.BlockedBalance += totalCost
+		if pIsPending {
+			lWallet.AvailableBalance -= lTotalCost
+			lWallet.BlockedBalance += lTotalCost
 		} else {
-			wallet.WalletBalance -= totalCost
-			wallet.AvailableBalance -= totalCost
+			lWallet.WalletBalance -= lTotalCost
+			lWallet.AvailableBalance -= lTotalCost
 		}
-		if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
-			return err
+		if lTxErr := pService.walletRepo.UpdateWalletWithVersion(pTx, lWallet); lTxErr != nil {
+			return lTxErr
 		}
 
 		// 4. Update share count (only if not pending)
-		if !isPending {
-			share.AvailableShares -= req.Quantity
-			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
-				return err
+		if !pIsPending {
+			lShare.AvailableShares -= pReq.Quantity
+			if lTxErr := pService.repo.UpdateShareWithVersion(pTx, lShare); lTxErr != nil {
+				return lTxErr
 			}
 		}
 
-		status := "completed"
-		if isPending {
-			status = "pending"
+		lStatus := "completed"
+		if pIsPending {
+			lStatus = "pending"
 		}
 
 		// 5. Record Transaction
-		transaction := &walletpkg.Transaction{
+		lTransaction := &walletpkg.Transaction{
 			ID:          uuid.New(),
-			UserID:      uID,
+			UserID:      lUID,
 			Type:        "trade_buy",
-			Amount:      totalCost,
+			Amount:      lTotalCost,
 			ReferenceID: fmt.Sprintf("BUY-%d", time.Now().UnixNano()),
-			Description: fmt.Sprintf("Bought %d shares of %s", req.Quantity, share.Symbol),
-			Status:      status,
+			Description: fmt.Sprintf("Bought %d shares of %s", pReq.Quantity, lShare.Symbol),
+			Status:      lStatus,
 		}
-		if err := s.walletRepo.CreateTransaction(tx, transaction); err != nil {
-			return err
+		if lTxErr := pService.walletRepo.CreateTransaction(pTx, lTransaction); lTxErr != nil {
+			return lTxErr
 		}
 
 		// 6. Record Trade
-		trade := &Trade{
+		lTrade := &Trade{
 			ID:       uuid.New(),
-			UserID:   uID,
-			ShareID:  share.ID,
-			Quantity: req.Quantity,
-			Price:    share.Price,
+			UserID:   lUID,
+			ShareID:  lShare.ID,
+			Quantity: pReq.Quantity,
+			Price:    lShare.Price,
 			Type:     "buy",
-			Status:   status,
+			Status:   lStatus,
 		}
-		return s.repo.CreateTrade(tx, trade)
+		return pService.repo.CreateTrade(pTx, lTrade)
 	})
 }
 
-func (s *tradeService) SellShare(userID string, req TradeRequest, isPending bool) error {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+func (pService *tradeService) SellShare(pUserID string, pReq TradeRequest, pIsPending bool) error {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user id")
 	}
 
-	u, err := s.userRepo.GetUserByID(userID)
-	if err != nil {
+	lU, lErr := pService.userRepo.GetUserByID(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user")
 	}
-	if u.Status == "closure_requested" {
+	if lU.Status == "closure_requested" {
 		return errors.New("account closure requested, trading not permitted")
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
 		// Basic check: Does user own enough of this share?
 		// In a real app we'd have a UserPortfolio table holding owned shares.
 		// For brevity, we assume the user owns it or we deduce from Trade history.
 		// Let's implement a quick aggregation to check owned quantity.
-		var ownedQty int64
+		var lOwnedQty int64
 		// SUM(buy) - SUM(sell completed) - SUM(sell pending)
 		type Result struct {
 			Total int64
 		}
-		var bought Result
-		tx.Model(&Trade{}).Select("COALESCE(SUM(quantity), 0) as total").Where("user_id = ? AND share_id = ? AND type = 'buy' AND status = 'completed'", userID, req.ShareID).Scan(&bought)
+		var lBought Result
+		pTx.Model(&Trade{}).Select("COALESCE(SUM(quantity), 0) as total").Where("user_id = ? AND share_id = ? AND type = 'buy' AND status = 'completed'", pUserID, pReq.ShareID).Scan(&lBought)
 
-		var sold Result
-		tx.Model(&Trade{}).Select("COALESCE(SUM(quantity), 0) as total").Where("user_id = ? AND share_id = ? AND type = 'sell' AND (status = 'completed' OR status = 'pending')", userID, req.ShareID).Scan(&sold)
+		var lSold Result
+		pTx.Model(&Trade{}).Select("COALESCE(SUM(quantity), 0) as total").Where("user_id = ? AND share_id = ? AND type = 'sell' AND (status = 'completed' OR status = 'pending')", pUserID, pReq.ShareID).Scan(&lSold)
 
-		ownedQty = bought.Total - sold.Total
-		if ownedQty < int64(req.Quantity) {
+		lOwnedQty = lBought.Total - lSold.Total
+		if lOwnedQty < int64(pReq.Quantity) {
 			return errors.New("insufficient owned shares (some may be locked in pending orders)")
 		}
 
 		// 1. Lock Share row
-		share, err := s.repo.GetShareForUpdate(tx, req.ShareID)
-		if err != nil {
+		lShare, lTxErr := pService.repo.GetShareForUpdate(pTx, pReq.ShareID)
+		if lTxErr != nil {
 			return errors.New("share not found")
 		}
 
 		// 2. Lock Wallet row
-		wallet, err := s.walletRepo.GetWalletForUpdate(tx, userID)
-		if err != nil {
+		lWallet, lTxErr := pService.walletRepo.GetWalletForUpdate(pTx, pUserID)
+		if lTxErr != nil {
 			return errors.New("wallet not found")
 		}
 
-		totalGain := share.Price * float64(req.Quantity)
+		lTotalGain := lShare.Price * float64(pReq.Quantity)
 
 		// 3. Add to wallet (only if completed)
-		if !isPending {
-			wallet.WalletBalance += totalGain
-			wallet.AvailableBalance += totalGain
-			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
-				return err
+		if !pIsPending {
+			lWallet.WalletBalance += lTotalGain
+			lWallet.AvailableBalance += lTotalGain
+			if lTxErr := pService.walletRepo.UpdateWalletWithVersion(pTx, lWallet); lTxErr != nil {
+				return lTxErr
 			}
 		}
 
 		// 4. Update share market count (only if completed)
-		if !isPending {
-			share.AvailableShares += req.Quantity
-			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
-				return err
+		if !pIsPending {
+			lShare.AvailableShares += pReq.Quantity
+			if lTxErr := pService.repo.UpdateShareWithVersion(pTx, lShare); lTxErr != nil {
+				return lTxErr
 			}
 		}
 
-		status := "completed"
-		if isPending {
-			status = "pending"
+		lStatus := "completed"
+		if pIsPending {
+			lStatus = "pending"
 		}
 
 		// 5. Record Transaction
-		transaction := &walletpkg.Transaction{
+		lTransaction := &walletpkg.Transaction{
 			ID:          uuid.New(),
-			UserID:      uID,
+			UserID:      lUID,
 			Type:        "trade_sell",
-			Amount:      totalGain,
+			Amount:      lTotalGain,
 			ReferenceID: fmt.Sprintf("SELL-%d", time.Now().UnixNano()),
-			Description: fmt.Sprintf("Sold %d shares of %s", req.Quantity, share.Symbol),
-			Status:      status,
+			Description: fmt.Sprintf("Sold %d shares of %s", pReq.Quantity, lShare.Symbol),
+			Status:      lStatus,
 		}
-		if err := s.walletRepo.CreateTransaction(tx, transaction); err != nil {
-			return err
+		if lTxErr := pService.walletRepo.CreateTransaction(pTx, lTransaction); lTxErr != nil {
+			return lTxErr
 		}
 
 		// 6. Record Trade
-		trade := &Trade{
+		lTrade := &Trade{
 			ID:       uuid.New(),
-			UserID:   uID,
-			ShareID:  share.ID,
-			Quantity: req.Quantity,
-			Price:    share.Price,
+			UserID:   lUID,
+			ShareID:  lShare.ID,
+			Quantity: pReq.Quantity,
+			Price:    lShare.Price,
 			Type:     "sell",
-			Status:   status,
+			Status:   lStatus,
 		}
-		return s.repo.CreateTrade(tx, trade)
+		return pService.repo.CreateTrade(pTx, lTrade)
 	})
 }
 
-func (s *tradeService) GetUserTrades(userID string) ([]Trade, error) {
-	return s.repo.GetTradesByUser(userID)
+func (pService *tradeService) GetUserTrades(pUserID string) ([]Trade, error) {
+	return pService.repo.GetTradesByUser(pUserID)
 }
 
-func (s *tradeService) ExecutePendingTrades() error {
+func (pService *tradeService) ExecutePendingTrades() error {
 	if !IsMarketOpen() {
 		return nil
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		var pendingTrades []Trade
-		if err := tx.Where("status = ?", "pending").Find(&pendingTrades).Error; err != nil {
-			return err
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		var lPendingTrades []Trade
+		if lTxErr := pTx.Where("status = ?", "pending").Find(&lPendingTrades).Error; lTxErr != nil {
+			return lTxErr
 		}
 
-		for _, trade := range pendingTrades {
+		for _, lTrade := range lPendingTrades {
 			// Lock Share
-			share, err := s.repo.GetShareForUpdate(tx, trade.ShareID.String())
-			if err != nil {
+			lShare, lErr := pService.repo.GetShareForUpdate(pTx, lTrade.ShareID.String())
+			if lErr != nil {
 				continue
 			}
 
 			// Lock Wallet
-			wallet, err := s.walletRepo.GetWalletForUpdate(tx, trade.UserID.String())
-			if err != nil {
+			lWallet, lErr := pService.walletRepo.GetWalletForUpdate(pTx, lTrade.UserID.String())
+			if lErr != nil {
 				continue
 			}
 
-			if trade.Type == "buy" {
-				totalCost := trade.Price * float64(trade.Quantity)
+			if lTrade.Type == "buy" {
+				lTotalCost := lTrade.Price * float64(lTrade.Quantity)
 				// Re-verify market has shares
-				if share.AvailableShares < trade.Quantity {
+				if lShare.AvailableShares < lTrade.Quantity {
 					continue // Still not enough shares, leave as pending or fail
 				}
 
 				// Finalize wallet deduction
-				wallet.BlockedBalance -= totalCost
-				wallet.WalletBalance -= totalCost
+				lWallet.BlockedBalance -= lTotalCost
+				lWallet.WalletBalance -= lTotalCost
 
 				// Update market shares
-				share.AvailableShares -= trade.Quantity
-			} else if trade.Type == "sell" {
-				totalGain := trade.Price * float64(trade.Quantity)
+				lShare.AvailableShares -= lTrade.Quantity
+			} else if lTrade.Type == "sell" {
+				lTotalGain := lTrade.Price * float64(lTrade.Quantity)
 
 				// Finalize wallet addition
-				wallet.WalletBalance += totalGain
-				wallet.AvailableBalance += totalGain
+				lWallet.WalletBalance += lTotalGain
+				lWallet.AvailableBalance += lTotalGain
 
 				// Update market shares
-				share.AvailableShares += trade.Quantity
+				lShare.AvailableShares += lTrade.Quantity
 			}
 
 			// Update records
-			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
+			if lErr := pService.walletRepo.UpdateWalletWithVersion(pTx, lWallet); lErr != nil {
 				continue
 			}
-			if err := s.repo.UpdateShareWithVersion(tx, share); err != nil {
+			if lErr := pService.repo.UpdateShareWithVersion(pTx, lShare); lErr != nil {
 				continue
 			}
 
 			// Update Trade and Transaction statuses
-			trade.Status = "completed"
-			trade.UpdatedAt = time.Now()
-			if err := tx.Save(&trade).Error; err != nil {
+			lTrade.Status = "completed"
+			lTrade.UpdatedAt = time.Now()
+			if lErr := pTx.Save(&lTrade).Error; lErr != nil {
 				continue
 			}
 
 			// Find corresponding transaction and complete it
-			var transaction walletpkg.Transaction
-			if err := tx.Where("user_id = ? AND status = ? AND type = ?", trade.UserID, "pending", "trade_"+trade.Type).First(&transaction).Error; err == nil {
-				transaction.Status = "completed"
-				tx.Save(&transaction)
+			var lTransaction walletpkg.Transaction
+			if lErr := pTx.Where("user_id = ? AND status = ? AND type = ?", lTrade.UserID, "pending", "trade_"+lTrade.Type).First(&lTransaction).Error; lErr == nil {
+				lTransaction.Status = "completed"
+				pTx.Save(&lTransaction)
 			}
 		}
 
@@ -424,59 +424,59 @@ func (s *tradeService) ExecutePendingTrades() error {
 	})
 }
 
-func (s *tradeService) CancelTrade(userID string, tradeID string) error {
-	tID, err := uuid.Parse(tradeID)
-	if err != nil {
+func (pService *tradeService) CancelTrade(pUserID string, pTradeID string) error {
+	lTID, lErr := uuid.Parse(pTradeID)
+	if lErr != nil {
 		return errors.New("invalid trade ID")
 	}
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user ID")
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		var trade Trade
-		if err := tx.Where("id = ?", tID).First(&trade).Error; err != nil {
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		var lTrade Trade
+		if lTxErr := pTx.Where("id = ?", lTID).First(&lTrade).Error; lTxErr != nil {
 			return errors.New("trade not found")
 		}
 
-		if trade.UserID != uID {
+		if lTrade.UserID != lUID {
 			return errors.New("unauthorized")
 		}
 
-		if trade.Status != "pending" {
+		if lTrade.Status != "pending" {
 			return errors.New("only pending trades can be cancelled")
 		}
 
-		if trade.Type == "buy" {
-			wallet, err := s.walletRepo.GetWalletForUpdate(tx, userID)
-			if err != nil {
+		if lTrade.Type == "buy" {
+			lWallet, lTxErr := pService.walletRepo.GetWalletForUpdate(pTx, pUserID)
+			if lTxErr != nil {
 				return errors.New("wallet not found")
 			}
-			refundAmount := trade.Price * float64(trade.Quantity)
-			wallet.BlockedBalance -= refundAmount
-			wallet.AvailableBalance += refundAmount
-			if err := s.walletRepo.UpdateWalletWithVersion(tx, wallet); err != nil {
-				return err
+			lRefundAmount := lTrade.Price * float64(lTrade.Quantity)
+			lWallet.BlockedBalance -= lRefundAmount
+			lWallet.AvailableBalance += lRefundAmount
+			if lTxErr := pService.walletRepo.UpdateWalletWithVersion(pTx, lWallet); lTxErr != nil {
+				return lTxErr
 			}
 		}
 
-		trade.Status = "cancelled"
-		trade.UpdatedAt = time.Now()
-		if err := tx.Save(&trade).Error; err != nil {
-			return err
+		lTrade.Status = "cancelled"
+		lTrade.UpdatedAt = time.Now()
+		if lTxErr := pTx.Save(&lTrade).Error; lTxErr != nil {
+			return lTxErr
 		}
 
-		var transaction walletpkg.Transaction
-		txType := "trade_buy"
-		if trade.Type == "sell" {
-			txType = "trade_sell"
+		var lTransaction walletpkg.Transaction
+		lTxType := "trade_buy"
+		if lTrade.Type == "sell" {
+			lTxType = "trade_sell"
 		}
 
-		totalAmount := trade.Price * float64(trade.Quantity)
-		if err := tx.Where("user_id = ? AND type = ? AND status = 'pending' AND amount = ?", uID, txType, totalAmount).Order("created_at desc").First(&transaction).Error; err == nil {
-			transaction.Status = "cancelled"
-			tx.Save(&transaction)
+		lTotalAmount := lTrade.Price * float64(lTrade.Quantity)
+		if lTxErr := pTx.Where("user_id = ? AND type = ? AND status = 'pending' AND amount = ?", lUID, lTxType, lTotalAmount).Order("created_at desc").First(&lTransaction).Error; lTxErr == nil {
+			lTransaction.Status = "cancelled"
+			pTx.Save(&lTransaction)
 		}
 
 		return nil

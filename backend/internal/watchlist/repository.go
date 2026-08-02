@@ -14,54 +14,54 @@ func NewWatchlistRepository() *WatchlistRepository {
 	return &WatchlistRepository{db: database.DB}
 }
 
-func (r *WatchlistRepository) Create(watchlist *Watchlist) error {
+func (pRepo *WatchlistRepository) Create(pWatchlist *Watchlist) error {
 	// Check if a soft-deleted record already exists
-	var existing Watchlist
-	err := r.db.Unscoped().Where("user_id = ? AND share_id = ?", watchlist.UserID, watchlist.ShareID).First(&existing).Error
-	if err == nil && existing.DeletedAt.Valid {
+	var lExisting Watchlist
+	lErr := pRepo.db.Unscoped().Where("user_id = ? AND share_id = ?", pWatchlist.UserID, pWatchlist.ShareID).First(&lExisting).Error
+	if lErr == nil && lExisting.DeletedAt.Valid {
 		// Restore it
-		existing.DeletedAt = gorm.DeletedAt{Valid: false}
-		existing.IsFavorite = false
-		return r.db.Unscoped().Save(&existing).Error
+		lExisting.DeletedAt = gorm.DeletedAt{Valid: false}
+		lExisting.IsFavorite = false
+		return pRepo.db.Unscoped().Save(&lExisting).Error
 	}
-	return r.db.Create(watchlist).Error
+	return pRepo.db.Create(pWatchlist).Error
 }
 
-func (r *WatchlistRepository) Delete(id, userID string) error {
-	result := r.db.Unscoped().Where("id = ? AND user_id = ?", id, userID).Delete(&Watchlist{})
-	if result.Error != nil {
-		return result.Error
+func (pRepo *WatchlistRepository) Delete(pID, pUserID string) error {
+	lResult := pRepo.db.Unscoped().Where("id = ? AND user_id = ?", pID, pUserID).Delete(&Watchlist{})
+	if lResult.Error != nil {
+		return lResult.Error
 	}
-	if result.RowsAffected == 0 {
+	if lResult.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
 
-func (r *WatchlistRepository) GetByUserID(userID string) ([]Watchlist, error) {
-	var watchlists []Watchlist
-	err := r.db.Where("user_id = ?", userID).Find(&watchlists).Error
-	return watchlists, err
+func (pRepo *WatchlistRepository) GetByUserID(pUserID string) ([]Watchlist, error) {
+	var lWatchlists []Watchlist
+	lErr := pRepo.db.Where("user_id = ?", pUserID).Find(&lWatchlists).Error
+	return lWatchlists, lErr
 }
 
-func (r *WatchlistRepository) GetUserWatchlistWithDetails(userID string) ([]WatchlistResponse, error) {
-	var responses []WatchlistResponse
+func (pRepo *WatchlistRepository) GetUserWatchlistWithDetails(pUserID string) ([]WatchlistResponse, error) {
+	var lResponses []WatchlistResponse
 	
-	err := r.db.Table("watchlists").
+	lErr := pRepo.db.Table("watchlists").
 		Select("watchlists.id, watchlists.share_id as stock_id, shares.name as stock_name, shares.symbol, shares.price as current_price, shares.previous_price as previous_price, watchlists.is_favorite").
 		Joins("JOIN shares ON shares.id = watchlists.share_id").
-		Where("watchlists.user_id = ? AND watchlists.deleted_at IS NULL", userID).
-		Scan(&responses).Error
+		Where("watchlists.user_id = ? AND watchlists.deleted_at IS NULL", pUserID).
+		Scan(&lResponses).Error
 		
-	return responses, err
+	return lResponses, lErr
 }
 
-func (r *WatchlistRepository) UpdateFavorite(id, userID string, isFavorite bool) error {
-	result := r.db.Model(&Watchlist{}).Where("id = ? AND user_id = ?", id, userID).Update("is_favorite", isFavorite)
-	if result.Error != nil {
-		return result.Error
+func (pRepo *WatchlistRepository) UpdateFavorite(pID, pUserID string, pIsFavorite bool) error {
+	lResult := pRepo.db.Model(&Watchlist{}).Where("id = ? AND user_id = ?", pID, pUserID).Update("is_favorite", pIsFavorite)
+	if lResult.Error != nil {
+		return lResult.Error
 	}
-	if result.RowsAffected == 0 {
+	if lResult.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
 	return nil

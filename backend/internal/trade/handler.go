@@ -14,15 +14,15 @@ type TradeController struct {
 	svc TradeService
 }
 
-func NewTradeController(svc TradeService) *TradeController {
-	return &TradeController{svc: svc}
+func NewTradeController(pSvc TradeService) *TradeController {
+	return &TradeController{svc: pSvc}
 }
 
 // ========================== GET SHARES ==========================
 
-func ConstructGetShares(pSvc TradeService, search string) (interface{}, error) {
+func ConstructGetShares(pSvc TradeService, pSearch string) (interface{}, error) {
 	log.Println("ConstructGetShares (+)")
-	lShares, lErr := pSvc.GetAllShares(search)
+	lShares, lErr := pSvc.GetAllShares(pSearch)
 	log.Println("ConstructGetShares (-)")
 	return lShares, lErr
 }
@@ -42,7 +42,7 @@ func CompleteGetShares(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg s
 	log.Println("CompleteGetShares (-)")
 }
 
-func (c *TradeController) GetShares(lCtx *gin.Context) {
+func (pController *TradeController) GetShares(lCtx *gin.Context) {
 	log.Println("GetShares (+)")
 	var lErr error
 	var lStatus int
@@ -50,8 +50,8 @@ func (c *TradeController) GetShares(lCtx *gin.Context) {
 	var lDetails interface{}
 	var lShares interface{}
 
-	search := lCtx.Query("search")
-	lShares, lErr = ConstructGetShares(c.svc, search)
+	lSearch := lCtx.Query("search")
+	lShares, lErr = ConstructGetShares(pController.svc, lSearch)
 	if lErr != nil {
 		lStatus = http.StatusInternalServerError
 		lCode = "FETCH_ERROR"
@@ -99,11 +99,11 @@ func ConstructBuyShare(pSvc TradeService, pUserID string, pReq TradeRequest, pIs
 
 func CommunicateBuyShare(pCtx *gin.Context, pIsPending bool) error {
 	log.Println("CommunicateBuyShare (+)")
-	msg := "Share bought successfully"
+	lMsg := "Share bought successfully"
 	if pIsPending {
-		msg = "Order placed (Pending)"
+		lMsg = "Order placed (Pending)"
 	}
-	response.Success(pCtx, http.StatusOK, msg, nil)
+	response.Success(pCtx, http.StatusOK, lMsg, nil)
 	log.Println("CommunicateBuyShare (-)")
 	return nil
 }
@@ -116,7 +116,7 @@ func CompleteBuyShare(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg st
 	log.Println("CompleteBuyShare (-)")
 }
 
-func (c *TradeController) BuyShare(lCtx *gin.Context) {
+func (pController *TradeController) BuyShare(lCtx *gin.Context) {
 	log.Println("BuyShare (+)")
 	var lErr error
 	var lStatus int
@@ -144,7 +144,7 @@ func (c *TradeController) BuyShare(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = ConstructBuyShare(c.svc, lUserID, lReq, lIsPending)
+	lErr = ConstructBuyShare(pController.svc, lUserID, lReq, lIsPending)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "TRADE_ERROR"
@@ -188,11 +188,11 @@ func ConstructSellShare(pSvc TradeService, pUserID string, pReq TradeRequest, pI
 
 func CommunicateSellShare(pCtx *gin.Context, pIsPending bool) error {
 	log.Println("CommunicateSellShare (+)")
-	msg := "Share sold successfully"
+	lMsg := "Share sold successfully"
 	if pIsPending {
-		msg = "Order placed (Pending)"
+		lMsg = "Order placed (Pending)"
 	}
-	response.Success(pCtx, http.StatusOK, msg, nil)
+	response.Success(pCtx, http.StatusOK, lMsg, nil)
 	log.Println("CommunicateSellShare (-)")
 	return nil
 }
@@ -205,7 +205,7 @@ func CompleteSellShare(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg s
 	log.Println("CompleteSellShare (-)")
 }
 
-func (c *TradeController) SellShare(lCtx *gin.Context) {
+func (pController *TradeController) SellShare(lCtx *gin.Context) {
 	log.Println("SellShare (+)")
 	var lErr error
 	var lStatus int
@@ -233,7 +233,7 @@ func (c *TradeController) SellShare(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = ConstructSellShare(c.svc, lUserID, lReq, lIsPending)
+	lErr = ConstructSellShare(pController.svc, lUserID, lReq, lIsPending)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "TRADE_ERROR"
@@ -286,7 +286,7 @@ func CompleteGetUserTrades(pCtx *gin.Context, pErr error, pStatus int, pCode, pM
 	log.Println("CompleteGetUserTrades (-)")
 }
 
-func (c *TradeController) GetUserTrades(lCtx *gin.Context) {
+func (pController *TradeController) GetUserTrades(lCtx *gin.Context) {
 	log.Println("GetUserTrades (+)")
 	var lErr error
 	var lStatus int
@@ -303,7 +303,7 @@ func (c *TradeController) GetUserTrades(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lTrades, lErr = ConstructGetUserTrades(c.svc, lUserID)
+	lTrades, lErr = ConstructGetUserTrades(pController.svc, lUserID)
 	if lErr != nil {
 		lStatus = http.StatusInternalServerError
 		lCode = "TRADE_ERROR"
@@ -365,7 +365,7 @@ func CompleteCancelTrade(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg
 	log.Println("CompleteCancelTrade (-)")
 }
 
-func (c *TradeController) CancelTrade(lCtx *gin.Context) {
+func (pController *TradeController) CancelTrade(lCtx *gin.Context) {
 	log.Println("CancelTrade (+)")
 	var lErr error
 	var lStatus int
@@ -389,7 +389,7 @@ func (c *TradeController) CancelTrade(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = ConstructCancelTrade(c.svc, lUserID, lTradeID)
+	lErr = ConstructCancelTrade(pController.svc, lUserID, lTradeID)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "TRADE_ERROR"

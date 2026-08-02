@@ -99,18 +99,18 @@ Complete:
 	CompleteSubmitKYC(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
 
-func (h *ProfileController) RequestClosure(pCtx *gin.Context) {
+func (pController *ProfileController) RequestClosure(pCtx *gin.Context) {
 	fmt.Println("RequestClosure (+)")
 	
-	userID, exists := pCtx.Get("userID")
-	if !exists {
+	lUserID, lExists := pCtx.Get("userID")
+	if !lExists {
 		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
 		return
 	}
 
-	err := h.svc.RequestClosure(userID.(string))
-	if err != nil {
-		response.Error(pCtx, http.StatusInternalServerError, "CLOSURE_FAILED", "Failed to submit account closure request", err.Error())
+	lErr := pController.svc.RequestClosure(lUserID.(string))
+	if lErr != nil {
+		response.Error(pCtx, http.StatusInternalServerError, "CLOSURE_FAILED", "Failed to submit account closure request", lErr.Error())
 		return
 	}
 
@@ -118,24 +118,24 @@ func (h *ProfileController) RequestClosure(pCtx *gin.Context) {
 	fmt.Println("RequestClosure (-)")
 }
 
-func (h *ProfileController) ChangePassword(pCtx *gin.Context) {
+func (pController *ProfileController) ChangePassword(pCtx *gin.Context) {
 	fmt.Println("ChangePassword (+)")
 	
-	userID, exists := pCtx.Get("userID")
-	if !exists {
+	lUserID, lExists := pCtx.Get("userID")
+	if !lExists {
 		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
 		return
 	}
 
-	var req ChangePasswordRequest
-	if err := pCtx.ShouldBindJSON(&req); err != nil {
-		response.Error(pCtx, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body", err.Error())
+	var lReq ChangePasswordRequest
+	if lErr := pCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(pCtx, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body", lErr.Error())
 		return
 	}
 
-	err := h.svc.ChangePassword(userID.(string), req)
-	if err != nil {
-		response.Error(pCtx, http.StatusBadRequest, "CHANGE_PASSWORD_FAILED", err.Error(), nil)
+	lErr := pController.svc.ChangePassword(lUserID.(string), lReq)
+	if lErr != nil {
+		response.Error(pCtx, http.StatusBadRequest, "CHANGE_PASSWORD_FAILED", lErr.Error(), nil)
 		return
 	}
 
