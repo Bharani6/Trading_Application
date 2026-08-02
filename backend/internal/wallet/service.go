@@ -30,127 +30,127 @@ func NewWalletService() WalletService {
 	}
 }
 
-func (s *walletService) GetBalance(userID string) (*WalletResponse, error) {
-	wallet, err := s.repo.GetWallet(userID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+func (pService *walletService) GetBalance(pUserID string) (*WalletResponse, error) {
+	lWallet, lErr := pService.repo.GetWallet(pUserID)
+	if lErr != nil {
+		if errors.Is(lErr, gorm.ErrRecordNotFound) {
 			return &WalletResponse{WalletBalance: 0, BlockedBalance: 0, AvailableBalance: 0}, nil
 		}
 		return nil, errors.New("failed to retrieve wallet balance")
 	}
 
 	return &WalletResponse{
-		WalletBalance:    wallet.WalletBalance,
-		BlockedBalance:   wallet.BlockedBalance,
-		AvailableBalance: wallet.AvailableBalance,
+		WalletBalance:    lWallet.WalletBalance,
+		BlockedBalance:   lWallet.BlockedBalance,
+		AvailableBalance: lWallet.AvailableBalance,
 	}, nil
 }
 
-func (s *walletService) AddFunds(userID string, amount float64) error {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+func (pService *walletService) AddFunds(pUserID string, pAmount float64) error {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user id")
 	}
-	if amount <= 0 {
+	if pAmount <= 0 {
 		return errors.New("amount must be greater than zero")
 	}
 
-	u, err := s.userRepo.GetUserByID(userID)
-	if err != nil {
+	lU, lErr := pService.userRepo.GetUserByID(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user")
 	}
-	if u.Status == "closure_requested" {
+	if lU.Status == "closure_requested" {
 		return errors.New("account closure requested, action not permitted")
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		wallet, err := s.repo.GetWalletForUpdate(tx, userID)
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		lWallet, lTxErr := pService.repo.GetWalletForUpdate(pTx, pUserID)
 
 		// If wallet doesn't exist, create it
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			wallet = &Wallet{
-				UserID:           uID,
-				WalletBalance:    amount,
-				AvailableBalance: amount,
+		if errors.Is(lTxErr, gorm.ErrRecordNotFound) {
+			lWallet = &Wallet{
+				UserID:           lUID,
+				WalletBalance:    pAmount,
+				AvailableBalance: pAmount,
 				BlockedBalance:   0,
 			}
-			if err := s.repo.CreateWallet(tx, wallet); err != nil {
-				return err
+			if lErr := pService.repo.CreateWallet(pTx, lWallet); lErr != nil {
+				return lErr
 			}
-		} else if err != nil {
-			return err
+		} else if lTxErr != nil {
+			return lTxErr
 		} else {
 			// Update existing wallet
-			wallet.WalletBalance += amount
-			wallet.AvailableBalance += amount
-			if err := s.repo.UpdateWallet(tx, wallet); err != nil {
-				return err
+			lWallet.WalletBalance += pAmount
+			lWallet.AvailableBalance += pAmount
+			if lErr := pService.repo.UpdateWallet(pTx, lWallet); lErr != nil {
+				return lErr
 			}
 		}
 
 		// Create transaction log
-		transaction := &Transaction{
+		lTransaction := &Transaction{
 			ID:          uuid.New(),
-			UserID:      uID,
+			UserID:      lUID,
 			Type:        "add_fund",
-			Amount:      amount,
+			Amount:      pAmount,
 			ReferenceID: fmt.Sprintf("DEP-%d", time.Now().UnixNano()),
 			Description: "Deposit to wallet",
 			Status:      "completed",
 		}
 
-		return s.repo.CreateTransaction(tx, transaction)
+		return pService.repo.CreateTransaction(pTx, lTransaction)
 	})
 }
 
-func (s *walletService) WithdrawFunds(userID string, amount float64) error {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+func (pService *walletService) WithdrawFunds(pUserID string, pAmount float64) error {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user id")
 	}
-	if amount <= 0 {
+	if pAmount <= 0 {
 		return errors.New("amount must be greater than zero")
 	}
 
-	u, err := s.userRepo.GetUserByID(userID)
-	if err != nil {
+	lU, lErr := pService.userRepo.GetUserByID(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user")
 	}
-	if u.Status == "closure_requested" {
+	if lU.Status == "closure_requested" {
 		return errors.New("account closure requested, action not permitted")
 	}
 
-	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		wallet, err := s.repo.GetWalletForUpdate(tx, userID)
-		if err != nil {
+	return pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		lWallet, lTxErr := pService.repo.GetWalletForUpdate(pTx, pUserID)
+		if lTxErr != nil {
 			return errors.New("wallet not found")
 		}
 
-		if wallet.AvailableBalance < amount {
+		if lWallet.AvailableBalance < pAmount {
 			return errors.New("insufficient available balance")
 		}
 
-		wallet.WalletBalance -= amount
-		wallet.AvailableBalance -= amount
+		lWallet.WalletBalance -= pAmount
+		lWallet.AvailableBalance -= pAmount
 
-		if err := s.repo.UpdateWallet(tx, wallet); err != nil {
-			return err
+		if lErr := pService.repo.UpdateWallet(pTx, lWallet); lErr != nil {
+			return lErr
 		}
 
-		transaction := &Transaction{
+		lTransaction := &Transaction{
 			ID:          uuid.New(),
-			UserID:      uID,
+			UserID:      lUID,
 			Type:        "withdraw",
-			Amount:      amount,
+			Amount:      pAmount,
 			ReferenceID: fmt.Sprintf("WDL-%d", time.Now().UnixNano()),
 			Description: "Withdrawal from wallet",
 			Status:      "completed",
 		}
 
-		return s.repo.CreateTransaction(tx, transaction)
+		return pService.repo.CreateTransaction(pTx, lTransaction)
 	})
 }
 
-func (s *walletService) GetTransactions(userID string) ([]Transaction, error) {
-	return s.repo.GetTransactionsByUser(userID)
+func (pService *walletService) GetTransactions(pUserID string) ([]Transaction, error) {
+	return pService.repo.GetTransactionsByUser(pUserID)
 }

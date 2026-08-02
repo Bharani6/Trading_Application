@@ -42,29 +42,29 @@ type JWTConfig struct {
 
 var App *Config
 
-func LoadConfig(dir string) {
-	viper.AddConfigPath(dir)
+func LoadConfig(pDir string) {
+	viper.AddConfigPath(pDir)
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+	if lErr := viper.ReadInConfig(); lErr != nil {
+		log.Fatalf("Error reading config file, %s", lErr)
 	}
 
-	env := viper.GetString("app.env")
-	if env != "" && env != "config" {
-		viper.SetConfigName(env)
-		if err := viper.MergeInConfig(); err != nil {
-			log.Printf("No environment specific config found for %s, or error: %s", env, err)
+	lEnv := viper.GetString("app.env")
+	if lEnv != "" && lEnv != "config" {
+		viper.SetConfigName(lEnv)
+		if lErr := viper.MergeInConfig(); lErr != nil {
+			log.Printf("No environment specific config found for %s, or error: %s", lEnv, lErr)
 		}
 	}
 
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatalf("Unable to decode into struct, %v", err)
+	var lConfig Config
+	if lErr := viper.Unmarshal(&lConfig); lErr != nil {
+		log.Fatalf("Unable to decode into struct, %v", lErr)
 	}
 
-	App = &config
+	App = &lConfig
 	log.Println("Configuration loaded successfully. Environment:", App.App.Env)
 }

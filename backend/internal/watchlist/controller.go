@@ -17,96 +17,96 @@ func NewWatchlistController() *WatchlistController {
 	}
 }
 
-func (ctrl *WatchlistController) AddStock(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
+func (pController *WatchlistController) AddStock(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
 		return
 	}
 
-	var req AddWatchlistRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body", err.Error())
+	var lReq AddWatchlistRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body", lErr.Error())
 		return
 	}
 
-	if err := ctrl.service.AddStock(userID.(string), req); err != nil {
-		if err.Error() == "Stock already in watchlist" {
-			response.Error(c, http.StatusConflict, "CONFLICT", err.Error(), nil)
+	if lErr := pController.service.AddStock(lUserID.(string), lReq); lErr != nil {
+		if lErr.Error() == "Stock already in watchlist" {
+			response.Error(lCtx, http.StatusConflict, "CONFLICT", lErr.Error(), nil)
 			return
 		}
-		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to add stock to watchlist", err.Error())
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to add stock to watchlist", lErr.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "Stock added to watchlist successfully", nil)
+	response.Success(lCtx, http.StatusCreated, "Stock added to watchlist successfully", nil)
 }
 
-func (ctrl *WatchlistController) RemoveStock(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
+func (pController *WatchlistController) RemoveStock(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
 		return
 	}
 
-	id := c.Param("id")
-	if id == "" {
-		response.Error(c, http.StatusBadRequest, "BAD_REQUEST", "Watchlist item ID is required", nil)
+	lID := lCtx.Param("id")
+	if lID == "" {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Watchlist item ID is required", nil)
 		return
 	}
 
-	if err := ctrl.service.RemoveStock(userID.(string), id); err != nil {
-		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to remove stock from watchlist", err.Error())
+	if lErr := pController.service.RemoveStock(lUserID.(string), lID); lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to remove stock from watchlist", lErr.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Removed from watchlist", nil)
+	response.Success(lCtx, http.StatusOK, "Removed from watchlist", nil)
 }
 
-func (ctrl *WatchlistController) GetWatchlist(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
+func (pController *WatchlistController) GetWatchlist(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
 		return
 	}
 
-	watchlists, err := ctrl.service.GetUserWatchlist(userID.(string))
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch watchlist", err.Error())
+	lWatchlists, lErr := pController.service.GetUserWatchlist(lUserID.(string))
+	if lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch watchlist", lErr.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Watchlist fetched successfully", watchlists)
+	response.Success(lCtx, http.StatusOK, "Watchlist fetched successfully", lWatchlists)
 }
 
-func (ctrl *WatchlistController) UpdateFavorite(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
+func (pController *WatchlistController) UpdateFavorite(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized", nil)
 		return
 	}
 
-	id := c.Param("id")
-	if id == "" {
-		response.Error(c, http.StatusBadRequest, "BAD_REQUEST", "Watchlist item ID is required", nil)
+	lID := lCtx.Param("id")
+	if lID == "" {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Watchlist item ID is required", nil)
 		return
 	}
 
-	var req UpdateFavoriteRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body", err.Error())
+	var lReq UpdateFavoriteRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body", lErr.Error())
 		return
 	}
 
-	if req.IsFavorite == nil {
-		response.Error(c, http.StatusBadRequest, "BAD_REQUEST", "isFavorite field is required", nil)
+	if lReq.IsFavorite == nil {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "isFavorite field is required", nil)
 		return
 	}
 
-	if err := ctrl.service.UpdateFavorite(userID.(string), id, *req.IsFavorite); err != nil {
-		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to update favorite status", err.Error())
+	if lErr := pController.service.UpdateFavorite(lUserID.(string), lID, *lReq.IsFavorite); lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to update favorite status", lErr.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Favorite status updated", nil)
+	response.Success(lCtx, http.StatusOK, "Favorite status updated", nil)
 }

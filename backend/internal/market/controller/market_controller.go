@@ -11,12 +11,12 @@ type MarketController struct {
 	marketSvc service.MarketDataService
 }
 
-func NewMarketController(svc service.MarketDataService) *MarketController {
-	return &MarketController{marketSvc: svc}
+func NewMarketController(pSvc service.MarketDataService) *MarketController {
+	return &MarketController{marketSvc: pSvc}
 }
 
-func (c *MarketController) GetIndices(ctx *gin.Context) {
-	symbols := []string{
+func (pController *MarketController) GetIndices(pCtx *gin.Context) {
+	lSymbols := []string{
 		"^NSEI",       // NIFTY 50
 		"^BSESN",      // SENSEX
 		"^NSEBANK",    // NIFTY BANK
@@ -24,9 +24,9 @@ func (c *MarketController) GetIndices(ctx *gin.Context) {
 		"^CNXFIN",     // FINNIFTY (Nifty Financial Services)
 	}
 
-	prices, err := c.marketSvc.GetLatestPrices(symbols)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch indices"})
+	lPrices, lErr := pController.marketSvc.GetLatestPrices(lSymbols)
+	if lErr != nil {
+		pCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch indices"})
 		return
 	}
 
@@ -37,9 +37,9 @@ func (c *MarketController) GetIndices(ctx *gin.Context) {
 		ChangePct float64 `json:"change_pct"`
 	}
 
-	var results []IndexData
+	var lResults []IndexData
 
-	mapping := map[string]string{
+	lMapping := map[string]string{
 		"^NSEI":       "NIFTY",
 		"^BSESN":      "SENSEX",
 		"^NSEBANK":    "BANKNIFTY",
@@ -47,22 +47,22 @@ func (c *MarketController) GetIndices(ctx *gin.Context) {
 		"^CNXFIN":     "FINNIFTY",
 	}
 
-	for _, sym := range symbols {
-		if p, ok := prices[sym]; ok && p.Current > 0 {
-			change := p.Current - p.Previous
-			changePct := 0.0
-			if p.Previous > 0 {
-				changePct = (change / p.Previous) * 100
+	for _, lSym := range lSymbols {
+		if lP, lOk := lPrices[lSym]; lOk && lP.Current > 0 {
+			lChange := lP.Current - lP.Previous
+			lChangePct := 0.0
+			if lP.Previous > 0 {
+				lChangePct = (lChange / lP.Previous) * 100
 			}
-			results = append(results, IndexData{
-				Name:      mapping[sym],
-				Current:   p.Current,
-				Change:    change,
-				ChangePct: changePct,
+			lResults = append(lResults, IndexData{
+				Name:      lMapping[lSym],
+				Current:   lP.Current,
+				Change:    lChange,
+				ChangePct: lChangePct,
 			})
 		} else {
-			results = append(results, IndexData{
-				Name:      mapping[sym],
+			lResults = append(lResults, IndexData{
+				Name:      lMapping[lSym],
 				Current:   0,
 				Change:    0,
 				ChangePct: 0,
@@ -70,5 +70,5 @@ func (c *MarketController) GetIndices(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": results})
+	pCtx.JSON(http.StatusOK, gin.H{"data": lResults})
 }

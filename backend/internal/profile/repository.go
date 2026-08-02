@@ -23,26 +23,26 @@ func NewProfileRepository() ProfileRepository {
 	return &profileRepository{db: database.DB}
 }
 
-func (r *profileRepository) GetPersonalDetails(userID string) (*user.PersonalDetails, error) {
-	var details user.PersonalDetails
-	err := r.db.Where("user_id = ?", userID).First(&details).Error
-	return &details, err
+func (pRepo *profileRepository) GetPersonalDetails(pUserID string) (*user.PersonalDetails, error) {
+	var lDetails user.PersonalDetails
+	lErr := pRepo.db.Where("user_id = ?", pUserID).First(&lDetails).Error
+	return &lDetails, lErr
 }
 
-func (r *profileRepository) SavePersonalDetails(details *user.PersonalDetails) error {
-	return r.db.Save(details).Error
+func (pRepo *profileRepository) SavePersonalDetails(pDetails *user.PersonalDetails) error {
+	return pRepo.db.Save(pDetails).Error
 }
 
-func (r *profileRepository) SaveBankDetails(details *user.BankDetails) error {
-	return r.db.Save(details).Error
+func (pRepo *profileRepository) SaveBankDetails(pDetails *user.BankDetails) error {
+	return pRepo.db.Save(pDetails).Error
 }
 
-func (r *profileRepository) UpdateUserStatus(userID string, status string) error {
-	return r.db.Model(&user.User{}).Where("id = ?", userID).Update("status", status).Error
+func (pRepo *profileRepository) UpdateUserStatus(pUserID string, pStatus string) error {
+	return pRepo.db.Model(&user.User{}).Where("id = ?", pUserID).Update("status", pStatus).Error
 }
 
-func (r *profileRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
-	return r.db.Transaction(fn)
+func (pRepo *profileRepository) RunInTransaction(pFn func(pTx *gorm.DB) error) error {
+	return pRepo.db.Transaction(pFn)
 }
 
 

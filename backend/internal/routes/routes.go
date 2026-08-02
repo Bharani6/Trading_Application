@@ -16,103 +16,104 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(r *gin.Engine) {
+func SetupRouter(pRouter *gin.Engine) {
 	// Controllers
-	authController := auth.NewAuthController()
-	profileController := profile.NewProfileController()
-	walletController := wallet.NewWalletController()
-	adminController := admin.NewAdminController()
-	utilsController := utils.NewUtilsController()
-	supportController := support.NewSupportController()
+	lAuthController := auth.NewAuthController()
+	lProfileController := profile.NewProfileController()
+	lWalletController := wallet.NewWalletController()
+	lAdminController := admin.NewAdminController()
+	lUtilsController := utils.NewUtilsController()
+	lSupportController := support.NewSupportController()
 
 	// Trade Dependencies
-	tradeRepo := trade.NewTradeRepository()
-	walletRepo := wallet.NewWalletRepository()
-	marketSvc := market_service.NewYahooFinanceService()
-	tradeService := trade.NewTradeService(tradeRepo, walletRepo, marketSvc)
-	tradeController := trade.NewTradeController(tradeService)
-	marketController := market_controller.NewMarketController(marketSvc)
+	lTradeRepo := trade.NewTradeRepository()
+	lWalletRepo := wallet.NewWalletRepository()
+	lMarketSvc := market_service.NewYahooFinanceService()
+	lTradeService := trade.NewTradeService(lTradeRepo, lWalletRepo, lMarketSvc)
+	lTradeController := trade.NewTradeController(lTradeService)
+	lMarketController := market_controller.NewMarketController(lMarketSvc)
 
-	api := r.Group("/api/v1")
+	lAPI := pRouter.Group("/api/v1")
 	{
 		// Authentication routes (Public) - rate limited to 10 req/60s per IP
-		auth := api.Group("/auth")
-		auth.Use(middleware.RateLimiter(10, 60))
+		lAuth := lAPI.Group("/auth")
+		lAuth.Use(middleware.RateLimiter(10, 60))
 		{
-			auth.POST("/register", authController.Register)
-			auth.POST("/login", authController.Login)
-			auth.POST("/forgot-password", authController.ForgotPassword)
-			auth.POST("/verify-reset-token", authController.VerifyResetToken)
-			auth.POST("/reset-password", authController.ResetPassword)
+			lAuth.POST("/register", lAuthController.Register)
+			lAuth.POST("/login", lAuthController.Login)
+			lAuth.POST("/forgot-password", lAuthController.ForgotPassword)
+			lAuth.POST("/verify-reset-token", lAuthController.VerifyResetToken)
+			lAuth.POST("/reset-password", lAuthController.ResetPassword)
 		}
 
-		utils := api.Group("/utils")
+		lUtils := lAPI.Group("/utils")
 		{
-			utils.GET("/ifsc/:code", utilsController.FetchIFSC)
-			utils.GET("/pincode/:code", utilsController.FetchPincode)
+			lUtils.GET("/ifsc/:code", lUtilsController.FetchIFSC)
+			lUtils.GET("/pincode/:code", lUtilsController.FetchPincode)
 		}
 
-		market := api.Group("/market")
+		lMarket := lAPI.Group("/market")
 		{
-			market.GET("/indices", marketController.GetIndices)
+			lMarket.GET("/indices", lMarketController.GetIndices)
 		}
 
-		api.POST("/support", supportController.SubmitMessage)
+		lAPI.POST("/support", lSupportController.SubmitMessage)
 
 		// Protected routes
-		secure := api.Group("/")
-		secure.Use(middleware.AuthMiddleware())
+		lSecure := lAPI.Group("/")
+		lSecure.Use(middleware.AuthMiddleware())
 		{
-			secure.GET("/users/me", authController.GetMe)
-			secure.POST("/users/kyc", profileController.SubmitKYC)
-			secure.POST("/users/closure", profileController.RequestClosure)
+			lSecure.GET("/users/me", lAuthController.GetMe)
+			lSecure.POST("/users/kyc", lProfileController.SubmitKYC)
+			lSecure.POST("/users/closure", lProfileController.RequestClosure)
+			lSecure.POST("/users/change-password", lProfileController.ChangePassword)
 			
-			secure.GET("/auth/sessions", authController.GetSessions)
-			secure.DELETE("/auth/sessions/:id", authController.RevokeSession)
+			lSecure.GET("/auth/sessions", lAuthController.GetSessions)
+			lSecure.DELETE("/auth/sessions/:id", lAuthController.RevokeSession)
 
-			wallet := secure.Group("/wallet")
+			lWalletGroup := lSecure.Group("/wallet")
 			{
-				wallet.GET("/balance", walletController.GetBalance)
-				wallet.POST("/add-fund", walletController.AddFunds)
-				wallet.POST("/withdraw", walletController.WithdrawFunds)
-				wallet.GET("/transactions", walletController.GetTransactions)
+				lWalletGroup.GET("/balance", lWalletController.GetBalance)
+				lWalletGroup.POST("/add-fund", lWalletController.AddFunds)
+				lWalletGroup.POST("/withdraw", lWalletController.WithdrawFunds)
+				lWalletGroup.GET("/transactions", lWalletController.GetTransactions)
 			}
 
-			shares := secure.Group("/shares")
+			lShares := lSecure.Group("/shares")
 			{
-				shares.GET("", tradeController.GetShares)
+				lShares.GET("", lTradeController.GetShares)
 			}
 
-			trades := secure.Group("/trades")
+			lTrades := lSecure.Group("/trades")
 			{
-				trades.POST("/buy", tradeController.BuyShare)
-				trades.POST("/sell", tradeController.SellShare)
-				trades.GET("/history", tradeController.GetUserTrades)
-				trades.POST("/:id/cancel", tradeController.CancelTrade)
+				lTrades.POST("/buy", lTradeController.BuyShare)
+				lTrades.POST("/sell", lTradeController.SellShare)
+				lTrades.GET("/history", lTradeController.GetUserTrades)
+				lTrades.POST("/:id/cancel", lTradeController.CancelTrade)
 			}
 
 			// Admin only routes
-			admin := secure.Group("/admin")
-			admin.Use(middleware.RoleMiddleware("admin"))
+			lAdmin := lSecure.Group("/admin")
+			lAdmin.Use(middleware.RoleMiddleware("admin"))
 			{
-				admin.GET("/users", adminController.GetUsers)
-				admin.GET("/users/:id/details", adminController.GetUserDetails)
-				admin.PUT("/users/:id/approve", adminController.ApproveUser)
-				admin.PUT("/users/:id/reject", adminController.RejectUser)
-				admin.PUT("/users/:id/block", adminController.BlockUser)
-				admin.PUT("/users/:id/close_account", adminController.CloseAccount)
-				admin.PUT("/users/:id/reject_closure", adminController.RejectClosure)
-				admin.POST("/shares/upload", adminController.UploadShares)
-				admin.DELETE("/shares", adminController.DeleteAllShares)
-				admin.GET("/support", supportController.GetMessages)
-				admin.PUT("/support/:id/status", supportController.UpdateStatus)
+				lAdmin.GET("/users", lAdminController.GetUsers)
+				lAdmin.GET("/users/:id/details", lAdminController.GetUserDetails)
+				lAdmin.PUT("/users/:id/approve", lAdminController.ApproveUser)
+				lAdmin.PUT("/users/:id/reject", lAdminController.RejectUser)
+				lAdmin.PUT("/users/:id/block", lAdminController.BlockUser)
+				lAdmin.PUT("/users/:id/close_account", lAdminController.CloseAccount)
+				lAdmin.PUT("/users/:id/reject_closure", lAdminController.RejectClosure)
+				lAdmin.POST("/shares/upload", lAdminController.UploadShares)
+				lAdmin.DELETE("/shares", lAdminController.DeleteAllShares)
+				lAdmin.GET("/support", lSupportController.GetMessages)
+				lAdmin.PUT("/support/:id/status", lSupportController.UpdateStatus)
 			}
 			
-			watchlistController := watchlist.NewWatchlistController()
-			secure.POST("/watchlist", watchlistController.AddStock)
-			secure.GET("/watchlist", watchlistController.GetWatchlist)
-			secure.DELETE("/watchlist/:id", watchlistController.RemoveStock)
-			secure.PUT("/watchlist/:id/favorite", watchlistController.UpdateFavorite)
+			lWatchlistController := watchlist.NewWatchlistController()
+			lSecure.POST("/watchlist", lWatchlistController.AddStock)
+			lSecure.GET("/watchlist", lWatchlistController.GetWatchlist)
+			lSecure.DELETE("/watchlist/:id", lWatchlistController.RemoveStock)
+			lSecure.PUT("/watchlist/:id/favorite", lWatchlistController.UpdateFavorite)
 		}
 	}
 }

@@ -23,8 +23,8 @@ type SearchResult struct {
 
 // MarketDataService defines the interface for fetching stock market prices
 type MarketDataService interface {
-	GetLatestPrices(symbols []string) (map[string]MarketPrice, error)
-	SearchSymbol(query string) ([]SearchResult, error)
+	GetLatestPrices(pSymbols []string) (map[string]MarketPrice, error)
+	SearchSymbol(pQuery string) ([]SearchResult, error)
 }
 
 type YahooFinanceService struct {
@@ -38,31 +38,31 @@ func NewYahooFinanceService() MarketDataService {
 }
 
 // GetLatestPrices fetches the latest prices from Yahoo Finance
-func (s *YahooFinanceService) GetLatestPrices(symbols []string) (map[string]MarketPrice, error) {
-	prices := make(map[string]MarketPrice)
-	if len(symbols) == 0 {
-		return prices, nil
+func (pService *YahooFinanceService) GetLatestPrices(pSymbols []string) (map[string]MarketPrice, error) {
+	lPrices := make(map[string]MarketPrice)
+	if len(pSymbols) == 0 {
+		return lPrices, nil
 	}
 
-	for _, symbol := range symbols {
-		url := fmt.Sprintf("https://query2.finance.yahoo.com/v8/finance/chart/%s?interval=1d&range=1d", symbol)
+	for _, lSymbol := range pSymbols {
+		lURL := fmt.Sprintf("https://query2.finance.yahoo.com/v8/finance/chart/%s?interval=1d&range=1d", lSymbol)
 		
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
+		lReq, lErr := http.NewRequest("GET", lURL, nil)
+		if lErr != nil {
 			continue // skip on error
 		}
 		
-		req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+		lReq.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 		
-		resp, err := s.client.Do(req)
-		if err != nil || resp.StatusCode != http.StatusOK {
-			if resp != nil && resp.Body != nil {
-				resp.Body.Close()
+		lResp, lErr := pService.client.Do(lReq)
+		if lErr != nil || lResp.StatusCode != http.StatusOK {
+			if lResp != nil && lResp.Body != nil {
+				lResp.Body.Close()
 			}
 			continue
 		}
 
-		var result struct {
+		var lResult struct {
 			Chart struct {
 				Result []struct {
 					Meta struct {
@@ -73,45 +73,45 @@ func (s *YahooFinanceService) GetLatestPrices(symbols []string) (map[string]Mark
 			} `json:"chart"`
 		}
 
-		err = json.NewDecoder(resp.Body).Decode(&result)
-		resp.Body.Close()
+		lErr = json.NewDecoder(lResp.Body).Decode(&lResult)
+		lResp.Body.Close()
 		
-		if err == nil && len(result.Chart.Result) > 0 {
-			meta := result.Chart.Result[0].Meta
-			prices[symbol] = MarketPrice{
-				Current:  meta.RegularMarketPrice,
-				Previous: meta.RegularMarketPreviousClose,
+		if lErr == nil && len(lResult.Chart.Result) > 0 {
+			lMeta := lResult.Chart.Result[0].Meta
+			lPrices[lSymbol] = MarketPrice{
+				Current:  lMeta.RegularMarketPrice,
+				Previous: lMeta.RegularMarketPreviousClose,
 			}
 		}
 	}
 
-	return prices, nil
+	return lPrices, nil
 }
 
-func (s *YahooFinanceService) SearchSymbol(query string) ([]SearchResult, error) {
-	var results []SearchResult
-	if query == "" {
-		return results, nil
+func (pService *YahooFinanceService) SearchSymbol(pQuery string) ([]SearchResult, error) {
+	var lResults []SearchResult
+	if pQuery == "" {
+		return lResults, nil
 	}
 
-	urlStr := fmt.Sprintf("https://query2.finance.yahoo.com/v1/finance/search?q=%s", url.QueryEscape(query))
-	req, err := http.NewRequest("GET", urlStr, nil)
-	if err != nil {
-		return nil, err
+	lUrlStr := fmt.Sprintf("https://query2.finance.yahoo.com/v1/finance/search?q=%s", url.QueryEscape(pQuery))
+	lReq, lErr := http.NewRequest("GET", lUrlStr, nil)
+	if lErr != nil {
+		return nil, lErr
 	}
-	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+	lReq.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return nil, err
+	lResp, lErr := pService.client.Do(lReq)
+	if lErr != nil {
+		return nil, lErr
 	}
-	defer resp.Body.Close()
+	defer lResp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("yahoo finance search returned status %d", resp.StatusCode)
+	if lResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("yahoo finance search returned status %d", lResp.StatusCode)
 	}
 
-	var searchResp struct {
+	var lSearchResp struct {
 		Quotes []struct {
 			Symbol    string `json:"symbol"`
 			Shortname string `json:"shortname"`
@@ -120,20 +120,20 @@ func (s *YahooFinanceService) SearchSymbol(query string) ([]SearchResult, error)
 		} `json:"quotes"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&searchResp); err != nil {
-		return nil, err
+	if lErr := json.NewDecoder(lResp.Body).Decode(&lSearchResp); lErr != nil {
+		return nil, lErr
 	}
 
-	for _, q := range searchResp.Quotes {
-		if q.QuoteType == "EQUITY" && (strings.HasSuffix(q.Symbol, ".NS") || strings.HasSuffix(q.Symbol, ".BO")) {
-			results = append(results, SearchResult{
-				Symbol:    q.Symbol,
-				ShortName: q.Shortname,
-				LongName:  q.Longname,
-				QuoteType: q.QuoteType,
+	for _, lQ := range lSearchResp.Quotes {
+		if lQ.QuoteType == "EQUITY" && (strings.HasSuffix(lQ.Symbol, ".NS") || strings.HasSuffix(lQ.Symbol, ".BO")) {
+			lResults = append(lResults, SearchResult{
+				Symbol:    lQ.Symbol,
+				ShortName: lQ.Shortname,
+				LongName:  lQ.Longname,
+				QuoteType: lQ.QuoteType,
 			})
 		}
 	}
 
-	return results, nil
+	return lResults, nil
 }

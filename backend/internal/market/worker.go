@@ -14,105 +14,105 @@ import (
 var WorkerStatus = "Stopped"
 
 func IsIndianMarketOpen() bool {
-	loc, err := time.LoadLocation("Asia/Kolkata")
-	if err != nil {
-		loc = time.FixedZone("IST", 5*3600+1800)
+	lLoc, lErr := time.LoadLocation("Asia/Kolkata")
+	if lErr != nil {
+		lLoc = time.FixedZone("IST", 5*3600+1800)
 	}
-	now := time.Now().In(loc)
+	lNow := time.Now().In(lLoc)
 
-	if now.Weekday() == time.Saturday || now.Weekday() == time.Sunday {
+	if lNow.Weekday() == time.Saturday || lNow.Weekday() == time.Sunday {
 		return false
 	}
 
-	hour := now.Hour()
-	min := now.Minute()
+	lHour := lNow.Hour()
+	lMin := lNow.Minute()
 
 	// Market opens at 09:15
-	if hour < 9 || (hour == 9 && min < 15) {
+	if lHour < 9 || (lHour == 9 && lMin < 15) {
 		return false
 	}
 
 	// Market closes at 15:30
-	if hour > 15 || (hour == 15 && min > 30) {
+	if lHour > 15 || (lHour == 15 && lMin > 30) {
 		return false
 	}
 
 	return true
 }
 
-func StartMarketDataWorker(db *gorm.DB, marketSvc service.MarketDataService) {
-	intervalStr := config.App.App.MarketUpdateInterval
-	if intervalStr == "" {
-		intervalStr = "1m" // default to 1 minute
+func StartMarketDataWorker(pDB *gorm.DB, pMarketSvc service.MarketDataService) {
+	lIntervalStr := config.App.App.MarketUpdateInterval
+	if lIntervalStr == "" {
+		lIntervalStr = "1m" // default to 1 minute
 	}
 
-	interval, err := time.ParseDuration(intervalStr)
-	if err != nil {
-		log.Printf("Invalid MARKET_UPDATE_INTERVAL %s, defaulting to 1m", intervalStr)
-		interval = 1 * time.Minute
+	lInterval, lErr := time.ParseDuration(lIntervalStr)
+	if lErr != nil {
+		log.Printf("Invalid MARKET_UPDATE_INTERVAL %s, defaulting to 1m", lIntervalStr)
+		lInterval = 1 * time.Minute
 	}
 
-	ticker := time.NewTicker(interval)
+	lTicker := time.NewTicker(lInterval)
 	WorkerStatus = "Running"
 	go func() {
-		log.Printf("Market Data Worker started, interval: %s\n", interval.String())
+		log.Printf("Market Data Worker started, interval: %s\n", lInterval.String())
 		
 		// Fetch prices immediately on startup so they aren't 0.0
-		if err := updateStockPrices(db, marketSvc); err != nil {
-			log.Printf("Failed to initial update stock prices: %v\n", err)
+		if lErr := updateStockPrices(pDB, pMarketSvc); lErr != nil {
+			log.Printf("Failed to initial update stock prices: %v\n", lErr)
 		}
 
-		for range ticker.C {
+		for range lTicker.C {
 			if !IsIndianMarketOpen() {
 				// Market is closed, do nothing
 				continue
 			}
 
-			if err := updateStockPrices(db, marketSvc); err != nil {
-				log.Printf("Failed to update stock prices: %v\n", err)
+			if lErr := updateStockPrices(pDB, pMarketSvc); lErr != nil {
+				log.Printf("Failed to update stock prices: %v\n", lErr)
 			}
 		}
 	}()
 }
 
-func updateStockPrices(db *gorm.DB, marketSvc service.MarketDataService) error {
-	var shares []trade.Share
-	if err := db.Find(&shares).Error; err != nil {
-		return err
+func updateStockPrices(pDB *gorm.DB, pMarketSvc service.MarketDataService) error {
+	var lShares []trade.Share
+	if lErr := pDB.Find(&lShares).Error; lErr != nil {
+		return lErr
 	}
 
-	if len(shares) == 0 {
+	if len(lShares) == 0 {
 		return nil
 	}
 
-	var symbols []string
-	for _, s := range shares {
-		symbols = append(symbols, s.Symbol)
+	var lSymbols []string
+	for _, lS := range lShares {
+		lSymbols = append(lSymbols, lS.Symbol)
 	}
 
-	prices, err := marketSvc.GetLatestPrices(symbols)
-	if err != nil {
-		return err
+	lPrices, lErr := pMarketSvc.GetLatestPrices(lSymbols)
+	if lErr != nil {
+		return lErr
 	}
 
-	if len(prices) == 0 {
+	if len(lPrices) == 0 {
 		return nil
 	}
 
 	// Begin transaction to update all prices
-	return db.Transaction(func(tx *gorm.DB) error {
-		for _, s := range shares {
-			if newPrice, ok := prices[s.Symbol]; ok && newPrice.Current > 0 {
-				if err := tx.Model(&trade.Share{}).Where("id = ?", s.ID).Updates(map[string]interface{}{
-					"price":          newPrice.Current,
-					"previous_price": newPrice.Previous,
+	return pDB.Transaction(func(pTx *gorm.DB) error {
+		for _, lS := range lShares {
+			if lNewPrice, lOk := lPrices[lS.Symbol]; lOk && lNewPrice.Current > 0 {
+				if lErr := pTx.Model(&trade.Share{}).Where("id = ?", lS.ID).Updates(map[string]interface{}{
+					"price":          lNewPrice.Current,
+					"previous_price": lNewPrice.Previous,
 					"updated_at":     time.Now(),
-				}).Error; err != nil {
-					return err
+				}).Error; lErr != nil {
+					return lErr
 				}
 			}
 		}
-		log.Printf("Successfully updated %d stock prices from market data provider", len(prices))
+		log.Printf("Successfully updated %d stock prices from market data provider", len(lPrices))
 		return nil
 	})
 }

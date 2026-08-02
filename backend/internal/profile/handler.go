@@ -99,21 +99,46 @@ Complete:
 	CompleteSubmitKYC(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
 
-func (h *ProfileController) RequestClosure(pCtx *gin.Context) {
+func (pController *ProfileController) RequestClosure(pCtx *gin.Context) {
 	fmt.Println("RequestClosure (+)")
 	
-	userID, exists := pCtx.Get("userID")
-	if !exists {
+	lUserID, lExists := pCtx.Get("userID")
+	if !lExists {
 		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
 		return
 	}
 
-	err := h.svc.RequestClosure(userID.(string))
-	if err != nil {
-		response.Error(pCtx, http.StatusInternalServerError, "CLOSURE_FAILED", "Failed to submit account closure request", err.Error())
+	lErr := pController.svc.RequestClosure(lUserID.(string))
+	if lErr != nil {
+		response.Error(pCtx, http.StatusInternalServerError, "CLOSURE_FAILED", "Failed to submit account closure request", lErr.Error())
 		return
 	}
 
 	response.Success(pCtx, http.StatusOK, "Account closure request submitted successfully", nil)
 	fmt.Println("RequestClosure (-)")
+}
+
+func (pController *ProfileController) ChangePassword(pCtx *gin.Context) {
+	fmt.Println("ChangePassword (+)")
+	
+	lUserID, lExists := pCtx.Get("userID")
+	if !lExists {
+		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
+		return
+	}
+
+	var lReq ChangePasswordRequest
+	if lErr := pCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(pCtx, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body", lErr.Error())
+		return
+	}
+
+	lErr := pController.svc.ChangePassword(lUserID.(string), lReq)
+	if lErr != nil {
+		response.Error(pCtx, http.StatusBadRequest, "CHANGE_PASSWORD_FAILED", lErr.Error(), nil)
+		return
+	}
+
+	response.Success(pCtx, http.StatusOK, "Password updated successfully", nil)
+	fmt.Println("ChangePassword (-)")
 }

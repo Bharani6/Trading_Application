@@ -11,52 +11,52 @@ import (
 )
 
 func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		tokenString := ""
+	return func(pCtx *gin.Context) {
+		lTokenString := ""
 
 		// 1. Try to get token from Authorization header
-		authHeader := c.GetHeader("Authorization")
-		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
-			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		lAuthHeader := pCtx.GetHeader("Authorization")
+		if lAuthHeader != "" && strings.HasPrefix(lAuthHeader, "Bearer ") {
+			lTokenString = strings.TrimPrefix(lAuthHeader, "Bearer ")
 		}
 
 		// 2. Fallback to HttpOnly cookie
-		if tokenString == "" {
-			cookie, err := c.Cookie("access_token")
-			if err == nil {
-				tokenString = cookie
+		if lTokenString == "" {
+			lCookie, lErr := pCtx.Cookie("access_token")
+			if lErr == nil {
+				lTokenString = lCookie
 			}
 		}
 
-		if tokenString == "" {
-			response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Missing authentication token", nil)
-			c.Abort()
+		if lTokenString == "" {
+			response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Missing authentication token", nil)
+			pCtx.Abort()
 			return
 		}
 
-		claims, err := utils.ValidateToken(tokenString)
-		if err != nil {
-			response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Invalid or expired token", err.Error())
-			c.Abort()
+		lClaims, lErr := utils.ValidateToken(lTokenString)
+		if lErr != nil {
+			response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "Invalid or expired token", lErr.Error())
+			pCtx.Abort()
 			return
 		}
 
 		// Store user data in context for subsequent handlers
-		c.Set("userID", claims.UserID)
-		c.Set("role", claims.Role)
+		pCtx.Set("userID", lClaims.UserID)
+		pCtx.Set("role", lClaims.Role)
 
-		c.Next()
+		pCtx.Next()
 	}
 }
 
-func RoleMiddleware(requiredRole string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		role, exists := c.Get("role")
-		if !exists || role.(string) != requiredRole {
-			response.Error(c, http.StatusForbidden, "FORBIDDEN", "You do not have permission to access this resource", nil)
-			c.Abort()
+func RoleMiddleware(pRequiredRole string) gin.HandlerFunc {
+	return func(pCtx *gin.Context) {
+		lRole, lExists := pCtx.Get("role")
+		if !lExists || lRole.(string) != pRequiredRole {
+			response.Error(pCtx, http.StatusForbidden, "FORBIDDEN", "You do not have permission to access this resource", nil)
+			pCtx.Abort()
 			return
 		}
-		c.Next()
+		pCtx.Next()
 	}
 }

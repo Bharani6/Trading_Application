@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-func StartTradeWorker(tradeSvc TradeService) {
-	ticker := time.NewTicker(1 * time.Minute)
+func StartTradeWorker(pTradeSvc TradeService) {
+	lTicker := time.NewTicker(1 * time.Minute)
 	go func() {
 		log.Println("Trade worker started, checking pending trades every minute.")
-		for range ticker.C {
+		for range lTicker.C {
 			if IsMarketOpen() {
-				err := tradeSvc.ExecutePendingTrades()
-				if err != nil {
-					log.Printf("Error executing pending trades: %v\n", err)
+				lErr := pTradeSvc.ExecutePendingTrades()
+				if lErr != nil {
+					log.Printf("Error executing pending trades: %v\n", lErr)
 				}
 			}
 		}

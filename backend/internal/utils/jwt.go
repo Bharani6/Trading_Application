@@ -16,55 +16,55 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateTokens(userID uuid.UUID, role string) (string, string, error) {
-	secret := []byte(config.App.JWT.Secret)
-	expHours := time.Duration(config.App.JWT.ExpirationHours) * time.Hour
+func GenerateTokens(pUserID uuid.UUID, pRole string) (string, string, error) {
+	lSecret := []byte(config.App.JWT.Secret)
+	lExpHours := time.Duration(config.App.JWT.ExpirationHours) * time.Hour
 
 	// Access Token
-	accessClaims := JWTClaims{
-		UserID: userID.String(),
-		Role:   role,
+	lAccessClaims := JWTClaims{
+		UserID: pUserID.String(),
+		Role:   pRole,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expHours)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(lExpHours)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "stock-trading-app",
-			Subject:   userID.String(),
+			Subject:   pUserID.String(),
 		},
 	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessTokenString, err := accessToken.SignedString(secret)
-	if err != nil {
-		return "", "", err
+	lAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, lAccessClaims)
+	lAccessTokenString, lErr := lAccessToken.SignedString(lSecret)
+	if lErr != nil {
+		return "", "", lErr
 	}
 
 	// Refresh Token (Longer lifespan)
-	refreshClaims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expHours * 24 * 7)), // 7 days
+	lRefreshClaims := jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(lExpHours * 24 * 7)), // 7 days
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		Subject:   userID.String(),
+		Subject:   pUserID.String(),
 	}
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshTokenString, err := refreshToken.SignedString(secret)
-	if err != nil {
-		return "", "", err
+	lRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, lRefreshClaims)
+	lRefreshTokenString, lErr := lRefreshToken.SignedString(lSecret)
+	if lErr != nil {
+		return "", "", lErr
 	}
 
-	return accessTokenString, refreshTokenString, nil
+	return lAccessTokenString, lRefreshTokenString, nil
 }
 
-func ValidateToken(tokenString string) (*JWTClaims, error) {
-	secret := []byte(config.App.JWT.Secret)
-	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+func ValidateToken(pTokenString string) (*JWTClaims, error) {
+	lSecret := []byte(config.App.JWT.Secret)
+	lToken, lErr := jwt.ParseWithClaims(pTokenString, &JWTClaims{}, func(pToken *jwt.Token) (interface{}, error) {
+		return lSecret, nil
 	})
 
-	if err != nil {
-		return nil, err
+	if lErr != nil {
+		return nil, lErr
 	}
 
-	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
-		return claims, nil
+	if lClaims, lOk := lToken.Claims.(*JWTClaims); lOk && lToken.Valid {
+		return lClaims, nil
 	}
 	return nil, errors.New("invalid token")
 }

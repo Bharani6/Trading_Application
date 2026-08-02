@@ -10,10 +10,10 @@ import (
 
 type AdminRepository interface {
 	GetAllUsers() ([]userpkg.User, error)
-	GetUserDetails(userID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error)
-	UpdateUserStatus(userID string, status string) error
-	GetOrCreateSegment(name string) (*trade.Segment, error)
-	BulkInsertShares(shares []trade.Share) error
+	GetUserDetails(pUserID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error)
+	UpdateUserStatus(pUserID string, pStatus string) error
+	GetOrCreateSegment(pName string) (*trade.Segment, error)
+	BulkInsertShares(pShares []trade.Share) error
 	DeleteAllShares() error
 }
 
@@ -25,44 +25,44 @@ func NewAdminRepository() AdminRepository {
 	return &adminRepository{db: database.DB}
 }
 
-func (r *adminRepository) GetAllUsers() ([]userpkg.User, error) {
-	var users []userpkg.User
-	err := r.db.Find(&users).Error
-	return users, err
+func (pRepo *adminRepository) GetAllUsers() ([]userpkg.User, error) {
+	var lUsers []userpkg.User
+	lErr := pRepo.db.Find(&lUsers).Error
+	return lUsers, lErr
 }
 
-func (r *adminRepository) GetUserDetails(userID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error) {
-	var user userpkg.User
-	if err := r.db.Where("id = ?", userID).First(&user).Error; err != nil {
-		return nil, nil, nil, nil, err
+func (pRepo *adminRepository) GetUserDetails(pUserID string) (*userpkg.User, *userpkg.PersonalDetails, []userpkg.BankDetails, []userpkg.NomineeDetails, error) {
+	var lUser userpkg.User
+	if lErr := pRepo.db.Where("id = ?", pUserID).First(&lUser).Error; lErr != nil {
+		return nil, nil, nil, nil, lErr
 	}
 
-	var personal userpkg.PersonalDetails
-	r.db.Where("user_id = ?", userID).First(&personal) // ignore error as they might not exist yet
+	var lPersonal userpkg.PersonalDetails
+	pRepo.db.Where("user_id = ?", pUserID).First(&lPersonal) // ignore error as they might not exist yet
 
-	var banks []userpkg.BankDetails
-	r.db.Where("user_id = ?", userID).Find(&banks)
+	var lBanks []userpkg.BankDetails
+	pRepo.db.Where("user_id = ?", pUserID).Find(&lBanks)
 
-	var nominees []userpkg.NomineeDetails
-	r.db.Where("user_id = ?", userID).Find(&nominees)
+	var lNominees []userpkg.NomineeDetails
+	pRepo.db.Where("user_id = ?", pUserID).Find(&lNominees)
 
-	return &user, &personal, banks, nominees, nil
+	return &lUser, &lPersonal, lBanks, lNominees, nil
 }
 
-func (r *adminRepository) UpdateUserStatus(userID string, status string) error {
-	return r.db.Model(&userpkg.User{}).Where("id = ?", userID).Update("status", status).Error
+func (pRepo *adminRepository) UpdateUserStatus(pUserID string, pStatus string) error {
+	return pRepo.db.Model(&userpkg.User{}).Where("id = ?", pUserID).Update("status", pStatus).Error
 }
 
-func (r *adminRepository) GetOrCreateSegment(name string) (*trade.Segment, error) {
-	var segment trade.Segment
-	err := r.db.Where("name = ?", name).FirstOrCreate(&segment, trade.Segment{Name: name}).Error
-	return &segment, err
+func (pRepo *adminRepository) GetOrCreateSegment(pName string) (*trade.Segment, error) {
+	var lSegment trade.Segment
+	lErr := pRepo.db.Where("name = ?", pName).FirstOrCreate(&lSegment, trade.Segment{Name: pName}).Error
+	return &lSegment, lErr
 }
 
-func (r *adminRepository) BulkInsertShares(shares []trade.Share) error {
-	return r.db.CreateInBatches(shares, 100).Error
+func (pRepo *adminRepository) BulkInsertShares(pShares []trade.Share) error {
+	return pRepo.db.CreateInBatches(pShares, 100).Error
 }
 
-func (r *adminRepository) DeleteAllShares() error {
-	return r.db.Unscoped().Where("1 = 1").Delete(&trade.Share{}).Error
+func (pRepo *adminRepository) DeleteAllShares() error {
+	return pRepo.db.Unscoped().Where("1 = 1").Delete(&trade.Share{}).Error
 }

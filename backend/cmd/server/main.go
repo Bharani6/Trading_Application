@@ -60,68 +60,68 @@ func main() {
 	// database.InitRedis()
 
 	// 4. Setup Services & Background Workers
-	tradeRepo := trade.NewTradeRepository()
-	walletRepo := wallet.NewWalletRepository()
-	marketSvc := service.NewYahooFinanceService()
+	lTradeRepo := trade.NewTradeRepository()
+	lWalletRepo := wallet.NewWalletRepository()
+	lMarketService := service.NewYahooFinanceService()
 	
-	tradeSvc := trade.NewTradeService(tradeRepo, walletRepo, marketSvc)
-	trade.StartTradeWorker(tradeSvc)
+	lTradeService := trade.NewTradeService(lTradeRepo, lWalletRepo, lMarketService)
+	trade.StartTradeWorker(lTradeService)
 
-	market.StartMarketDataWorker(database.DB, marketSvc)
+	market.StartMarketDataWorker(database.DB, lMarketService)
 
 	// 5. Setup Router
 	if config.App.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	r := gin.Default()
+	lRouter := gin.Default()
 
 	// CORS middleware
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+	lRouter.Use(func(pContext *gin.Context) {
+		pContext.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		pContext.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		pContext.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		pContext.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+		if pContext.Request.Method == "OPTIONS" {
+			pContext.AbortWithStatus(204)
 			return
 		}
 
-		c.Next()
+		pContext.Next()
 	})
 
 	// Health check
-	r.GET("/health", func(c *gin.Context) {
-		dbStatus := "OK"
-		if err := database.DB.Exec("SELECT 1").Error; err != nil {
-			dbStatus = "Error: " + err.Error()
+	lRouter.GET("/health", func(pContext *gin.Context) {
+		lDBStatus := "OK"
+		if lErr := database.DB.Exec("SELECT 1").Error; lErr != nil {
+			lDBStatus = "Error: " + lErr.Error()
 		}
 
-		yahooStatus := "OK"
+		lYahooStatus := "OK"
 		// Make a quick HEAD/GET request to Yahoo to check connectivity
-		if resp, err := http.Get("https://query1.finance.yahoo.com/v7/finance/quote?symbols=AAPL"); err != nil || resp.StatusCode != 200 {
-			yahooStatus = "Error or Unreachable"
+		if lResp, lErr := http.Get("https://query1.finance.yahoo.com/v7/finance/quote?symbols=AAPL"); lErr != nil || lResp.StatusCode != 200 {
+			lYahooStatus = "Error or Unreachable"
 		}
 
-		workerStatus := market.WorkerStatus
-		version := "v1.0.0"
+		lWorkerStatus := market.WorkerStatus
+		lVersion := "v1.0.0"
 
-		c.JSON(200, gin.H{
-			"database": dbStatus,
-			"yahoo":    yahooStatus,
-			"worker":   workerStatus,
-			"version":  version,
+		pContext.JSON(200, gin.H{
+			"database": lDBStatus,
+			"yahoo":    lYahooStatus,
+			"worker":   lWorkerStatus,
+			"version":  lVersion,
 		})
 	})
 
 	// Register API Routes
-	routes.SetupRouter(r)
+	routes.SetupRouter(lRouter)
 
 	// 5. Start Server
-	port := fmt.Sprintf(":%d", config.App.App.Port)
-	zap.L().Info("Server running on port", zap.String("port", port))
-	if err := r.Run(port); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	lPort := fmt.Sprintf(":%d", config.App.App.Port)
+	zap.L().Info("Server running on port", zap.String("port", lPort))
+	if lErr := lRouter.Run(lPort); lErr != nil {
+		log.Fatalf("Server failed to start: %v", lErr)
 	}
 }
 

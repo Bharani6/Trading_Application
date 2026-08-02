@@ -18,79 +18,79 @@ func NewUtilsController() *UtilsController {
 }
 
 // FetchIFSC proxies the request to Razorpay IFSC API
-func (c *UtilsController) FetchIFSC(ctx *gin.Context) {
-	code := ctx.Param("code")
-	if len(code) != 11 {
-		response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid IFSC code length", nil)
+func (pController *UtilsController) FetchIFSC(lCtx *gin.Context) {
+	lCode := lCtx.Param("code")
+	if len(lCode) != 11 {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid IFSC code length", nil)
 		return
 	}
 
-	resp, err := http.Get(fmt.Sprintf("https://ifsc.razorpay.com/%s", code))
-	if err != nil || resp.StatusCode != 200 {
-		response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid IFSC code or API error", nil)
+	lResp, lErr := http.Get(fmt.Sprintf("https://ifsc.razorpay.com/%s", lCode))
+	if lErr != nil || lResp.StatusCode != 200 {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid IFSC code or API error", nil)
 		return
 	}
-	defer resp.Body.Close()
+	defer lResp.Body.Close()
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to parse API response", err.Error())
+	var lResult map[string]interface{}
+	if lErr := json.NewDecoder(lResp.Body).Decode(&lResult); lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to parse API response", lErr.Error())
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Fetched IFSC details", result)
+	response.Success(lCtx, http.StatusOK, "Fetched IFSC details", lResult)
 }
 
 // FetchPincode proxies the request to Postal Pincode API
-func (c *UtilsController) FetchPincode(ctx *gin.Context) {
-	code := ctx.Param("code")
-	if len(code) != 6 {
-		response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode length", nil)
+func (pController *UtilsController) FetchPincode(lCtx *gin.Context) {
+	lCode := lCtx.Param("code")
+	if len(lCode) != 6 {
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode length", nil)
 		return
 	}
 
-	tr := &http.Transport{
+	lTr := &http.Transport{
 		ForceAttemptHTTP2: false,
 		// Disable HTTP/2 by providing an empty map for TLSNextProto
 		TLSNextProto: make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),
 	}
-	client := &http.Client{Transport: tr}
+	lClient := &http.Client{Transport: lTr}
 
-	resp, err := client.Get(fmt.Sprintf("https://api.postalpincode.in/pincode/%s", code))
-	if err != nil {
-		fmt.Println("Pincode API error:", err)
-		response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode or API error", err.Error())
+	lResp, lErr := lClient.Get(fmt.Sprintf("https://api.postalpincode.in/pincode/%s", lCode))
+	if lErr != nil {
+		fmt.Println("Pincode API error:", lErr)
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode or API error", lErr.Error())
 		return
 	}
-	if resp.StatusCode != 200 {
-		fmt.Println("Pincode API status code:", resp.StatusCode)
-		response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode or API error", fmt.Sprintf("status: %d", resp.StatusCode))
+	if lResp.StatusCode != 200 {
+		fmt.Println("Pincode API status code:", lResp.StatusCode)
+		response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode or API error", fmt.Sprintf("status: %d", lResp.StatusCode))
 		return
 	}
-	defer resp.Body.Close()
+	defer lResp.Body.Close()
 
-	var result []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Println("Pincode JSON decode error:", err)
-		response.Error(ctx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to parse API response", err.Error())
+	var lResult []map[string]interface{}
+	if lErr := json.NewDecoder(lResp.Body).Decode(&lResult); lErr != nil {
+		fmt.Println("Pincode JSON decode error:", lErr)
+		response.Error(lCtx, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to parse API response", lErr.Error())
 		return
 	}
 
-	fmt.Println("Pincode parsed result:", result)
+	fmt.Println("Pincode parsed result:", lResult)
 
-	if len(result) > 0 && result[0]["Status"] == "Success" {
-		postOffices, ok := result[0]["PostOffice"].([]interface{})
-		if ok && len(postOffices) > 0 {
-			firstPO := postOffices[0].(map[string]interface{})
-			data := map[string]interface{}{
-				"state":    firstPO["State"],
-				"district": firstPO["District"],
-				"country":  firstPO["Country"],
+	if len(lResult) > 0 && lResult[0]["Status"] == "Success" {
+		lPostOffices, lOk := lResult[0]["PostOffice"].([]interface{})
+		if lOk && len(lPostOffices) > 0 {
+			lFirstPO := lPostOffices[0].(map[string]interface{})
+			lData := map[string]interface{}{
+				"state":    lFirstPO["State"],
+				"district": lFirstPO["District"],
+				"country":  lFirstPO["Country"],
 			}
-			response.Success(ctx, http.StatusOK, "Fetched Pincode details", data)
+			response.Success(lCtx, http.StatusOK, "Fetched Pincode details", lData)
 			return
 		}
 	}
 
-	response.Error(ctx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode", nil)
+	response.Error(lCtx, http.StatusBadRequest, "BAD_REQUEST", "Invalid Pincode", nil)
 }

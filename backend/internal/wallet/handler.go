@@ -16,70 +16,70 @@ func NewWalletController() *WalletController {
 	return &WalletController{svc: NewWalletService()}
 }
 
-func (c *WalletController) GetBalance(ctx *gin.Context) {
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		response.Error(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
+func (pController *WalletController) GetBalance(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
 		return
 	}
 
-	res, err := c.svc.GetBalance(userID.(string))
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "WALLET_ERROR", err.Error(), nil)
+	lRes, lErr := pController.svc.GetBalance(lUserID.(string))
+	if lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "WALLET_ERROR", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Wallet balance retrieved", res)
+	response.Success(lCtx, http.StatusOK, "Wallet balance retrieved", lRes)
 }
 
-func (c *WalletController) AddFunds(ctx *gin.Context) {
-	userID, _ := ctx.Get("userID")
+func (pController *WalletController) AddFunds(lCtx *gin.Context) {
+	lUserID, _ := lCtx.Get("userID")
 
-	var req FundRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input", err.Error())
+	var lReq FundRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input", lErr.Error())
 		return
 	}
 
-	err := c.svc.AddFunds(userID.(string), req.Amount)
-	if err != nil {
-		response.Error(ctx, http.StatusBadRequest, "WALLET_ERROR", err.Error(), nil)
+	lErr := pController.svc.AddFunds(lUserID.(string), lReq.Amount)
+	if lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "WALLET_ERROR", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Funds added successfully", nil)
+	response.Success(lCtx, http.StatusOK, "Funds added successfully", nil)
 }
 
-func (c *WalletController) WithdrawFunds(ctx *gin.Context) {
-	userID, _ := ctx.Get("userID")
+func (pController *WalletController) WithdrawFunds(lCtx *gin.Context) {
+	lUserID, _ := lCtx.Get("userID")
 
-	var req FundRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input", err.Error())
+	var lReq FundRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input", lErr.Error())
 		return
 	}
 
-	err := c.svc.WithdrawFunds(userID.(string), req.Amount)
-	if err != nil {
-		response.Error(ctx, http.StatusBadRequest, "WALLET_ERROR", err.Error(), nil)
+	lErr := pController.svc.WithdrawFunds(lUserID.(string), lReq.Amount)
+	if lErr != nil {
+		response.Error(lCtx, http.StatusBadRequest, "WALLET_ERROR", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Funds withdrawn successfully", nil)
+	response.Success(lCtx, http.StatusOK, "Funds withdrawn successfully", nil)
 }
 
-func (c *WalletController) GetTransactions(ctx *gin.Context) {
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		response.Error(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
+func (pController *WalletController) GetTransactions(lCtx *gin.Context) {
+	lUserID, lExists := lCtx.Get("userID")
+	if !lExists {
+		response.Error(lCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
 		return
 	}
 
-	transactions, err := c.svc.GetTransactions(userID.(string))
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "TRANSACTION_ERROR", err.Error(), nil)
+	lTransactions, lErr := pController.svc.GetTransactions(lUserID.(string))
+	if lErr != nil {
+		response.Error(lCtx, http.StatusInternalServerError, "TRANSACTION_ERROR", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Transactions retrieved", transactions)
+	response.Success(lCtx, http.StatusOK, "Transactions retrieved", lTransactions)
 }

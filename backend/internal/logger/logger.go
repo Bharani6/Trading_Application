@@ -9,21 +9,21 @@ import (
 
 var Log *zap.Logger
 
-func InitLogger(env string) {
-	var config zap.Config
-	if env == "production" {
-		config = zap.NewProductionConfig()
-		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+func InitLogger(pEnv string) {
+	var lConfig zap.Config
+	if pEnv == "production" {
+		lConfig = zap.NewProductionConfig()
+		lConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	} else {
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		lConfig = zap.NewDevelopmentConfig()
+		lConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	logger, err := config.Build()
-	if err != nil {
-		log.Fatalf("Failed to initialize zap logger: %v", err)
+	lLogger, lErr := lConfig.Build()
+	if lErr != nil {
+		log.Fatalf("Failed to initialize zap logger: %v", lErr)
 	}
 
-	Log = logger
-	zap.ReplaceGlobals(logger)
+	Log = lLogger
+	zap.ReplaceGlobals(lLogger)
 }

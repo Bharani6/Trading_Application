@@ -13,22 +13,22 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() {
-	host := viper.GetString("db.host")
-	port := viper.GetString("db.port")
-	user := viper.GetString("db.user")
-	password := viper.GetString("db.password")
-	dbname := viper.GetString("db.name")
+	lHost := viper.GetString("db.host")
+	lPort := viper.GetString("db.port")
+	lUser := viper.GetString("db.user")
+	lPassword := viper.GetString("db.password")
+	lDbname := viper.GetString("db.name")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		host, user, password, dbname, port)
+	lDsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+		lHost, lUser, lPassword, lDbname, lPort)
 
-	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+	var lErr error
+	DB, lErr = gorm.Open(postgres.Open(lDsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 
-	if err != nil {
-		log.Fatalf("Failed to connect to Postgres database: %v", err)
+	if lErr != nil {
+		log.Fatalf("Failed to connect to Postgres database: %v", lErr)
 	}
 
 	log.Println("Successfully connected to Postgres database")

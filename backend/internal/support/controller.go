@@ -19,67 +19,67 @@ type SupportRequest struct {
 	Message string `json:"message" binding:"required"`
 }
 
-func (sc *SupportController) SubmitMessage(c *gin.Context) {
-	var req SupportRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format or missing required fields", "details": err.Error()})
+func (pController *SupportController) SubmitMessage(lCtx *gin.Context) {
+	var lReq SupportRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		lCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format or missing required fields", "details": lErr.Error()})
 		return
 	}
 
-	msg := SupportMessage{
-		Name:    req.Name,
-		Email:   req.Email,
-		Message: req.Message,
+	lMsg := SupportMessage{
+		Name:    lReq.Name,
+		Email:   lReq.Email,
+		Message: lReq.Message,
 		Status:  "Open",
 	}
 
-	if err := database.DB.Create(&msg).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save support message"})
+	if lErr := database.DB.Create(&lMsg).Error; lErr != nil {
+		lCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save support message"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	lCtx.JSON(http.StatusCreated, gin.H{
 		"message": "Support message submitted successfully",
-		"data":    msg,
+		"data":    lMsg,
 	})
 }
 
-func (sc *SupportController) GetMessages(c *gin.Context) {
-	var messages []SupportMessage
-	if err := database.DB.Order("created_at desc").Find(&messages).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch support messages"})
+func (pController *SupportController) GetMessages(lCtx *gin.Context) {
+	var lMessages []SupportMessage
+	if lErr := database.DB.Order("created_at desc").Find(&lMessages).Error; lErr != nil {
+		lCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch support messages"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"messages": messages})
+	lCtx.JSON(http.StatusOK, gin.H{"messages": lMessages})
 }
 
 type UpdateStatusRequest struct {
 	Status string `json:"status" binding:"required"`
 }
 
-func (sc *SupportController) UpdateStatus(c *gin.Context) {
-	id := c.Param("id")
-	var req UpdateStatusRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
+func (pController *SupportController) UpdateStatus(lCtx *gin.Context) {
+	lID := lCtx.Param("id")
+	var lReq UpdateStatusRequest
+	if lErr := lCtx.ShouldBindJSON(&lReq); lErr != nil {
+		lCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": lErr.Error()})
 		return
 	}
 
-	var msg SupportMessage
-	if err := database.DB.First(&msg, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Support message not found"})
+	var lMsg SupportMessage
+	if lErr := database.DB.First(&lMsg, lID).Error; lErr != nil {
+		lCtx.JSON(http.StatusNotFound, gin.H{"error": "Support message not found"})
 		return
 	}
 
-	msg.Status = req.Status
-	if err := database.DB.Save(&msg).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update status"})
+	lMsg.Status = lReq.Status
+	if lErr := database.DB.Save(&lMsg).Error; lErr != nil {
+		lCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update status"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	lCtx.JSON(http.StatusOK, gin.H{
 		"message": "Status updated successfully",
-		"data":    msg,
+		"data":    lMsg,
 	})
 }

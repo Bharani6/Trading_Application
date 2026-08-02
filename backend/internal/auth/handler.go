@@ -49,7 +49,7 @@ func CompleteRegister(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg st
 	fmt.Println("CompleteRegister (-)")
 }
 
-func (c *AuthController) Register(lCtx *gin.Context) {
+func (pController *AuthController) Register(pCtx *gin.Context) {
 	var lErr error
 	var lStatus int
 	var lCode, lMsg string
@@ -57,7 +57,7 @@ func (c *AuthController) Register(lCtx *gin.Context) {
 	var lReq RegisterRequest
 	var lUser interface{}
 
-	lErr = CollectRegister(lCtx, &lReq)
+	lErr = CollectRegister(pCtx, &lReq)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "VALIDATION_ERROR"
@@ -66,7 +66,7 @@ func (c *AuthController) Register(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lUser, lErr = ConstructRegister(c.svc, lReq)
+	lUser, lErr = ConstructRegister(pController.svc, lReq)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "REGISTRATION_FAILED"
@@ -74,13 +74,13 @@ func (c *AuthController) Register(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = CommunicateRegister(lCtx, lUser)
+	lErr = CommunicateRegister(pCtx, lUser)
 	if lErr != nil {
 		goto Complete
 	}
 
 Complete:
-	CompleteRegister(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
+	CompleteRegister(pCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
 
 // ========================== LOGIN ==========================
@@ -116,7 +116,7 @@ func CompleteLogin(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg strin
 	fmt.Println("CompleteLogin (-)")
 }
 
-func (c *AuthController) Login(lCtx *gin.Context) {
+func (pController *AuthController) Login(pCtx *gin.Context) {
 	var lErr error
 	var lStatus int
 	var lCode, lMsg string
@@ -124,7 +124,7 @@ func (c *AuthController) Login(lCtx *gin.Context) {
 	var lReq LoginRequest
 	var lTokens *LoginResponse
 
-	lErr = CollectLogin(lCtx, &lReq)
+	lErr = CollectLogin(pCtx, &lReq)
 	if lErr != nil {
 		lStatus = http.StatusBadRequest
 		lCode = "VALIDATION_ERROR"
@@ -133,7 +133,7 @@ func (c *AuthController) Login(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lTokens, lErr = ConstructLogin(lCtx, c.svc, lReq)
+	lTokens, lErr = ConstructLogin(pCtx, pController.svc, lReq)
 	if lErr != nil {
 		lStatus = http.StatusUnauthorized
 		lCode = "LOGIN_FAILED"
@@ -141,13 +141,13 @@ func (c *AuthController) Login(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = CommunicateLogin(lCtx, lTokens)
+	lErr = CommunicateLogin(pCtx, lTokens)
 	if lErr != nil {
 		goto Complete
 	}
 
 Complete:
-	CompleteLogin(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
+	CompleteLogin(pCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
 
 // ========================== GET ME ==========================
@@ -185,7 +185,7 @@ func CompleteGetMe(pCtx *gin.Context, pErr error, pStatus int, pCode, pMsg strin
 	fmt.Println("CompleteGetMe (-)")
 }
 
-func (c *AuthController) GetMe(lCtx *gin.Context) {
+func (pController *AuthController) GetMe(pCtx *gin.Context) {
 	var lErr error
 	var lStatus int
 	var lCode, lMsg string
@@ -193,7 +193,7 @@ func (c *AuthController) GetMe(lCtx *gin.Context) {
 	var lUserID string
 	var lUser interface{}
 
-	lUserID, lErr = CollectGetMe(lCtx)
+	lUserID, lErr = CollectGetMe(pCtx)
 	if lErr != nil {
 		lStatus = http.StatusUnauthorized
 		lCode = "UNAUTHORIZED"
@@ -201,7 +201,7 @@ func (c *AuthController) GetMe(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lUser, lErr = ConstructGetMe(c.svc, lUserID)
+	lUser, lErr = ConstructGetMe(pController.svc, lUserID)
 	if lErr != nil {
 		lStatus = http.StatusInternalServerError
 		lCode = "USER_ERROR"
@@ -209,102 +209,102 @@ func (c *AuthController) GetMe(lCtx *gin.Context) {
 		goto Complete
 	}
 
-	lErr = CommunicateGetMe(lCtx, lUser)
+	lErr = CommunicateGetMe(pCtx, lUser)
 	if lErr != nil {
 		goto Complete
 	}
 
 Complete:
-	CompleteGetMe(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
+	CompleteGetMe(pCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
 
 // ========================== FORGOT PASSWORD ==========================
 
-func (c *AuthController) ForgotPassword(ctx *gin.Context) {
-	var req ForgotPasswordRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+func (pController *AuthController) ForgotPassword(pContext *gin.Context) {
+	var lReq ForgotPasswordRequest
+	if lErr := pContext.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(pContext, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", lErr.Error())
 		return
 	}
 
-	tokenStr, err := c.svc.ForgotPassword(req)
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "FORGOT_PASSWORD_ERROR", err.Error(), nil)
+	lTokenStr, lErr := pController.svc.ForgotPassword(lReq)
+	if lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "FORGOT_PASSWORD_ERROR", lErr.Error(), nil)
 		return
 	}
 
 	// Token string is sent back to mock email functionality
-	response.Success(ctx, http.StatusOK, "Password reset link has been generated", gin.H{"mock_token": tokenStr})
+	response.Success(pContext, http.StatusOK, "Password reset link has been generated", gin.H{"mock_token": lTokenStr})
 }
 
 // ========================== VERIFY RESET TOKEN ==========================
 
-func (c *AuthController) VerifyResetToken(ctx *gin.Context) {
-	var req VerifyResetTokenRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+func (pController *AuthController) VerifyResetToken(pContext *gin.Context) {
+	var lReq VerifyResetTokenRequest
+	if lErr := pContext.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(pContext, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", lErr.Error())
 		return
 	}
 
-	if err := c.svc.VerifyResetToken(req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "INVALID_TOKEN", err.Error(), nil)
+	if lErr := pController.svc.VerifyResetToken(lReq); lErr != nil {
+		response.Error(pContext, http.StatusBadRequest, "INVALID_TOKEN", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Token is valid", gin.H{"valid": true})
+	response.Success(pContext, http.StatusOK, "Token is valid", gin.H{"valid": true})
 }
 
 // ========================== RESET PASSWORD ==========================
 
-func (c *AuthController) ResetPassword(ctx *gin.Context) {
-	var req ResetPasswordRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.Error(ctx, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", err.Error())
+func (pController *AuthController) ResetPassword(pContext *gin.Context) {
+	var lReq ResetPasswordRequest
+	if lErr := pContext.ShouldBindJSON(&lReq); lErr != nil {
+		response.Error(pContext, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid input parameters", lErr.Error())
 		return
 	}
 
-	if err := c.svc.ResetPassword(req); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "RESET_PASSWORD_ERROR", err.Error(), nil)
+	if lErr := pController.svc.ResetPassword(lReq); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "RESET_PASSWORD_ERROR", lErr.Error(), nil)
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Password reset successful", nil)
+	response.Success(pContext, http.StatusOK, "Password reset successful", nil)
 }
 
-func (c *AuthController) GetSessions(ctx *gin.Context) {
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		response.Error(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "User not logged in", nil)
+func (pController *AuthController) GetSessions(pContext *gin.Context) {
+	lUserID, lExists := pContext.Get("userID")
+	if !lExists {
+		response.Error(pContext, http.StatusUnauthorized, "UNAUTHORIZED", "User not logged in", nil)
 		return
 	}
 
-	tokenString := ""
-	authHeader := ctx.GetHeader("Authorization")
-	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
-		tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+	lTokenString := ""
+	lAuthHeader := pContext.GetHeader("Authorization")
+	if lAuthHeader != "" && strings.HasPrefix(lAuthHeader, "Bearer ") {
+		lTokenString = strings.TrimPrefix(lAuthHeader, "Bearer ")
 	}
-	if tokenString == "" {
-		cookie, err := ctx.Cookie("access_token")
-		if err == nil {
-			tokenString = cookie
+	if lTokenString == "" {
+		lCookie, lErr := pContext.Cookie("access_token")
+		if lErr == nil {
+			lTokenString = lCookie
 		}
 	}
 
-	sessions, err := c.svc.GetActiveSessions(userID.(string), tokenString)
-	if err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "SESSIONS_ERROR", "Failed to retrieve sessions", err.Error())
+	lSessions, lErr := pController.svc.GetActiveSessions(lUserID.(string), lTokenString)
+	if lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "SESSIONS_ERROR", "Failed to retrieve sessions", lErr.Error())
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Sessions retrieved successfully", sessions)
+	response.Success(pContext, http.StatusOK, "Sessions retrieved successfully", lSessions)
 }
 
-func (c *AuthController) RevokeSession(ctx *gin.Context) {
-	sessionID := ctx.Param("id")
-	if err := c.svc.RevokeSession(sessionID); err != nil {
-		response.Error(ctx, http.StatusInternalServerError, "REVOKE_SESSION_ERROR", "Failed to revoke session", err.Error())
+func (pController *AuthController) RevokeSession(pContext *gin.Context) {
+	lSessionID := pContext.Param("id")
+	if lErr := pController.svc.RevokeSession(lSessionID); lErr != nil {
+		response.Error(pContext, http.StatusInternalServerError, "REVOKE_SESSION_ERROR", "Failed to revoke session", lErr.Error())
 		return
 	}
 
-	response.Success(ctx, http.StatusOK, "Session revoked successfully", nil)
+	response.Success(pContext, http.StatusOK, "Session revoked successfully", nil)
 }

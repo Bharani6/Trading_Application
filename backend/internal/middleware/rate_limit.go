@@ -20,38 +20,38 @@ var (
 
 // RateLimiter returns a middleware that limits requests per IP.
 // maxRequests: max number of requests allowed within windowSeconds.
-func RateLimiter(maxRequests int, windowSeconds int) gin.HandlerFunc {
-	window := time.Duration(windowSeconds) * time.Second
+func RateLimiter(pMaxRequests int, pWindowSeconds int) gin.HandlerFunc {
+	lWindow := time.Duration(pWindowSeconds) * time.Second
 
-	return func(c *gin.Context) {
-		ip := c.ClientIP()
+	return func(pCtx *gin.Context) {
+		lIp := pCtx.ClientIP()
 
 		rateLimitMu.Lock()
-		entry, exists := rateLimitStore[ip]
+		lEntry, lExists := rateLimitStore[lIp]
 
-		if !exists || time.Now().After(entry.resetAt) {
+		if !lExists || time.Now().After(lEntry.resetAt) {
 			// New window
-			rateLimitStore[ip] = &rateLimitEntry{
+			rateLimitStore[lIp] = &rateLimitEntry{
 				count:   1,
-				resetAt: time.Now().Add(window),
+				resetAt: time.Now().Add(lWindow),
 			}
 			rateLimitMu.Unlock()
-			c.Next()
+			pCtx.Next()
 			return
 		}
 
-		entry.count++
-		count := entry.count
+		lEntry.count++
+		lCount := lEntry.count
 		rateLimitMu.Unlock()
 
-		if count > maxRequests {
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+		if lCount > pMaxRequests {
+			pCtx.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
 				"success": false,
 				"message": "Too many requests. Please wait and try again.",
 			})
 			return
 		}
 
-		c.Next()
+		pCtx.Next()
 	}
 }

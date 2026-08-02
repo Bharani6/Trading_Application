@@ -27,54 +27,54 @@ func NewWalletRepository() WalletRepository {
 	return &walletRepository{db: database.DB}
 }
 
-func (r *walletRepository) GetWallet(userID string) (*Wallet, error) {
-	var wallet Wallet
-	err := r.db.Where("user_id = ?", userID).First(&wallet).Error
-	return &wallet, err
+func (pRepo *walletRepository) GetWallet(pUserID string) (*Wallet, error) {
+	var lWallet Wallet
+	lErr := pRepo.db.Where("user_id = ?", pUserID).First(&lWallet).Error
+	return &lWallet, lErr
 }
 
-func (r *walletRepository) GetWalletForUpdate(tx *gorm.DB, userID string) (*Wallet, error) {
-	var wallet Wallet
+func (pRepo *walletRepository) GetWalletForUpdate(pTx *gorm.DB, pUserID string) (*Wallet, error) {
+	var lWallet Wallet
 	// SELECT * FROM wallets WHERE user_id = ? FOR UPDATE (Row level lock)
-	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("user_id = ?", userID).First(&wallet).Error
-	return &wallet, err
+	lErr := pTx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("user_id = ?", pUserID).First(&lWallet).Error
+	return &lWallet, lErr
 }
 
-func (r *walletRepository) CreateWallet(tx *gorm.DB, wallet *Wallet) error {
-	return tx.Create(wallet).Error
+func (pRepo *walletRepository) CreateWallet(pTx *gorm.DB, pWallet *Wallet) error {
+	return pTx.Create(pWallet).Error
 }
 
-func (r *walletRepository) UpdateWallet(tx *gorm.DB, wallet *Wallet) error {
-	return tx.Save(wallet).Error
+func (pRepo *walletRepository) UpdateWallet(pTx *gorm.DB, pWallet *Wallet) error {
+	return pTx.Save(pWallet).Error
 }
 
-func (r *walletRepository) UpdateWalletWithVersion(tx *gorm.DB, wallet *Wallet) error {
-	result := tx.Model(wallet).Where("version = ?", wallet.Version).Updates(map[string]interface{}{
-		"wallet_balance":    wallet.WalletBalance,
-		"blocked_balance":   wallet.BlockedBalance,
-		"available_balance": wallet.AvailableBalance,
-		"version":           wallet.Version + 1,
+func (pRepo *walletRepository) UpdateWalletWithVersion(pTx *gorm.DB, pWallet *Wallet) error {
+	lResult := pTx.Model(pWallet).Where("version = ?", pWallet.Version).Updates(map[string]interface{}{
+		"wallet_balance":    pWallet.WalletBalance,
+		"blocked_balance":   pWallet.BlockedBalance,
+		"available_balance": pWallet.AvailableBalance,
+		"version":           pWallet.Version + 1,
 	})
-	if result.Error != nil {
-		return result.Error
+	if lResult.Error != nil {
+		return lResult.Error
 	}
-	if result.RowsAffected == 0 {
+	if lResult.RowsAffected == 0 {
 		return errors.New("optimistic lock failed for wallet")
 	}
-	wallet.Version++
+	pWallet.Version++
 	return nil
 }
 
-func (r *walletRepository) CreateTransaction(tx *gorm.DB, transaction *Transaction) error {
-	return tx.Create(transaction).Error
+func (pRepo *walletRepository) CreateTransaction(pTx *gorm.DB, pTransaction *Transaction) error {
+	return pTx.Create(pTransaction).Error
 }
 
-func (r *walletRepository) GetTransactionsByUser(userID string) ([]Transaction, error) {
-	var transactions []Transaction
-	err := r.db.Where("user_id = ?", userID).Order("created_at desc").Find(&transactions).Error
-	return transactions, err
+func (pRepo *walletRepository) GetTransactionsByUser(pUserID string) ([]Transaction, error) {
+	var lTransactions []Transaction
+	lErr := pRepo.db.Where("user_id = ?", pUserID).Order("created_at desc").Find(&lTransactions).Error
+	return lTransactions, lErr
 }
 
-func (r *walletRepository) RunInTransaction(fn func(tx *gorm.DB) error) error {
-	return r.db.Transaction(fn)
+func (pRepo *walletRepository) RunInTransaction(pFn func(pTx *gorm.DB) error) error {
+	return pRepo.db.Transaction(pFn)
 }

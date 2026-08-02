@@ -4,6 +4,7 @@ import (
 	"errors"
 	"regexp"
 	"stock-trading/internal/user"
+	"stock-trading/internal/utils"
 
 	"time"
 
@@ -15,6 +16,7 @@ import (
 type ProfileService interface {
 	SubmitKYC(userID string, req KYCSubmitRequest) error
 	RequestClosure(userID string) error
+	ChangePassword(userID string, req ChangePasswordRequest) error
 }
 
 type profileService struct {
@@ -25,66 +27,66 @@ func NewProfileService() ProfileService {
 	return &profileService{repo: NewProfileRepository()}
 }
 
-func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
+func (pService *profileService) SubmitKYC(pUserID string, pReq KYCSubmitRequest) error {
+	lUID, lErr := uuid.Parse(pUserID)
+	if lErr != nil {
 		return errors.New("invalid user id")
 	}
 
-	var details user.PersonalDetails
-	if existing, err := s.repo.GetPersonalDetails(uID.String()); err == nil {
-		details = *existing
+	var lDetails user.PersonalDetails
+	if lExisting, lErr := pService.repo.GetPersonalDetails(lUID.String()); lErr == nil {
+		lDetails = *lExisting
 	} else {
-		details = user.PersonalDetails{UserID: uID}
+		lDetails = user.PersonalDetails{UserID: lUID}
 	}
 
-	if req.FatherName != "" {
-		details.FatherName = req.FatherName
+	if pReq.FatherName != "" {
+		lDetails.FatherName = pReq.FatherName
 	}
-	if req.MotherName != "" {
-		details.MotherName = req.MotherName
+	if pReq.MotherName != "" {
+		lDetails.MotherName = pReq.MotherName
 	}
-	if req.Country != "" {
-		details.Country = req.Country
+	if pReq.Country != "" {
+		lDetails.Country = pReq.Country
 	}
-	if req.State != "" {
-		details.State = req.State
+	if pReq.State != "" {
+		lDetails.State = pReq.State
 	}
-	if req.City != "" {
-		details.City = req.City
+	if pReq.City != "" {
+		lDetails.City = pReq.City
 	}
-	if req.Address != "" {
-		details.Address = req.Address
+	if pReq.Address != "" {
+		lDetails.Address = pReq.Address
 	}
-	if req.Pincode != "" {
-		details.Pincode = req.Pincode
+	if pReq.Pincode != "" {
+		lDetails.Pincode = pReq.Pincode
 	}
-	var bankAccounts []user.BankDetails
-	ifscRegex := regexp.MustCompile(`^[A-Z]{4}0[A-Z0-9]{6}$`)
+	var lBankAccounts []user.BankDetails
+	lIfscRegex := regexp.MustCompile(`^[A-Z]{4}0[A-Z0-9]{6}$`)
 
-	for _, b := range req.BankAccounts {
-		if !ifscRegex.MatchString(b.IFSC) {
+	for _, lB := range pReq.BankAccounts {
+		if !lIfscRegex.MatchString(lB.IFSC) {
 			return errors.New("invalid IFSC format")
 		}
-		bankAccounts = append(bankAccounts, user.BankDetails{
-			UserID:        uID,
-			AccountType:   b.AccountType,
-			IFSC:          b.IFSC,
-			BankName:      b.BankName,
-			Branch:        b.Branch,
-			AccountNumber: b.AccountNumber,
-			IncomeRange:   req.IncomeRange,
+		lBankAccounts = append(lBankAccounts, user.BankDetails{
+			UserID:        lUID,
+			AccountType:   lB.AccountType,
+			IFSC:          lB.IFSC,
+			BankName:      lB.BankName,
+			Branch:        lB.Branch,
+			AccountNumber: lB.AccountNumber,
+			IncomeRange:   pReq.IncomeRange,
 		})
 	}
 
-	var nominees []user.NomineeDetails
-	var totalPercentage float64 = 0
+	var lNominees []user.NomineeDetails
+	var lTotalPercentage float64 = 0
 
-	for _, n := range req.Nominees {
-		if n.GuardianName != "" {
-			if n.GuardianDOB != "" {
-				dob, err := time.Parse("2006-01-02", n.GuardianDOB)
-				if err != nil || time.Since(dob).Hours() < 18*365*24 {
+	for _, lN := range pReq.Nominees {
+		if lN.GuardianName != "" {
+			if lN.GuardianDOB != "" {
+				lDob, lErr := time.Parse("2006-01-02", lN.GuardianDOB)
+				if lErr != nil || time.Since(lDob).Hours() < 18*365*24 {
 					return errors.New("guardian must be at least 18 years old")
 				}
 			} else {
@@ -92,88 +94,117 @@ func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
 			}
 		}
 
-		nominees = append(nominees, user.NomineeDetails{
-			UserID:               uID,
-			Name:                 n.Name,
-			DOB:                  n.DOB,
-			PAN:                  n.PAN,
-			Relationship:         n.Relationship,
-			Percentage:           n.Percentage,
-			GuardianName:         n.GuardianName,
-			GuardianRelationship: n.GuardianRelationship,
-			GuardianPAN:          n.GuardianPAN,
-			GuardianDOB:          n.GuardianDOB,
+		lNominees = append(lNominees, user.NomineeDetails{
+			UserID:               lUID,
+			Name:                 lN.Name,
+			DOB:                  lN.DOB,
+			PAN:                  lN.PAN,
+			Relationship:         lN.Relationship,
+			Percentage:           lN.Percentage,
+			GuardianName:         lN.GuardianName,
+			GuardianRelationship: lN.GuardianRelationship,
+			GuardianPAN:          lN.GuardianPAN,
+			GuardianDOB:          lN.GuardianDOB,
 		})
-		totalPercentage += n.Percentage
+		lTotalPercentage += lN.Percentage
 	}
 
-	if len(nominees) > 0 && totalPercentage != 100 {
+	if len(lNominees) > 0 && lTotalPercentage != 100 {
 		return errors.New("total nominee percentage allocation must equal exactly 100")
 	}
 
-	err = s.repo.RunInTransaction(func(tx *gorm.DB) error {
-		if err := tx.Save(&details).Error; err != nil {
-			return err
+	lErr = pService.repo.RunInTransaction(func(pTx *gorm.DB) error {
+		if lTxErr := pTx.Save(&lDetails).Error; lTxErr != nil {
+			return lTxErr
 		}
 
 		// Replace bank details only if they are provided
-		if len(bankAccounts) > 0 {
-			if err := tx.Where("user_id = ?", uID).Delete(&user.BankDetails{}).Error; err != nil {
-				return err
+		if len(lBankAccounts) > 0 {
+			if lTxErr := pTx.Where("user_id = ?", lUID).Delete(&user.BankDetails{}).Error; lTxErr != nil {
+				return lTxErr
 			}
-			for i := range bankAccounts {
-				if err := tx.Create(&bankAccounts[i]).Error; err != nil {
-					return err
+			for i := range lBankAccounts {
+				if lTxErr := pTx.Create(&lBankAccounts[i]).Error; lTxErr != nil {
+					return lTxErr
 				}
 			}
 		}
 
 		// Replace nominees only if they are provided
-		if len(nominees) > 0 {
-			if err := tx.Where("user_id = ?", uID).Delete(&user.NomineeDetails{}).Error; err != nil {
-				return err
+		if len(lNominees) > 0 {
+			if lTxErr := pTx.Where("user_id = ?", lUID).Delete(&user.NomineeDetails{}).Error; lTxErr != nil {
+				return lTxErr
 			}
-			for i := range nominees {
-				if err := tx.Create(&nominees[i]).Error; err != nil {
-					return err
+			for i := range lNominees {
+				if lTxErr := pTx.Create(&lNominees[i]).Error; lTxErr != nil {
+					return lTxErr
 				}
 			}
 		}
 
-		var existingUser user.User
-		updateData := map[string]interface{}{}
-		if err := tx.Where("id = ?", userID).First(&existingUser).Error; err == nil {
-			if existingUser.Role != "admin" {
-				updateData["status"] = "pending_approval"
+		var lExistingUser user.User
+		lUpdateData := map[string]interface{}{}
+		if lTxErr := pTx.Where("id = ?", pUserID).First(&lExistingUser).Error; lTxErr == nil {
+			if lExistingUser.Role != "admin" {
+				lUpdateData["status"] = "pending_approval"
 			}
 		} else {
-			updateData["status"] = "pending_approval"
+			lUpdateData["status"] = "pending_approval"
 		}
 		
-		if req.Mobile != "" {
-			updateData["mobile"] = req.Mobile
+		if pReq.Mobile != "" {
+			lUpdateData["mobile"] = pReq.Mobile
 		}
-		if req.IncomeRange != "" {
-			updateData["income_range"] = req.IncomeRange
+		if pReq.IncomeRange != "" {
+			lUpdateData["income_range"] = pReq.IncomeRange
 		}
-		if req.Occupation != "" {
-			updateData["occupation"] = req.Occupation
+		if pReq.Occupation != "" {
+			lUpdateData["occupation"] = pReq.Occupation
 		}
-		if err := tx.Model(&user.User{}).Where("id = ?", userID).Updates(updateData).Error; err != nil {
-			return err
+		if lTxErr := pTx.Model(&user.User{}).Where("id = ?", pUserID).Updates(lUpdateData).Error; lTxErr != nil {
+			return lTxErr
 		}
 		return nil
 	})
 
-	if err != nil {
-		zap.L().Error("KYC submission failed", zap.Error(err))
+	if lErr != nil {
+		zap.L().Error("KYC submission failed", zap.Error(lErr))
 		return errors.New("failed to submit KYC details")
 	}
 
 	return nil
 }
 
-func (s *profileService) RequestClosure(userID string) error {
-	return s.repo.UpdateUserStatus(userID, "closure_requested")
+func (pService *profileService) RequestClosure(pUserID string) error {
+	return pService.repo.UpdateUserStatus(pUserID, "closure_requested")
+}
+
+func (pService *profileService) ChangePassword(pUserID string, pReq ChangePasswordRequest) error {
+	lUserRepo := user.NewUserRepository()
+	lU, lErr := lUserRepo.GetUserByID(pUserID)
+	if lErr != nil {
+		return errors.New("invalid user")
+	}
+
+	if !utils.CheckPasswordHash(pReq.CurrentPassword, lU.PasswordHash) {
+		return errors.New("current password is incorrect")
+	}
+
+	if len(pReq.NewPassword) < 8 {
+		return errors.New("new password must be at least 8 characters long")
+	}
+	lHasUpper := regexp.MustCompile(`[A-Z]`).MatchString(pReq.NewPassword)
+	lHasLower := regexp.MustCompile(`[a-z]`).MatchString(pReq.NewPassword)
+	lHasDigit := regexp.MustCompile(`[0-9]`).MatchString(pReq.NewPassword)
+	if !lHasUpper || !lHasLower || !lHasDigit {
+		return errors.New("new password must contain at least one uppercase letter, one lowercase letter, and one number")
+	}
+
+	lHashedPassword, lErr := utils.HashPassword(pReq.NewPassword)
+	if lErr != nil {
+		return errors.New("internal server error")
+	}
+
+	return lUserRepo.UpdatePassword(pUserID, lHashedPassword)
 }
 

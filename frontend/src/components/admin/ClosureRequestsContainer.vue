@@ -250,6 +250,8 @@ const updateStatus = async (userId, action) => {
         if (action === 'approve') u.status = 'active'
         else if (action === 'reject') u.status = 'rejected'
         else if (action === 'block') u.status = 'blocked'
+        else if (action === 'close_account') u.status = 'closed'
+        else if (action === 'reject_closure') u.status = 'active'
       }
     }
   } catch (err) {
