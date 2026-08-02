@@ -66,6 +66,7 @@ func SetupRouter(r *gin.Engine) {
 			secure.GET("/users/me", authController.GetMe)
 			secure.POST("/users/kyc", profileController.SubmitKYC)
 			secure.POST("/users/closure", profileController.RequestClosure)
+			secure.POST("/users/change-password", profileController.ChangePassword)
 			
 			secure.GET("/auth/sessions", authController.GetSessions)
 			secure.DELETE("/auth/sessions/:id", authController.RevokeSession)

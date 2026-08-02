@@ -11,5 +11,9 @@ export const userApi = {
 
   requestAccountClosure: () => {
     return api.post('/users/closure')
+  },
+
+  changePassword: (payload) => {
+    return api.post('/users/change-password', payload)
   }
 }

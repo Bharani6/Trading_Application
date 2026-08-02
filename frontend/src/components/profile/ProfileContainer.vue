@@ -177,19 +177,21 @@
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">Current Password</label>
-              <input type="password" class="form-input" placeholder="Enter current password" />
+              <input type="password" class="form-input" v-model="passwordForm.current_password" placeholder="Enter current password" />
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">New Password</label>
-              <input type="password" class="form-input" placeholder="Enter new password" />
+              <input type="password" class="form-input" v-model="passwordForm.new_password" placeholder="Enter new password" />
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-input" placeholder="Confirm new password" />
+              <input type="password" class="form-input" v-model="passwordForm.confirm_password" placeholder="Confirm new password" />
             </div>
             <div class="full-width">
-              <button type="button" class="btn-outline-small" style="padding: 10px 20px;" @click="toast.info('Password change functionality coming soon')">
-                <i class="fas fa-key"></i> Update Password
+              <button type="button" class="btn-outline-small" style="padding: 10px 20px;" @click="handleChangePassword" :disabled="changePasswordLoading">
+                <i v-if="!changePasswordLoading" class="fas fa-key"></i>
+                <i v-else class="fas fa-spinner fa-spin"></i> 
+                Update Password
               </button>
             </div>
           </template>
@@ -650,7 +652,42 @@ const revokeSession = async (id) => {
   }
 }
 
-const activeTab = computed(() => route.query.tab || 'personal-details')
+const passwordForm = reactive({
+  current_password: '',
+  new_password: '',
+  confirm_password: ''
+})
+const changePasswordLoading = ref(false)
+
+const handleChangePassword = async () => {
+  if (!passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password) {
+    toast.error('Please fill in all password fields')
+    return
+  }
+  
+  if (passwordForm.new_password !== passwordForm.confirm_password) {
+    toast.error('New password and confirm password do not match')
+    return
+  }
+
+  changePasswordLoading.value = true
+  try {
+    await userApi.changePassword({
+      current_password: passwordForm.current_password,
+      new_password: passwordForm.new_password
+    })
+    toast.success('Password updated successfully')
+    passwordForm.current_password = ''
+    passwordForm.new_password = ''
+    passwordForm.confirm_password = ''
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to change password')
+  } finally {
+    changePasswordLoading.value = false
+  }
+}
+
+const activeTab = ref(route.query.tab || 'personal-details')
 
 watch(activeTab, (newVal) => {
   if (newVal === 'active-devices') {

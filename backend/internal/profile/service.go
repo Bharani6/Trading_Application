@@ -4,6 +4,7 @@ import (
 	"errors"
 	"regexp"
 	"stock-trading/internal/user"
+	"stock-trading/internal/utils"
 
 	"time"
 
@@ -15,6 +16,7 @@ import (
 type ProfileService interface {
 	SubmitKYC(userID string, req KYCSubmitRequest) error
 	RequestClosure(userID string) error
+	ChangePassword(userID string, req ChangePasswordRequest) error
 }
 
 type profileService struct {
@@ -175,5 +177,34 @@ func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
 
 func (s *profileService) RequestClosure(userID string) error {
 	return s.repo.UpdateUserStatus(userID, "closure_requested")
+}
+
+func (s *profileService) ChangePassword(userID string, req ChangePasswordRequest) error {
+	userRepo := user.NewUserRepository()
+	u, err := userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("invalid user")
+	}
+
+	if !utils.CheckPasswordHash(req.CurrentPassword, u.PasswordHash) {
+		return errors.New("current password is incorrect")
+	}
+
+	if len(req.NewPassword) < 8 {
+		return errors.New("new password must be at least 8 characters long")
+	}
+	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(req.NewPassword)
+	hasLower := regexp.MustCompile(`[a-z]`).MatchString(req.NewPassword)
+	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(reqn.NewPassword)
+	if !hasUpper || !hasLower || !hasDigit {
+		return errors.New("new password must contain at least one uppercase letter, one lowercase letter, and one number")
+	}
+
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	return userRepo.UpdatePassword(userID, hashedPassword)
 }
 

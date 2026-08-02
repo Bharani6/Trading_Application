@@ -34,3 +34,8 @@ type NomineeDTO struct {
 	GuardianPAN          string  `json:"guardian_pan"`
 	GuardianDOB          string  `json:"guardian_dob"`
 }
+
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required"`
+}

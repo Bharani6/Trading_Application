@@ -117,3 +117,28 @@ func (h *ProfileController) RequestClosure(pCtx *gin.Context) {
 	response.Success(pCtx, http.StatusOK, "Account closure request submitted successfully", nil)
 	fmt.Println("RequestClosure (-)")
 }
+
+func (h *ProfileController) ChangePassword(pCtx *gin.Context) {
+	fmt.Println("ChangePassword (+)")
+	
+	userID, exists := pCtx.Get("userID")
+	if !exists {
+		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
+		return
+	}
+
+	var req ChangePasswordRequest
+	if err := pCtx.ShouldBindJSON(&req); err != nil {
+		response.Error(pCtx, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body", err.Error())
+		return
+	}
+
+	err := h.svc.ChangePassword(userID.(string), req)
+	if err != nil {
+		response.Error(pCtx, http.StatusBadRequest, "CHANGE_PASSWORD_FAILED", err.Error(), nil)
+		return
+	}
+
+	response.Success(pCtx, http.StatusOK, "Password updated successfully", nil)
+	fmt.Println("ChangePassword (-)")
+}
