@@ -177,15 +177,24 @@
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">Current Password</label>
-              <input type="password" class="form-input" v-model="passwordForm.current_password" placeholder="Enter current password" />
+              <div style="position: relative;">
+                <input :type="showCurrentPassword ? 'text' : 'password'" class="form-input" v-model="passwordForm.current_password" placeholder="Enter current password" style="padding-right: 40px;" />
+                <i :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" @click="showCurrentPassword = !showCurrentPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);"></i>
+              </div>
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">New Password</label>
-              <input type="password" class="form-input" v-model="passwordForm.new_password" placeholder="Enter new password" />
+              <div style="position: relative;">
+                <input :type="showNewPassword ? 'text' : 'password'" class="form-input" v-model="passwordForm.new_password" placeholder="Enter new password" style="padding-right: 40px;" />
+                <i :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" @click="showNewPassword = !showNewPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);"></i>
+              </div>
             </div>
             <div class="form-group full-width" style="max-width: 400px; margin-bottom: 20px;">
               <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-input" v-model="passwordForm.confirm_password" placeholder="Confirm new password" />
+              <div style="position: relative;">
+                <input :type="showConfirmPassword ? 'text' : 'password'" class="form-input" v-model="passwordForm.confirm_password" placeholder="Confirm new password" style="padding-right: 40px;" />
+                <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" @click="showConfirmPassword = !showConfirmPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);"></i>
+              </div>
             </div>
             <div class="full-width">
               <button type="button" class="btn-outline-small" style="padding: 10px 20px;" @click="handleChangePassword" :disabled="changePasswordLoading">
@@ -658,6 +667,9 @@ const passwordForm = reactive({
   confirm_password: ''
 })
 const changePasswordLoading = ref(false)
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 const handleChangePassword = async () => {
   if (!passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password) {
@@ -688,6 +700,10 @@ const handleChangePassword = async () => {
 }
 
 const activeTab = ref(route.query.tab || 'personal-details')
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab) activeTab.value = newTab
+})
 
 watch(activeTab, (newVal) => {
   if (newVal === 'active-devices') {

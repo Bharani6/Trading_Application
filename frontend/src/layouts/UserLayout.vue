@@ -113,37 +113,6 @@
           </a>
         </nav>
       </aside>
-
-      <!-- Sidebar ONLY for Admin Routes -->
-      <aside class="sidebar-section admin-sidebar" v-if="route.path.startsWith('/admin')">
-        <nav class="sidebar-nav">
-          <router-link to="/dashboard" class="nav-item">
-            <div class="nav-icon"><i class="fas fa-arrow-left"></i></div>
-            <span>Back to User View</span>
-          </router-link>
-          <router-link to="/admin/dashboard" class="nav-item" active-class="active">
-            <i class="fas fa-tachometer-alt nav-icon"></i>
-            <span>Overview</span>
-          </router-link>
-          <router-link to="/admin/users" class="nav-item" active-class="active">
-            <i class="fas fa-users-cog nav-icon"></i>
-            <span>User Approvals</span>
-          </router-link>
-          <router-link to="/admin/stocks" class="nav-item" active-class="active">
-            <i class="fas fa-file-csv nav-icon"></i>
-            <span>Stock Management</span>
-          </router-link>
-          <router-link to="/admin/closurerequest" class="nav-item" active-class="active">
-            <i class="fas fa-user-times nav-icon"></i>
-            <span>Closure Requests</span>
-          </router-link>
-          <router-link to="/admin/support" class="nav-item" active-class="active">
-            <i class="fas fa-envelope nav-icon"></i>
-            <span>Support</span>
-          </router-link>
-        </nav>
-      </aside>
-
       <main class="page-container" :class="{ 'with-sidebar': route.path === '/profile' || route.path.startsWith('/admin') }">
         <router-view></router-view>
       </main>
@@ -168,6 +137,10 @@ const toast = useToast()
 const isSupportModalOpen = ref(false)
 
 const activeSection = ref(route.query.tab || 'personal-details')
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab) activeSection.value = newTab
+})
 
 const changeTab = (id) => {
   activeSection.value = id
