@@ -455,7 +455,60 @@
             </div>
           </template>
 
-          <div class="form-actions full-width mt-4 text-right" v-if="activeTab !== 'change-password' && activeTab !== 'active-devices'">
+          <!-- ACCOUNT CLOSURE TAB -->
+          <template v-if="activeTab === 'account-closure'">
+            <div class="full-width account-closure-container">
+              <h3 class="section-title closure-title">
+                Account Closure
+              </h3>
+              <template v-if="authStore.state.user?.status === 'closure_requested'">
+                <div class="alert alert-warning" style="margin-top: 1rem; border-color: rgba(234, 179, 8, 0.3); background-color: rgba(234, 179, 8, 0.15); color: #eab308; padding: 1.5rem; border-radius: 8px;">
+                  <h4 style="margin: 0 0 0.5rem 0;"><i class="fas fa-clock"></i> Closure Request Submitted</h4>
+                  <p style="margin: 0; font-size: 14px;">Your account closure request is currently pending admin approval. We will notify you once it has been processed.</p>
+                </div>
+              </template>
+              <template v-else>
+                <p class="device-section-subtitle">
+                  Closing your account is permanent. All your data, portfolio history, and active sessions will be permanently deleted.
+                  SEBI regulations require all holdings to be sold and balances cleared before closure.
+                </p>
+
+                <div class="closure-checklist-box">
+                  <h4 class="closure-checklist-title">Pre-closure Checklist</h4>
+                  <div class="closure-checklist-group">
+                    <div class="closure-checklist-item">
+                      <i :class="isBalanceZero ? 'fas fa-check-circle text-profit closure-checklist-icon' : 'fas fa-times-circle text-loss closure-checklist-icon'"></i>
+                      <div class="closure-checklist-content">
+                        <span class="closure-checklist-label">Zero Wallet Balance</span>
+                        <span class="closure-checklist-desc">
+                          Current balance: ₹{{ walletStore.state.balance.available_balance.toFixed(2) }}
+                          <span v-if="!isBalanceZero">(Please withdraw/clear this amount)</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="closure-checklist-item">
+                      <i :class="activeHoldingsCount === 0 ? 'fas fa-check-circle text-profit closure-checklist-icon' : 'fas fa-times-circle text-loss closure-checklist-icon'"></i>
+                      <div class="closure-checklist-content">
+                        <span class="closure-checklist-label">Empty Portfolio</span>
+                        <span class="closure-checklist-desc">
+                          Active holdings: {{ activeHoldingsCount }}
+                          <span v-if="activeHoldingsCount > 0">(Please sell or transfer all active stocks)</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions text-left">
+                  <button type="button" @click="handleAccountClosure" class="submit-btn btn-close-account" :disabled="!canCloseAccount">
+                    <i class="fas fa-trash-alt btn-icon"></i> Close Account
+                  </button>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <div class="form-actions full-width mt-4 text-right" v-if="activeTab !== 'change-password' && activeTab !== 'active-devices' && activeTab !== 'account-closure'">
             <button type="submit" class="submit-btn" :disabled="loading || (kycForm.nomineeEnabled && activeTab === 'nominee-details' && totalNomineePercentage !== 100)">
               <span v-if="!loading"><i class="fas fa-save"></i> Save Changes</span>
               <i v-else class="fas fa-spinner fa-spin"></i>
@@ -467,6 +520,27 @@
         </form>
       </div>
     </div>
+
+    <!-- CUSTOM ACCOUNT CLOSURE MODAL -->
+    <div class="closure-modal-overlay" v-if="showClosureModal">
+      <div class="closure-modal">
+        <div class="modal-header">
+          <h3>Confirm Account Closure</h3>
+          <button type="button" class="close-btn" @click="showClosureModal = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text text-main" style="margin-top: 0;">
+            Are you sure you want to close your account? This action cannot be undone.
+          </p>
+          <div class="modal-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button type="button" class="closure-btn-cancel" @click="showClosureModal = false">Cancel</button>
+            <button type="button" class="closure-btn-confirm" @click="confirmAccountClosure">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -475,16 +549,52 @@ import '../../assets/css/profile.css'
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useAuthStore } from '../../store'
 import { useToast } from 'vue-toastification'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { userApi } from '../../api/user.api'
 import { utilsApi } from '../../api/utils.api'
 import { authApi } from '../../api/auth.api'
+import { useWalletStore } from '../../store/wallet'
+import { useTradeStore } from '../../store/trade'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
+const walletStore = useWalletStore()
+const tradeStore = useTradeStore()
 const toast = useToast()
 const loading = ref(false)
 const editingField = ref(null)
+
+const activeHoldingsCount = computed(() => {
+  const history = tradeStore.state.history || []
+  const holdings = {}
+  history.forEach(t => {
+    const type = (t.Type || t.type || '').toLowerCase()
+    const status = (t.Status || t.status || '').toLowerCase()
+    const qty = t.Quantity || t.quantity || 0
+    const shareId = t.ShareID || t.share_id || (t.Share ? (t.Share.ID || t.Share.id) : null)
+    
+    if (status === 'completed' && shareId) {
+      if (!holdings[shareId]) holdings[shareId] = 0
+      if (type === 'buy') holdings[shareId] += qty
+      else if (type === 'sell') holdings[shareId] -= qty
+    }
+  })
+  
+  let active = 0
+  for (const id in holdings) {
+    if (holdings[id] > 0) active++
+  }
+  return active
+})
+
+const isBalanceZero = computed(() => {
+  return walletStore.state.balance.available_balance === 0
+})
+
+const canCloseAccount = computed(() => {
+  return isBalanceZero.value && activeHoldingsCount.value === 0
+})
 
 const sessions = ref([])
 const loadingSessions = ref(false)
@@ -714,6 +824,8 @@ onMounted(() => {
   if (authStore.state.user) {
     populateForm(authStore.state.user)
   }
+  walletStore.fetchBalance()
+  tradeStore.fetchHistory()
 })
 
 const addSecondaryBank = () => {
@@ -848,6 +960,34 @@ const saveProfile = async () => {
     } else {
       toast.error(apiMessage || 'Failed to submit account settings')
     }
+  } finally {
+    loading.value = false
+  }
+}
+
+const showClosureModal = ref(false)
+
+const handleAccountClosure = () => {
+  showClosureModal.value = true
+}
+
+const confirmAccountClosure = async () => {
+  try {
+    loading.value = true
+    await userApi.requestAccountClosure()
+    toast.success("Account closure request submitted successfully.")
+    
+    // Update local state instead of logging out
+    if (authStore.state.user) {
+      authStore.state.user.status = 'closure_requested'
+      // Optionally update local storage if needed by the store
+      const updatedUser = { ...authStore.state.user, status: 'closure_requested' }
+      authStore.login(updatedUser, authStore.state.token)
+    }
+    
+    showClosureModal.value = false
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to submit request")
   } finally {
     loading.value = false
   }

@@ -266,6 +266,10 @@ func (s *authService) Login(req LoginRequest, ip string, userAgent string) (*Log
 		return nil, errors.New("invalid credentials")
 	}
 
+	if user.Status == "closed" {
+		return nil, errors.New("invalid credentials")
+	}
+
 	if user.Status == "blocked" {
 		return nil, errors.New("account blocked")
 	}

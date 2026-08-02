@@ -157,6 +157,11 @@ onMounted(async () => {
 })
 
 const initiateTransaction = async () => {
+  if (authStore.state.user?.status === 'closure_requested') {
+    toast.error('Account closure requested, wallet actions are disabled.')
+    return;
+  }
+
   if (!amount.value || amount.value <= 0) {
     toast.error('Please enter a valid amount greater than 0')
     return;

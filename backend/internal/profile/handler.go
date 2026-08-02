@@ -98,3 +98,22 @@ func (c *ProfileController) SubmitKYC(lCtx *gin.Context) {
 Complete:
 	CompleteSubmitKYC(lCtx, lErr, lStatus, lCode, lMsg, lDetails)
 }
+
+func (h *ProfileController) RequestClosure(pCtx *gin.Context) {
+	fmt.Println("RequestClosure (+)")
+	
+	userID, exists := pCtx.Get("userID")
+	if !exists {
+		response.Error(pCtx, http.StatusUnauthorized, "UNAUTHORIZED", "User not found in context", nil)
+		return
+	}
+
+	err := h.svc.RequestClosure(userID.(string))
+	if err != nil {
+		response.Error(pCtx, http.StatusInternalServerError, "CLOSURE_FAILED", "Failed to submit account closure request", err.Error())
+		return
+	}
+
+	response.Success(pCtx, http.StatusOK, "Account closure request submitted successfully", nil)
+	fmt.Println("RequestClosure (-)")
+}

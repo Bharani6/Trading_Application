@@ -55,6 +55,14 @@ func (s *walletService) AddFunds(userID string, amount float64) error {
 		return errors.New("amount must be greater than zero")
 	}
 
+	u, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("invalid user")
+	}
+	if u.Status == "closure_requested" {
+		return errors.New("account closure requested, action not permitted")
+	}
+
 	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
 		wallet, err := s.repo.GetWalletForUpdate(tx, userID)
 
@@ -102,6 +110,14 @@ func (s *walletService) WithdrawFunds(userID string, amount float64) error {
 	}
 	if amount <= 0 {
 		return errors.New("amount must be greater than zero")
+	}
+
+	u, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("invalid user")
+	}
+	if u.Status == "closure_requested" {
+		return errors.New("account closure requested, action not permitted")
 	}
 
 	return s.repo.RunInTransaction(func(tx *gorm.DB) error {

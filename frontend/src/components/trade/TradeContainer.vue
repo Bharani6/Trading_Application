@@ -229,6 +229,10 @@ const getOwnedShares = (shareId) => {
 }
 
 const openTradeModal = async (stock, action) => {
+  if (authStore.state.user?.status === 'closure_requested') {
+    toast.error('Account closure requested, trading is disabled.')
+    return
+  }
   if (authStore.state.user?.status !== 'active') {
     toast.error('You must be approved by an Admin (KYC verification) to trade.')
     return

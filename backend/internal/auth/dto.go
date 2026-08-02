@@ -54,10 +54,11 @@ type UserResponse struct {
 	PAN          string                   `json:"pan,omitempty"`
 	Aadhaar      string                   `json:"aadhaar,omitempty"`
 	IncomeRange  string                   `json:"income_range,omitempty"`
-	Occupation   string                   `json:"occupation,omitempty"`
-	IPVPhoto     string                   `json:"ipv_photo,omitempty"`
-	IPVLatitude  string                   `json:"ipv_latitude,omitempty"`
-	IPVLongitude string                   `json:"ipv_longitude,omitempty"`
+	Occupation    string                   `json:"occupation,omitempty"`
+	IPVPhoto      string                   `json:"ipv_photo,omitempty"`
+	IPVLatitude   string                   `json:"ipv_latitude,omitempty"`
+	IPVLongitude  string                   `json:"ipv_longitude,omitempty"`
+	WalletBalance float64                  `json:"wallet_balance"`
 	FatherName   string                   `json:"father_name,omitempty"`
 	MotherName   string                   `json:"mother_name,omitempty"`
 	Country      string                   `json:"country,omitempty"`
@@ -67,6 +68,7 @@ type UserResponse struct {
 	BankAccounts []profile.BankAccountDTO `json:"bank_accounts,omitempty"`
 	Nominees     []profile.NomineeDTO     `json:"nominees,omitempty"`
 	CreatedAt    string                   `json:"created_at"`
+	UpdatedAt    string                   `json:"updated_at"`
 }
 
 type LoginResponse struct {
