@@ -6,6 +6,7 @@ import (
 	"time"
 
 	market_service "stock-trading/internal/market/service"
+	"stock-trading/internal/user"
 	"stock-trading/internal/wallet"
 	walletpkg "stock-trading/internal/wallet"
 
@@ -26,6 +27,7 @@ type tradeService struct {
 	repo              TradeRepository
 	walletRepo        wallet.WalletRepository
 	marketDataService market_service.MarketDataService
+	userRepo          user.UserRepository
 }
 
 func NewTradeService(repo TradeRepository, walletRepo wallet.WalletRepository, marketDataService market_service.MarketDataService) TradeService {
@@ -33,6 +35,7 @@ func NewTradeService(repo TradeRepository, walletRepo wallet.WalletRepository, m
 		repo:              repo,
 		walletRepo:        walletRepo,
 		marketDataService: marketDataService,
+		userRepo:          user.NewUserRepository(),
 	}
 }
 
@@ -157,6 +160,14 @@ func (s *tradeService) BuyShare(userID string, req TradeRequest, isPending bool)
 		return errors.New("invalid user id")
 	}
 
+	u, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("invalid user")
+	}
+	if u.Status == "closure_requested" {
+		return errors.New("account closure requested, trading not permitted")
+	}
+
 	return s.repo.RunInTransaction(func(tx *gorm.DB) error {
 		// 1. Lock Share row
 		share, err := s.repo.GetShareForUpdate(tx, req.ShareID)
@@ -239,6 +250,14 @@ func (s *tradeService) SellShare(userID string, req TradeRequest, isPending bool
 	uID, err := uuid.Parse(userID)
 	if err != nil {
 		return errors.New("invalid user id")
+	}
+
+	u, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("invalid user")
+	}
+	if u.Status == "closure_requested" {
+		return errors.New("account closure requested, trading not permitted")
 	}
 
 	return s.repo.RunInTransaction(func(tx *gorm.DB) error {

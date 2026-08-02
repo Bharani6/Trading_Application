@@ -62,6 +62,24 @@ func (c *AdminController) BlockUser(ctx *gin.Context) {
 	response.Success(ctx, http.StatusOK, "User blocked", nil)
 }
 
+func (c *AdminController) CloseAccount(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if err := c.svc.CloseAccount(id); err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to close account", err.Error())
+		return
+	}
+	response.Success(ctx, http.StatusOK, "Account closed successfully", nil)
+}
+
+func (c *AdminController) RejectClosure(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if err := c.svc.RejectClosure(id); err != nil {
+		response.Error(ctx, http.StatusInternalServerError, "ADMIN_ERROR", "Failed to reject closure", err.Error())
+		return
+	}
+	response.Success(ctx, http.StatusOK, "Account closure rejected", nil)
+}
+
 func (c *AdminController) UploadShares(ctx *gin.Context) {
 	file, _, err := ctx.Request.FormFile("file")
 	if err != nil {

@@ -65,6 +65,10 @@ func SetupRouter(r *gin.Engine) {
 		{
 			secure.GET("/users/me", authController.GetMe)
 			secure.POST("/users/kyc", profileController.SubmitKYC)
+			secure.POST("/users/closure", profileController.RequestClosure)
+			
+			secure.GET("/auth/sessions", authController.GetSessions)
+			secure.DELETE("/auth/sessions/:id", authController.RevokeSession)
 
 			wallet := secure.Group("/wallet")
 			{
@@ -96,6 +100,8 @@ func SetupRouter(r *gin.Engine) {
 				admin.PUT("/users/:id/approve", adminController.ApproveUser)
 				admin.PUT("/users/:id/reject", adminController.RejectUser)
 				admin.PUT("/users/:id/block", adminController.BlockUser)
+				admin.PUT("/users/:id/close_account", adminController.CloseAccount)
+				admin.PUT("/users/:id/reject_closure", adminController.RejectClosure)
 				admin.POST("/shares/upload", adminController.UploadShares)
 				admin.DELETE("/shares", adminController.DeleteAllShares)
 				admin.GET("/support", supportController.GetMessages)

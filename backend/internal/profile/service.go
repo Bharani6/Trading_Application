@@ -14,6 +14,7 @@ import (
 
 type ProfileService interface {
 	SubmitKYC(userID string, req KYCSubmitRequest) error
+	RequestClosure(userID string) error
 }
 
 type profileService struct {
@@ -170,5 +171,9 @@ func (s *profileService) SubmitKYC(userID string, req KYCSubmitRequest) error {
 	}
 
 	return nil
+}
+
+func (s *profileService) RequestClosure(userID string) error {
+	return s.repo.UpdateUserStatus(userID, "closure_requested")
 }
 

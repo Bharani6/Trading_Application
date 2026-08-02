@@ -34,6 +34,14 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type SessionDTO struct {
+	ID        string `json:"id"`
+	IPAddress string `json:"ip_address"`
+	UserAgent string `json:"user_agent"`
+	CreatedAt string `json:"created_at"`
+	IsCurrent bool   `json:"is_current"`
+}
+
 type UserResponse struct {
 	ID           string                   `json:"id"`
 	Name         string                   `json:"name"`
@@ -46,10 +54,11 @@ type UserResponse struct {
 	PAN          string                   `json:"pan,omitempty"`
 	Aadhaar      string                   `json:"aadhaar,omitempty"`
 	IncomeRange  string                   `json:"income_range,omitempty"`
-	Occupation   string                   `json:"occupation,omitempty"`
-	IPVPhoto     string                   `json:"ipv_photo,omitempty"`
-	IPVLatitude  string                   `json:"ipv_latitude,omitempty"`
-	IPVLongitude string                   `json:"ipv_longitude,omitempty"`
+	Occupation    string                   `json:"occupation,omitempty"`
+	IPVPhoto      string                   `json:"ipv_photo,omitempty"`
+	IPVLatitude   string                   `json:"ipv_latitude,omitempty"`
+	IPVLongitude  string                   `json:"ipv_longitude,omitempty"`
+	WalletBalance float64                  `json:"wallet_balance"`
 	FatherName   string                   `json:"father_name,omitempty"`
 	MotherName   string                   `json:"mother_name,omitempty"`
 	Country      string                   `json:"country,omitempty"`
@@ -59,6 +68,7 @@ type UserResponse struct {
 	BankAccounts []profile.BankAccountDTO `json:"bank_accounts,omitempty"`
 	Nominees     []profile.NomineeDTO     `json:"nominees,omitempty"`
 	CreatedAt    string                   `json:"created_at"`
+	UpdatedAt    string                   `json:"updated_at"`
 }
 
 type LoginResponse struct {

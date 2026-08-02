@@ -19,5 +19,13 @@ export const authApi = {
 
   resetPassword: (data) => {
     return api.post('/auth/reset-password', data)
+  },
+
+  getSessions: () => {
+    return api.get('/auth/sessions')
+  },
+
+  revokeSession: (id) => {
+    return api.delete(`/auth/sessions/${id}`)
   }
 }

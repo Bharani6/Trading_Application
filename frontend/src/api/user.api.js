@@ -7,5 +7,9 @@ export const userApi = {
   
   updateKyc: (payload) => {
     return api.post('/users/kyc', payload)
+  },
+
+  requestAccountClosure: () => {
+    return api.post('/users/closure')
   }
 }

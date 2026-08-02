@@ -200,7 +200,7 @@
   text-transform: uppercase;
   background-color: var(--primary-dim);
   color: var(--primary-color);
-  border: 1px solid rgba(59,130,246,0.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .tradepage .market-section .segment-badge.nse {
@@ -212,7 +212,7 @@
 .tradepage .market-section .segment-badge.bse {
   background-color: var(--orange-dim);
   color: var(--orange-color);
-  border-color: rgba(249,115,22,0.25);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
 /* ── Price Cell ── */
@@ -315,18 +315,25 @@
 }
 
 .trade-modal-card {
-  background: #131929;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b0b0b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
   animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes modalPop {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -334,7 +341,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h3 {
@@ -362,7 +369,8 @@
 }
 
 .stock-summary {
-  background: rgba(255, 255, 255, 0.02);
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 20px;
@@ -395,8 +403,8 @@
 
 .qty-input {
   width: 100%;
-  background: #0b0f1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #f1f5f9;
   padding: 12px 16px;
   border-radius: 8px;
@@ -431,7 +439,8 @@
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.cancel-btn, .confirm-btn {
+.cancel-btn,
+.confirm-btn {
   flex: 1;
   padding: 12px;
   border-radius: 8px;
@@ -519,7 +528,7 @@
   }
 
   /* Hide volume col on medium screens */
-  .tradepage .market-section .market-row > *:nth-child(4) {
+  .tradepage .market-section .market-row>*:nth-child(4) {
     display: none;
   }
 

@@ -1,8 +1,8 @@
 <template>
   <div class="usermanagementpage">
     <div class="dashboard-header">
-      <h1>User Approvals</h1>
-      <p>Manage user accounts and KYC applications</p>
+      <h1>Closure Requests</h1>
+      <p>Manage account closure requests</p>
     </div>
     
     <div class="table-card">
@@ -20,34 +20,32 @@
               <th>User</th>
               <th>KYC Docs</th>
               <th>Joined Date</th>
+              <th>Closure Request Date</th>
+              <th>Wallet Balance</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody v-if="loading">
-            <tr>
-              <td colspan="5" class="empty-state">
-                <i class="fas fa-spinner fa-spin"></i> Loading users...
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="7" class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
               </td>
             </tr>
-          </tbody>
-          <tbody v-else-if="filteredUsers.length === 0">
-            <tr>
-              <td colspan="5" class="empty-state">
-                No users found matching your criteria.
+            <tr v-else-if="filteredUsers.length === 0">
+              <td colspan="7" class="text-center py-8 text-muted">
+                No closure requests found.
               </td>
             </tr>
-          </tbody>
-          <tbody v-else>
-            <tr v-for="user in filteredUsers" :key="user.id">
+            <tr v-for="user in filteredUsers" :key="user.id" v-else>
               <td>
                 <div class="user-cell">
                   <div class="user-avatar" :class="{'has-photo': user.ipv_photo}">
-                    <img v-if="user.ipv_photo" :src="user.ipv_photo" alt="User Photo" class="avatar-img" />
+                    <img v-if="user.ipv_photo" :src="user.ipv_photo" alt="avatar" class="avatar-img" />
                     <span v-else>{{ user.name ? user.name.charAt(0).toUpperCase() : 'U' }}</span>
                   </div>
                   <div class="user-details">
-                    <span class="user-name">{{ user.name || 'Unknown User' }}</span>
+                    <span class="user-name">{{ user.name }}</span>
                     <span class="user-email">{{ user.email }}</span>
                   </div>
                 </div>
@@ -56,7 +54,9 @@
                 <div>PAN: {{ user.pan || 'N/A' }}</div>
                 <div style="color: var(--text-muted);">AADHAAR: {{ user.aadhaar ? '****' + user.aadhaar.slice(-4) : 'N/A' }}</div>
               </td>
-              <td>{{ user.created_at || 'Unknown' }}</td>
+              <td>{{ user.created_at || 'N/A' }}</td>
+              <td>{{ user.updated_at ? user.updated_at.split(' ')[0] : 'N/A' }}</td>
+              <td class="font-medium">₹{{ (user.wallet_balance || 0).toFixed(2) }}</td>
               <td>
                 <span :class="['status-badge', getStatusClass(user.status)]">
                   {{ formatStatus(user.status) }}
@@ -70,40 +70,19 @@
                   <i class="fas fa-eye"></i> View
                 </button>
                 <button 
-                  v-if="user.status === 'pending_approval' || user.status === 'pending' || user.status === 'rejected'"
                   class="btn-action btn-approve"
-                  @click="updateStatus(user.id, 'approve')"
+                  @click="updateStatus(user.id, 'close_account')"
                   :disabled="actionLoading === user.id"
                 >
                   <i class="fas fa-check"></i> Approve
                 </button>
-                <button
-                  v-if="user.status === 'blocked' && user.role !== 'admin'"
-                  class="btn-action btn-approve"
-                  @click="updateStatus(user.id, 'approve')"
-                  :disabled="actionLoading === user.id"
-                >
-                  <i class="fas fa-check"></i> Activate
-                </button>
                 <button 
-                  v-if="user.status === 'pending_approval' || user.status === 'pending'"
                   class="btn-action btn-reject"
-                  @click="updateStatus(user.id, 'reject')"
+                  @click="updateStatus(user.id, 'reject_closure')"
                   :disabled="actionLoading === user.id"
                 >
                   <i class="fas fa-times"></i> Reject
                 </button>
-                <button
-                  v-if="user.status === 'active' && user.role !== 'admin'"
-                  class="btn-action btn-reject"
-                  @click="updateStatus(user.id, 'block')"
-                  :disabled="actionLoading === user.id"
-                >
-                  <i class="fas fa-ban"></i> Deactivate
-                </button>
-                <span v-if="(user.status === 'active' || user.status === 'blocked') && user.role === 'admin'" style="color: var(--text-muted); font-size: 12px;">
-                  No actions
-                </span>
               </td>
             </tr>
           </tbody>
@@ -232,9 +211,10 @@ const fetchUsers = async () => {
 }
 
 const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value
+  const closureUsers = users.value.filter(u => u.status === 'closure_requested')
+  if (!searchQuery.value) return closureUsers
   const query = searchQuery.value.toLowerCase()
-  return users.value.filter(u => 
+  return closureUsers.filter(u => 
     (u.name && u.name.toLowerCase().includes(query)) || 
     (u.email && u.email.toLowerCase().includes(query)) ||
     (u.pan && u.pan.toLowerCase().includes(query))

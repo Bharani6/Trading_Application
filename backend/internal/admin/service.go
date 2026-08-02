@@ -8,6 +8,8 @@ import (
 	"stock-trading/internal/auth"
 	"stock-trading/internal/profile"
 	"stock-trading/internal/trade"
+	"stock-trading/internal/user"
+	"stock-trading/internal/wallet"
 
 	"github.com/google/uuid"
 )
@@ -18,6 +20,8 @@ type AdminService interface {
 	ApproveUser(userID string) error
 	RejectUser(userID string) error
 	BlockUser(userID string) error
+	CloseAccount(userID string) error
+	RejectClosure(userID string) error
 	UploadShares(file multipart.File) error
 	DeleteAllShares() error
 }
@@ -84,22 +88,31 @@ func (s *adminService) GetUsers() ([]auth.UserResponse, error) {
 		return nil, err
 	}
 
+	walletRepo := wallet.NewWalletRepository()
 	var res []auth.UserResponse
 	for _, u := range users {
+		w, _ := walletRepo.GetWallet(u.ID.String())
+		var wb float64 = 0
+		if w != nil {
+			wb = w.WalletBalance
+		}
+
 		res = append(res, auth.UserResponse{
-			ID:          u.ID.String(),
-			Name:        u.Name,
-			Email:       u.Email,
-			Mobile:      u.Mobile,
-			Role:        u.Role,
-			Status:      u.Status,
-			DOB:         u.DOB.Format("2006-01-02"),
-			Address:     u.Address,
-			PAN:         u.PAN,
-			Aadhaar:     u.Aadhaar,
-			IncomeRange: u.IncomeRange,
-			IPVPhoto:    u.IPVPhoto,
-			CreatedAt:   u.CreatedAt.Format("2006-01-02"),
+			ID:            u.ID.String(),
+			Name:          u.Name,
+			Email:         u.Email,
+			Mobile:        u.Mobile,
+			Role:          u.Role,
+			Status:        u.Status,
+			DOB:           u.DOB.Format("2006-01-02"),
+			Address:       u.Address,
+			PAN:           u.PAN,
+			Aadhaar:       u.Aadhaar,
+			IncomeRange:   u.IncomeRange,
+			IPVPhoto:      u.IPVPhoto,
+			WalletBalance: wb,
+			CreatedAt:     u.CreatedAt.Format("2006-01-02"),
+			UpdatedAt:     u.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 	return res, nil
@@ -111,23 +124,32 @@ func (s *adminService) GetUserDetails(userID string) (*auth.UserResponse, error)
 		return nil, err
 	}
 
+	walletRepo := wallet.NewWalletRepository()
+	w, _ := walletRepo.GetWallet(userID)
+	var wb float64 = 0
+	if w != nil {
+		wb = w.WalletBalance
+	}
+
 	res := &auth.UserResponse{
-		ID:           u.ID.String(),
-		Name:         u.Name,
-		Email:        u.Email,
-		Mobile:       u.Mobile,
-		Role:         u.Role,
-		Status:       u.Status,
-		DOB:          u.DOB.Format("2006-01-02"),
-		Address:      u.Address,
-		PAN:          u.PAN,
-		Aadhaar:      u.Aadhaar,
-		IncomeRange:  u.IncomeRange,
-		Occupation:   u.Occupation,
-		IPVPhoto:     u.IPVPhoto,
-		IPVLatitude:  u.IPVLatitude,
-		IPVLongitude: u.IPVLongitude,
-		CreatedAt:    u.CreatedAt.Format("2006-01-02"),
+		ID:            u.ID.String(),
+		Name:          u.Name,
+		Email:         u.Email,
+		Mobile:        u.Mobile,
+		Role:          u.Role,
+		Status:        u.Status,
+		DOB:           u.DOB.Format("2006-01-02"),
+		Address:       u.Address,
+		PAN:           u.PAN,
+		Aadhaar:       u.Aadhaar,
+		IncomeRange:   u.IncomeRange,
+		Occupation:    u.Occupation,
+		IPVPhoto:      u.IPVPhoto,
+		IPVLatitude:   u.IPVLatitude,
+		IPVLongitude:  u.IPVLongitude,
+		WalletBalance: wb,
+		CreatedAt:     u.CreatedAt.Format("2006-01-02"),
+		UpdatedAt:     u.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	if personal != nil {
@@ -176,4 +198,14 @@ func (s *adminService) RejectUser(userID string) error {
 
 func (s *adminService) BlockUser(userID string) error {
 	return s.repo.UpdateUserStatus(userID, "blocked")
+}
+
+func (s *adminService) CloseAccount(userID string) error {
+	userRepo := user.NewUserRepository()
+	userRepo.DeleteAllSessions(userID)
+	return s.repo.UpdateUserStatus(userID, "closed")
+}
+
+func (s *adminService) RejectClosure(userID string) error {
+	return s.repo.UpdateUserStatus(userID, "active")
 }

@@ -103,6 +103,14 @@
             <i class="fas fa-users nav-icon"></i>
             <span>Nominee Details</span>
           </a>
+          <a href="#" class="nav-item" :class="{ active: activeSection === 'active-devices' }" @click.prevent="changeTab('active-devices')">
+            <i class="fas fa-mobile-alt nav-icon"></i>
+            <span>Active Devices</span>
+          </a>
+          <a href="#" class="nav-item" :class="{ active: activeSection === 'account-closure' }" @click.prevent="changeTab('account-closure')">
+            <i class="fas fa-user-slash nav-icon"></i>
+            <span>Account Closure</span>
+          </a>
         </nav>
       </aside>
 
